@@ -1,0 +1,31 @@
+{
+  "name": "wanphp/plugins-weixin",
+  "type": "wanphp-plugin",
+  "description": "wanphp 微信接口",
+  "keywords": [
+    "Weixin",
+    "MiniProgram",
+    "WeCharPay"
+  ],
+  "homepage": "https://www.wanphp.com",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "火子",
+      "email": "wanphp@outlook.com"
+    }
+  ],
+  "require": {
+    "wanphp/installers": "*",
+    "wanphp/libray-mysql": "^1.0.0",
+    "wanphp/libray-weixin": "^1.0.0",
+    "php-di/php-di": "^6.3",
+    "slim/psr7": "^1.3",
+    "slim/slim": "^4.7"
+  },
+  "autoload": {
+    "psr-4": {
+      "Wanphp\\Plugins\\Weixin\\": "/src"
+    }
+  }
+}
