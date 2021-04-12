@@ -51,13 +51,13 @@ class TemplateMessageApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Delete(
-   *  path="/api/manage/weixin/tplmsg/{tplID}",
+   *  path="/api/manage/weixin/tplmsg/{tplid}",
    *  tags={"TemplateMessage"},
    *  summary="删除消息模板",
    *  operationId="delTemplateMessage",
    *  security={{"bearerAuth":{}}},
    *  @OA\Parameter(
-   *    name="ID",
+   *    name="tplid",
    *    in="path",
    *    description="模板ID",
    *    required=true,
@@ -93,7 +93,6 @@ class TemplateMessageApi extends Api
         } else {
           return $this->respondWithError($result['errmsg']);
         }
-        break;
       case 'DELETE':
         $template_id = $this->args['tplid'] ?? '';
         if ($template_id) {
@@ -107,7 +106,6 @@ class TemplateMessageApi extends Api
         } else {
           return $this->respondWithError('缺少模板ID');
         }
-        break;
       case 'GET':
         $msgtemplate = $this->weChatBase->templateMessage();
         $list = $this->msgTemplate->select('*');
@@ -142,7 +140,6 @@ class TemplateMessageApi extends Api
         ];
 
         return $this->respondWithData($datas);
-        break;
       default:
         return $this->respondWithError('禁止访问', 403);
     }

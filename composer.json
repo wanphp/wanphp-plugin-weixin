@@ -1,7 +1,7 @@
 {
   "name": "wanphp/plugins-weixin",
   "type": "wanphp-plugin",
-  "description": "wanphp 微信接口",
+  "description": "wanphp 微信扩展接口,公众号、小程序、支付",
   "keywords": [
     "Weixin",
     "MiniProgram",
@@ -26,6 +26,12 @@
   "autoload": {
     "psr-4": {
       "Wanphp\\Plugins\\Weixin\\": "/src"
+    }
+  },
+  "repositories": {
+    "packagist": {
+      "type": "composer",
+      "url": "https://mirrors.aliyun.com/composer/"
     }
   }
 }

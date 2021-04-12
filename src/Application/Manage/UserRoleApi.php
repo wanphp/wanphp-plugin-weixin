@@ -32,7 +32,7 @@ class UserRoleApi extends Api
    * @return Response
    * @throws \Exception
    * @OA\Post(
-   *  path="/api/manage/user/role",
+   *  path="/api/manage/weixin/user/role",
    *  tags={"UserRole"},
    *  summary="添加用户角色",
    *  operationId="addUserRole",
@@ -60,7 +60,7 @@ class UserRoleApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Put(
-   *  path="/api/manage/user/role/{ID}",
+   *  path="/api/manage/weixin/user/role/{ID}",
    *  tags={"UserRole"},
    *  summary="修改用户角色",
    *  operationId="editUserRole",
@@ -95,7 +95,7 @@ class UserRoleApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Delete(
-   *  path="/api/manage/user/role/{ID}",
+   *  path="/api/manage/weixin/user/role/{ID}",
    *  tags={"UserRole"},
    *  summary="删除用户角色",
    *  operationId="delUserRole",
@@ -122,7 +122,7 @@ class UserRoleApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Get(
-   *  path="/api/manage/user/role",
+   *  path="/api/manage/weixin/user/role",
    *  tags={"UserRole"},
    *  summary="用户角色",
    *  operationId="listUserRole",
@@ -149,19 +149,15 @@ class UserRoleApi extends Api
         $data = $this->request->getParsedBody();
         $data['id'] = $this->userRole->insert($data);
         return $this->respondWithData($data, 201);
-        break;
       case  'PUT';
         $data = $this->request->getParsedBody();
         $num = $this->userRole->update($data, ['id' => $this->args['id']]);
         return $this->respondWithData(['up_num' => $num], 201);
-        break;
       case  'DELETE';
         $delnum = $this->userRole->delete(['id' => $this->args['id']]);
         return $this->respondWithData(['del_num' => $delnum], 200);
-        break;
       case 'GET';
         return $this->respondWithData($this->userRole->select('*'));
-        break;
       default:
         return $this->respondWithError('禁止访问', 403);
     }

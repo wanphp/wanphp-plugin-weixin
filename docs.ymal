@@ -1,0 +1,1033 @@
+openapi: 3.0.0
+info:
+  title: 微信扩展接口
+  description: 'wanphp 微信扩展接口'
+  version: 1.0.0
+servers:
+  -
+    url: 'https://localhost'
+    description: 'OpenApi host'
+paths:
+  /api/manage/weixin/createMenu:
+    post:
+      tags:
+        - WeixinCustomMenu
+      summary: 创建公众号自定义菜单
+      operationId: createWeixinCustomMenu
+      requestBody:
+        description: 创建自定义菜单，tag_id=0为默认菜单
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                tag_id:
+                  description: 粉丝标签
+                  type: number
+              type: object
+      responses:
+        '201':
+          description: 添加成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+  /api/manage/weixin/menu:
+    get:
+      tags:
+        - WeixinCustomMenu
+      summary: 自定义菜单
+      operationId: listWeixinCustomMenu
+      responses:
+        '200':
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+    post:
+      tags:
+        - WeixinCustomMenu
+      summary: 添加公众号自定义菜单
+      operationId: addWeixinCustomMenu
+      requestBody:
+        description: 自定义菜单
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewCustomMenu'
+      responses:
+        '201':
+          description: 添加成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+  '/api/manage/weixin/menu/{id}':
+    put:
+      tags:
+        - WeixinCustomMenu
+      summary: 修改公众号自定义菜单
+      operationId: editWeixinCustomMenu
+      parameters:
+        -
+          name: id
+          in: path
+          description: 自定义菜单ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: 自定义菜单
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewCustomMenu'
+      responses:
+        '201':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+    delete:
+      tags:
+        - WeixinCustomMenu
+      summary: 删除公众号自定义菜单
+      operationId: delWeixinCustomMenu
+      parameters:
+        -
+          name: id
+          in: path
+          description: 自定义菜单ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+  /api/manage/weixin/tag:
+    get:
+      tags:
+        - WeixinTag
+      summary: 用户角色
+      operationId: listWeixinTag
+      responses:
+        '200':
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+    post:
+      tags:
+        - WeixinTag
+      summary: 添加公众号用户标签
+      operationId: addWeixinTag
+      requestBody:
+        description: 用户标签
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  type: string
+              type: object
+      responses:
+        '201':
+          description: 添加成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+  '/api/manage/weixin/tag/{id}':
+    put:
+      tags:
+        - WeixinTag
+      summary: 修改公众号用户标签
+      operationId: editWeixinTag
+      parameters:
+        -
+          name: id
+          in: path
+          description: 标签ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: 用户标签
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  type: string
+              type: object
+      responses:
+        '201':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+    delete:
+      tags:
+        - WeixinTag
+      summary: 删除公众号用户标签
+      operationId: delWeixinTag
+      parameters:
+        -
+          name: id
+          in: path
+          description: 标签ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+  /api/manage/weixin/tplmsg:
+    get:
+      tags:
+        - TemplateMessage
+      summary: 消息模板
+      operationId: listTemplateMessage
+      responses:
+        '200':
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+    post:
+      tags:
+        - TemplateMessage
+      summary: 添加消息模板
+      operationId: addTemplateMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                tplid:
+                  description: 模板ID
+                  type: string
+              type: object
+      responses:
+        '201':
+          description: 添加成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+  '/api/manage/weixin/tplmsg/{tplid}':
+    delete:
+      tags:
+        - TemplateMessage
+      summary: 删除消息模板
+      operationId: delTemplateMessage
+      parameters:
+        -
+          name: tplid
+          in: path
+          description: 模板ID
+          required: true
+          schema:
+            type: string
+            format: int64
+      responses:
+        '200':
+          description: 删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+  '/api/manage/weixin/users/{id}':
+    get:
+      tags:
+        - User
+      summary: 查看用户信息，后台管理员查看
+      operationId: loadUser
+      parameters:
+        -
+          name: id
+          in: path
+          description: 用户ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 用户信息
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/Success' }
+                  - { properties: { res: { $ref: '#/components/schemas/UserEntity' } }, type: object }
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+    patch:
+      tags:
+        - User
+      summary: 更新用户，管理员操作
+      operationId: editUser
+      parameters:
+        -
+          name: id
+          in: path
+          description: 用户ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: 指定更新用户数据
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserEntity'
+            example:
+              name: ''
+              tel: null
+              address: ''
+              integral: '0'
+              cash_back: '0.00'
+              money: '0.00'
+      responses:
+        '201':
+          description: 用户更新成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/Success' }
+                  - { properties: { res: { properties: { up_num: { description: 更新数量, type: integer } }, type: object } }, type: object }
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+  /api/manage/weixin/users:
+    get:
+      tags:
+        - User
+      summary: 用户信息列表，后台管理获取
+      operationId: ListUsers
+      parameters:
+        -
+          name: size
+          in: query
+          description: 每页返回数量
+          schema:
+            type: integer
+            format: int64
+            default: 10
+        -
+          name: page
+          in: query
+          description: 页码
+          schema:
+            type: integer
+            format: int64
+            default: 1
+        -
+          name: keyword
+          in: query
+          description: 关键词
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 用户信息
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/Success' }
+                  - { properties: { res: { example: { id: '', headimgurl: 用户头像, nickname: 用户昵称, role: 用色, name: Name, tel: Tel } } }, type: object }
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+  /api/manage/weixin/user/role:
+    get:
+      tags:
+        - UserRole
+      summary: 用户角色
+      operationId: listUserRole
+      responses:
+        '200':
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/Success' }
+                  - { properties: { res: { type: array, items: { $ref: '#/components/schemas/UserRoleEntity' } } }, type: object }
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+    post:
+      tags:
+        - UserRole
+      summary: 添加用户角色
+      operationId: addUserRole
+      requestBody:
+        description: 用户角色数据
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRoleEntity'
+      responses:
+        '201':
+          description: 添加成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/Success' }
+                  - { properties: { res: { properties: { id: { type: integer } }, type: object } }, type: object }
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+  '/api/manage/weixin/user/role/{ID}':
+    put:
+      tags:
+        - UserRole
+      summary: 修改用户角色
+      operationId: editUserRole
+      parameters:
+        -
+          name: ID
+          in: path
+          description: 用户角色ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: 指定需要更新数据
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRoleEntity'
+      responses:
+        '201':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/Success' }
+                  - { properties: { res: { properties: { up_num: { type: integer } }, type: object } }, type: object }
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+    delete:
+      tags:
+        - UserRole
+      summary: 删除用户角色
+      operationId: delUserRole
+      parameters:
+        -
+          name: ID
+          in: path
+          description: 用户角色ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 删除成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/Success' }
+                  - { properties: { res: { properties: { del_num: { type: integer } }, type: object } }, type: object }
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+  /api/manage/weixin/user/tag:
+    post:
+      tags:
+        - WeixinUserTag
+      summary: 给粉丝添加标签
+      operationId: addWeixinUserTag
+      requestBody:
+        description: 用户标签
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                openid:
+                  description: 粉丝OPENID
+                  type: string
+                tagid:
+                  description: 标签ID
+                  type: string
+              type: object
+      responses:
+        '201':
+          description: 添加成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+  '/api/manage/weixin/user/{openid}/tag/{tagid}':
+    delete:
+      tags:
+        - WeixinUserTag
+      summary: 删除粉丝标签
+      operationId: delWeixinUserTag
+      parameters:
+        -
+          name: openid
+          in: path
+          description: 粉丝OPENID
+          required: true
+          schema:
+            type: string
+        -
+          name: tagid
+          in: path
+          description: 标签ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+  '/api/manage/weixin/user/tag/{openid}':
+    get:
+      tags:
+        - WeixinUserTag
+      summary: 用户角色
+      operationId: UserWeixinTagList
+      parameters:
+        -
+          name: openid
+          in: path
+          description: 粉丝OPENID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+  /api/user:
+    get:
+      tags:
+        - User
+      summary: 查看当前用户信息，用户操作
+      operationId: ViewUser
+      responses:
+        '200':
+          description: 用户信息
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/Success' }
+                  - { properties: { res: { example: { name: '', tel: null, address: '', integral: '0', cash_back: '0.00', money: '0.00' } } }, type: object }
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+    patch:
+      tags:
+        - User
+      summary: 更新用户信息，用户操作
+      operationId: UpdateUser
+      requestBody:
+        description: 指定更新用户数据
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserEntity'
+            example:
+              name: ''
+              tel: null
+              address: ''
+              integral: '0'
+              cash_back: '0.00'
+              money: '0.00'
+      responses:
+        '201':
+          description: 用户更新成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/Success' }
+                  - { properties: { res: { properties: { up_num: { description: 更新数量, type: integer } }, type: object } }, type: object }
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+components:
+  schemas:
+    Error:
+      title: 出错提示
+      properties:
+        code:
+          type: string
+          example: '400'
+        error:
+          type: string
+        error_description:
+          type: string
+        hint:
+          type: string
+        message:
+          type: string
+          example: 错误说明
+      type: object
+    Success:
+      title: 成功提示
+      required:
+        - code
+        - message
+        - res
+      properties:
+        code:
+          type: string
+          example: '200'
+        message:
+          type: string
+          example: OK
+        datas:
+          description: 返回数据
+          type: object
+      type: object
+    NewCustomMenu:
+      required:
+        - name
+        - type
+      properties:
+        tag_id:
+          description: 微信标签
+          type: string
+        parent_id:
+          description: 上级菜单ID
+          type: integer
+        name:
+          description: 菜单名
+          type: integer
+        type:
+          description: 事件类型
+          type: string
+        key:
+          description: click等点击类型必须；菜单KEY值，用于消息接口推送
+          type: string
+        url:
+          description: 'view、miniprogram类型必须，网页 链接，用户点击菜单可打开链接，不超过1024字节。 type为miniprogram时，不支持小程序的老版本客户端将打开本url。'
+          type: string
+        appid:
+          description: miniprogram类型必须；小程序的appid（仅认证公众号可配置）
+          type: string
+        pagepath:
+          description: miniprogram类型必须；小程序的页面路径
+          type: string
+        sort_order:
+          description: 排序
+          type: integer
+      type: object
+    CustomMenu:
+      type: object
+      allOf:
+        -
+          $ref: '#/components/schemas/NewCustomMenu'
+        -
+          required:
+            - id
+          properties:
+            id:
+              description: 菜单ID
+              type: integer
+              format: int64
+          type: object
+    MiniProgramEntity:
+      title: 用户小程序关联信息
+      description: 用户小程序关联信息
+      required:
+        - openid
+        - nickname
+        - headimgurl
+        - sex
+      properties:
+        id:
+          description: 用户ID
+          type: integer
+          format: int64
+          nullable: true
+        openid:
+          description: 微信openid
+          type: string
+        parent_id:
+          description: 推荐用户ID
+          type: integer
+      type: object
+    MsgTemplateEntity:
+      title: 消息模板
+      description: 微信消息模板
+      required:
+        - template_id_short
+        - template_id
+      properties:
+        id:
+          description: ID
+          type: integer
+          nullable: true
+        template_id_short:
+          description: 模板消息编号
+          type: string
+        template_id:
+          description: 模板消息ID
+          type: string
+        status:
+          description: 是否可用
+          type: integer
+      type: object
+    PublicEntity:
+      title: 用户公众号关联信息
+      description: 用户公众号关联信息
+      required:
+        - openid
+        - nickname
+        - headimgurl
+        - sex
+      properties:
+        id:
+          description: 用户ID
+          type: integer
+          format: int64
+          nullable: true
+        openid:
+          description: 微信openid
+          type: string
+        tagid_list:
+          description: 粉丝标签
+          type: string
+        parent_id:
+          description: 推荐用户ID
+          type: integer
+        subscribe:
+          description: 是否关注公众号
+          type: integer
+        subscribe_time:
+          description: 关注公众号时间
+          type: integer
+        unsubscribe_time:
+          description: 取消关注公众号时间
+          type: string
+        subscribe_scene:
+          description: 用户关注公众号的渠道来源
+          type: string
+        lastop_time:
+          description: 最后来访时间，若在48小时内可以发客服信息
+          type: string
+      type: object
+    UserEntity:
+      title: 用户
+      description: 用户数据结构
+      required:
+        - nickname
+        - headimgurl
+        - sex
+      properties:
+        id:
+          description: 用户ID
+          type: integer
+          format: int64
+          nullable: true
+        unionid:
+          description: 微信unionid
+          type: string
+        nickname:
+          description: 微信昵称
+          type: string
+        headimgurl:
+          description: 微信头像
+          type: string
+        sex:
+          description: 姓别（1男，2女，0保密）
+          type: integer
+          enum:
+            - 0
+            - 1
+            - 2
+        role_id:
+          description: 用户角色ID
+          type: integer
+        name:
+          description: 用户姓名
+          type: string
+        tel:
+          description: 用户联系电话
+          type: string
+        address:
+          description: 用户默认地址
+          type: string
+        integral:
+          description: 用户当前可用积分
+          type: integer
+        cash_back:
+          description: 用户当前可提现金额
+          type: number
+          format: float
+        money:
+          description: 用户充值余额
+          type: number
+          format: float
+      type: object
+    UserRoleEntity:
+      title: 用户角色
+      description: 用户角色数据结构
+      required:
+        - name
+      properties:
+        id:
+          description: 角色ID
+          type: integer
+          format: int32
+          nullable: true
+        name:
+          description: 角色名称
+          type: string
+        sortOrder:
+          description: 显示排序
+          type: integer
+      type: object
+  securitySchemes:
+    bearerAuth:
+      type: http
+      bearerFormat: JWT
+      scheme: bearer
+tags:
+  -
+    name: UserRole
+    description: 用户角色
+  -
+    name: User
+    description: 用户操作接口

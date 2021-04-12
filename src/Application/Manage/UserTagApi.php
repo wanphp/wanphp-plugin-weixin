@@ -58,7 +58,7 @@ class UserTagApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Delete(
-   *  path="/api/manage/weixin/user/tag",
+   *  path="/api/manage/weixin/user/{openid}/tag/{tagid}",
    *  tags={"WeixinUserTag"},
    *  summary="删除粉丝标签",
    *  operationId="delWeixinUserTag",
@@ -113,7 +113,6 @@ class UserTagApi extends Api
         } else {
           return $this->respondWithError('未知用户');
         }
-        break;
       case 'DELETE':
         $openid = $this->args['openid'] ?? '';
         $tagid = $this->args['tagid'] ?? '';
@@ -129,7 +128,6 @@ class UserTagApi extends Api
         } else {
           return $this->respondWithError('未知用户');
         }
-        break;
       case 'GET':
         $openid = $this->args['openid'] ?? '';
         if ($openid) {
@@ -138,7 +136,6 @@ class UserTagApi extends Api
         } else {
           return $this->respondWithError('未知用户');
         }
-        break;
       default:
         return $this->respondWithError('禁止访问', 403);
     }

@@ -16,7 +16,7 @@ namespace Wanphp\Plugins\Weixin\Application;
  * )
  * @OA\Server(
  *   description="OpenApi host",
- *   url="https://www.wanphp.com/api"
+ *   url="https://localhost"
  * )
  */
 
@@ -67,6 +67,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpBadRequestException;
 use Slim\Exception\HttpNotFoundException;
+use Exception;
 
 abstract class Api
 {
@@ -101,7 +102,7 @@ abstract class Api
 
     try {
       return $this->action();
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       throw new HttpBadRequestException($this->request, $e->getMessage());
     }
   }
@@ -109,7 +110,7 @@ abstract class Api
   /**
    * @return Response
    * @throws HttpBadRequestException
-   * @throws \Exception
+   * @throws Exception
    */
   abstract protected function action(): Response;
 

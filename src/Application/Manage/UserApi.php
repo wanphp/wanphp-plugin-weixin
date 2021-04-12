@@ -38,7 +38,7 @@ class UserApi extends Api
    * @return Response
    * @throws \Exception
    * @OA\Patch(
-   *  path="/api/manage/users/{id}",
+   *  path="/api/manage/weixin/users/{id}",
    *  tags={"User"},
    *  summary="更新用户，管理员操作",
    *  operationId="editUser",
@@ -74,7 +74,7 @@ class UserApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Get(
-   *   path="/api/manage/users/{id}",
+   *   path="/api/manage/weixin/users/{id}",
    *   tags={"User"},
    *   summary="查看用户信息，后台管理员查看",
    *   operationId="loadUser",
@@ -101,7 +101,7 @@ class UserApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Get(
-   *   path="/api/manage/users",
+   *   path="/api/manage/weixin/users",
    *   tags={"User"},
    *   summary="用户信息列表，后台管理获取",
    *   operationId="ListUsers",
@@ -154,7 +154,6 @@ class UserApi extends Api
         if (empty($data)) return $this->respondWithError('无用户数据');
         $num = $this->user->update($data, ['id' => $this->args['id']]);
         return $this->respondWithData(['up_num' => $num], 201);
-        break;
       case 'GET':
         $id = $this->args['id'] ?? 0;
         if ($id > 0) {
@@ -199,7 +198,6 @@ class UserApi extends Api
           }
         }
         return $this->respondWithData(['users' => $users, 'total' => $total ?? null, 'tags' => $tags ?? null]);
-        break;
       default:
         return $this->respondWithError('禁止访问', 403);
     }

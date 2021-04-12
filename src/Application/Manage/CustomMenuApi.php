@@ -9,7 +9,6 @@
 namespace Wanphp\Plugins\Weixin\Application\Manage;
 
 
-use Wanphp\Libray\Weixin\WeChatBase;
 use Psr\Http\Message\ResponseInterface as Response;
 use Wanphp\Plugins\Weixin\Application\Api;
 use Wanphp\Plugins\Weixin\Domain\CustomMenuInterface;
@@ -22,12 +21,10 @@ use Wanphp\Plugins\Weixin\Domain\CustomMenuInterface;
  */
 class CustomMenuApi extends Api
 {
-  private $weChatBase;
   private $customMenu;
 
-  public function __construct(WeChatBase $weChatBase, CustomMenuInterface $customMenu)
+  public function __construct(CustomMenuInterface $customMenu)
   {
-    $this->weChatBase = $weChatBase;
     $this->customMenu = $customMenu;
   }
 
@@ -44,20 +41,20 @@ class CustomMenuApi extends Api
    *     description="自定义菜单",
    *     required=true,
    *     @OA\MediaType(
-   *       mediaType="application/json",@OA\Schema(ref="#/components/schemas/CustomMenuEntity")
+   *       mediaType="application/json",@OA\Schema(ref="#/components/schemas/NewCustomMenu")
    *     )
    *   ),
    *  @OA\Response(response="201",description="添加成功",@OA\JsonContent(ref="#/components/schemas/Success")),
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Put(
-   *  path="/api/manage/weixin/menu/{ID}",
+   *  path="/api/manage/weixin/menu/{id}",
    *  tags={"WeixinCustomMenu"},
    *  summary="修改公众号自定义菜单",
    *  operationId="editWeixinCustomMenu",
    *  security={{"bearerAuth":{}}},
    *   @OA\Parameter(
-   *     name="ID",
+   *     name="id",
    *     in="path",
    *     description="自定义菜单ID",
    *     required=true,
@@ -67,20 +64,20 @@ class CustomMenuApi extends Api
    *     description="自定义菜单",
    *     required=true,
    *     @OA\MediaType(
-   *       mediaType="application/json",@OA\Schema(ref="#/components/schemas/CustomMenuEntity")
+   *       mediaType="application/json",@OA\Schema(ref="#/components/schemas/NewCustomMenu")
    *     )
    *   ),
    *  @OA\Response(response="201",description="更新成功",@OA\JsonContent(ref="#/components/schemas/Success")),
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Delete(
-   *  path="/api/manage/weixin/menu/{ID}",
+   *  path="/api/manage/weixin/menu/{id}",
    *  tags={"WeixinCustomMenu"},
    *  summary="删除公众号自定义菜单",
    *  operationId="delWeixinCustomMenu",
    *  security={{"bearerAuth":{}}},
    *  @OA\Parameter(
-   *    name="ID",
+   *    name="id",
    *    in="path",
    *    description="自定义菜单ID",
    *    required=true,
@@ -106,17 +103,14 @@ class CustomMenuApi extends Api
         $data = $this->request->getParsedBody();
         $id = $this->customMenu->insert($data);
         return $this->respondWithData(['id' => $id], 201);
-        break;
       case 'PUT':
         $data = $this->request->getParsedBody();
         $num = $this->customMenu->update($data, ['id' => $this->args['id']]);
         return $this->respondWithData(['up_num' => $num], 201);
-        break;
       case 'DELETE':
         $delnum = $this->customMenu->delete(['id' => $this->args['id']]);
         $delnum += $this->customMenu->delete(['parent_id' => $this->args['id']]);
         return $this->respondWithData(['del_num' => $delnum], 200);
-        break;
       case 'GET':
         $params = $this->request->getQueryParams();
         $tag_id = $params['tag_id'] ?? 0;
@@ -128,7 +122,6 @@ class CustomMenuApi extends Api
           $menus[] = $item;
         }
         return $this->respondWithData($menus);
-        break;
       default:
         return $this->respondWithError('禁止访问', 403);
     }

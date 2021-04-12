@@ -13,6 +13,7 @@ use Wanphp\Libray\Weixin\WeChatBase;
 use Predis\ClientInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Wanphp\Plugins\Weixin\Application\Api;
+use Exception;
 
 /**
  * Class TagsApi
@@ -22,8 +23,8 @@ use Wanphp\Plugins\Weixin\Application\Api;
  */
 class TagsApi extends Api
 {
-  private $weChatBase;
-  private $redis;
+  private WeChatBase $weChatBase;
+  private ClientInterface $redis;
 
   public function __construct(WeChatBase $weChatBase, ClientInterface $redis)
   {
@@ -33,7 +34,7 @@ class TagsApi extends Api
 
   /**
    * @return Response
-   * @throws \Exception
+   * @throws Exception
    * @OA\Post(
    *  path="/api/manage/weixin/tag",
    *  tags={"WeixinTag"},
@@ -52,13 +53,13 @@ class TagsApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Put(
-   *  path="/api/manage/weixin/tag/{ID}",
+   *  path="/api/manage/weixin/tag/{id}",
    *  tags={"WeixinTag"},
    *  summary="修改公众号用户标签",
    *  operationId="editWeixinTag",
    *  security={{"bearerAuth":{}}},
    *   @OA\Parameter(
-   *     name="ID",
+   *     name="id",
    *     in="path",
    *     description="标签ID",
    *     required=true,
@@ -76,13 +77,13 @@ class TagsApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Delete(
-   *  path="/api/manage/weixin/tag/{ID}",
+   *  path="/api/manage/weixin/tag/{id}",
    *  tags={"WeixinTag"},
    *  summary="删除公众号用户标签",
    *  operationId="delWeixinTag",
    *  security={{"bearerAuth":{}}},
    *  @OA\Parameter(
-   *    name="ID",
+   *    name="id",
    *    in="path",
    *    description="标签ID",
    *    required=true,
@@ -112,7 +113,6 @@ class TagsApi extends Api
         } else {
           return $this->respondWithError('缺少标签名称');
         }
-        break;
       case 'PUT':
         $id = $this->args['id'] ?? 0;
         $data = $this->request->getParsedBody();
@@ -122,7 +122,6 @@ class TagsApi extends Api
         } else {
           return $this->respondWithError('缺少ID或标签名称');
         }
-        break;
       case 'DELETE':
         $id = $this->args['id'] ?? 0;
         if ($id > 0) {
@@ -131,7 +130,6 @@ class TagsApi extends Api
         } else {
           return $this->respondWithError('缺少ID');
         }
-        break;
       case 'GET':
         //公众号粉丝数
         $user_total = $this->redis->get('wxuser_total');
@@ -146,7 +144,6 @@ class TagsApi extends Api
           'tags' => $userTags['tags'] ?? [],
           'total' => $user_total,
         ]);
-        break;
       default:
         return $this->respondWithError('禁止访问', 403);
     }
