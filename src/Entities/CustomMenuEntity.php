@@ -9,12 +9,15 @@
 namespace Wanphp\Plugins\Weixin\Entities;
 
 
+use JsonSerializable;
+use Wanphp\Libray\Mysql\EntityTrait;
+
 /**
  * Class CustomMenuEntity
  * @package Wanphp\Plugins\Weixin\Entities
  * @OA\Schema(schema="NewCustomMenu", required={"name","type"})
  */
-class CustomMenuEntity implements \JsonSerializable
+class CustomMenuEntity implements JsonSerializable
 {
   use EntityTrait;
   /**

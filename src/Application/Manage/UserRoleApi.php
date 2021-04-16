@@ -52,7 +52,7 @@ class UserRoleApi extends Api
    *      allOf={
    *       @OA\Schema(ref="#/components/schemas/Success"),
    *       @OA\Schema(
-   *         @OA\Property(property="res",@OA\Property(property="id",type="integer"))
+   *         @OA\Property(property="datas",@OA\Property(property="id",type="integer"))
    *       )
    *      }
    *    )
@@ -87,7 +87,7 @@ class UserRoleApi extends Api
    *      allOf={
    *       @OA\Schema(ref="#/components/schemas/Success"),
    *       @OA\Schema(
-   *         @OA\Property(property="res",@OA\Property(property="up_num",type="integer"))
+   *         @OA\Property(property="datas",@OA\Property(property="up_num",type="integer"))
    *       )
    *      }
    *    )
@@ -114,7 +114,7 @@ class UserRoleApi extends Api
    *      allOf={
    *       @OA\Schema(ref="#/components/schemas/Success"),
    *       @OA\Schema(
-   *         @OA\Property(property="res",@OA\Property(property="del_num",type="integer"))
+   *         @OA\Property(property="datas",@OA\Property(property="del_num",type="integer"))
    *       )
    *      }
    *    )
@@ -134,7 +134,7 @@ class UserRoleApi extends Api
    *      allOf={
    *       @OA\Schema(ref="#/components/schemas/Success"),
    *       @OA\Schema(
-   *         @OA\Property(property="res",type="array",@OA\Items(ref="#/components/schemas/UserRoleEntity"))
+   *         @OA\Property(property="datas",type="array",@OA\Items(ref="#/components/schemas/UserRoleEntity"))
    *       )
    *      }
    *    )

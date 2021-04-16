@@ -9,6 +9,9 @@
 namespace Wanphp\Plugins\Weixin\Entities;
 
 
+use JsonSerializable;
+use Wanphp\Libray\Mysql\EntityTrait;
+
 /**
  * Class UserRole
  * @package Wanphp\Plugins\Weixin\Entities
@@ -18,7 +21,7 @@ namespace Wanphp\Plugins\Weixin\Entities;
  *   required={"name"}
  * )
  */
-class UserRoleEntity implements \JsonSerializable
+class UserRoleEntity implements JsonSerializable
 {
   use EntityTrait;
   /**

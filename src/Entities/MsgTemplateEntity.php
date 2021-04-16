@@ -4,6 +4,9 @@ declare(strict_types=1);
 namespace Wanphp\Plugins\Weixin\Entities;
 
 
+use JsonSerializable;
+use Wanphp\Libray\Mysql\EntityTrait;
+
 /**
  * Class MsgTemplateEntity
  * @package Wanphp\Plugins\Weixin\Entities
@@ -13,7 +16,7 @@ namespace Wanphp\Plugins\Weixin\Entities;
  *   required={"template_id_short","template_id"}
  * )
  */
-class MsgTemplateEntity implements \JsonSerializable
+class MsgTemplateEntity implements JsonSerializable
 {
   use EntityTrait;
   /**

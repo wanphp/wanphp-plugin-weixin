@@ -52,7 +52,7 @@ class UserApi extends Api
    *     allOf={
    *      @OA\Schema(ref="#/components/schemas/Success"),
    *      @OA\Schema(
-   *        @OA\Property(property="res", @OA\Property(property="up_num",type="integer",description="更新数量"))
+   *        @OA\Property(property="datas", @OA\Property(property="up_num",type="integer",description="更新数量"))
    *      )
    *     }
    *   )
@@ -72,7 +72,7 @@ class UserApi extends Api
    *      allOf={
    *       @OA\Schema(ref="#/components/schemas/Success"),
    *       @OA\Schema(
-   *         @OA\Property(property="res",example={
+   *         @OA\Property(property="datas",example={
   "name": "",
   "tel": null,
   "address": "",

@@ -508,7 +508,7 @@ paths:
               schema:
                 allOf:
                   - { $ref: '#/components/schemas/Success' }
-                  - { properties: { res: { type: array, items: { $ref: '#/components/schemas/UserRoleEntity' } } }, type: object }
+                  - { properties: { datas: { type: array, items: { $ref: '#/components/schemas/UserRoleEntity' } } }, type: object }
         '400':
           description: 请求失败
           content:
@@ -538,7 +538,7 @@ paths:
               schema:
                 allOf:
                   - { $ref: '#/components/schemas/Success' }
-                  - { properties: { res: { properties: { id: { type: integer } }, type: object } }, type: object }
+                  - { properties: { datas: { properties: { id: { type: integer } }, type: object } }, type: object }
         '400':
           description: 请求失败
           content:
@@ -578,7 +578,7 @@ paths:
               schema:
                 allOf:
                   - { $ref: '#/components/schemas/Success' }
-                  - { properties: { res: { properties: { up_num: { type: integer } }, type: object } }, type: object }
+                  - { properties: { datas: { properties: { up_num: { type: integer } }, type: object } }, type: object }
         '400':
           description: 请求失败
           content:
@@ -610,7 +610,7 @@ paths:
               schema:
                 allOf:
                   - { $ref: '#/components/schemas/Success' }
-                  - { properties: { res: { properties: { del_num: { type: integer } }, type: object } }, type: object }
+                  - { properties: { datas: { properties: { del_num: { type: integer } }, type: object } }, type: object }
         '400':
           description: 请求失败
           content:
@@ -738,7 +738,7 @@ paths:
               schema:
                 allOf:
                   - { $ref: '#/components/schemas/Success' }
-                  - { properties: { res: { example: { name: '', tel: null, address: '', integral: '0', cash_back: '0.00', money: '0.00' } } }, type: object }
+                  - { properties: { datas: { example: { name: '', tel: null, address: '', integral: '0', cash_back: '0.00', money: '0.00' } } }, type: object }
         '400':
           description: 请求失败
           content:
@@ -775,7 +775,7 @@ paths:
               schema:
                 allOf:
                   - { $ref: '#/components/schemas/Success' }
-                  - { properties: { res: { properties: { up_num: { description: 更新数量, type: integer } }, type: object } }, type: object }
+                  - { properties: { datas: { properties: { up_num: { description: 更新数量, type: integer } }, type: object } }, type: object }
         '400':
           description: 请求失败
           content:

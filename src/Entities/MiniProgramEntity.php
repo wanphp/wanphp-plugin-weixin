@@ -9,6 +9,9 @@
 namespace Wanphp\Plugins\Weixin\Entities;
 
 
+use JsonSerializable;
+use Wanphp\Libray\Mysql\EntityTrait;
+
 /**
  * Class MiniProgramEntity
  * @package Wanphp\Plugins\Weixin\Entities
@@ -18,7 +21,7 @@ namespace Wanphp\Plugins\Weixin\Entities;
  *   required={"openid","nickname","headimgurl","sex"}
  * )
  */
-class MiniProgramEntity implements \JsonSerializable
+class MiniProgramEntity implements JsonSerializable
 {
   use EntityTrait;
   /**

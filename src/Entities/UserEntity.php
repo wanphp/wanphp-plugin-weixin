@@ -4,6 +4,9 @@ declare(strict_types=1);
 namespace Wanphp\Plugins\Weixin\Entities;
 
 
+use JsonSerializable;
+use Wanphp\Libray\Mysql\EntityTrait;
+
 /**
  * Class UserEntity
  * @package Wanphp\Plugins\Weixin\Entities
@@ -13,7 +16,7 @@ namespace Wanphp\Plugins\Weixin\Entities;
  *   required={"nickname","headimgurl","sex"}
  * )
  */
-class UserEntity implements \JsonSerializable
+class UserEntity implements JsonSerializable
 {
   use EntityTrait;
   /**
