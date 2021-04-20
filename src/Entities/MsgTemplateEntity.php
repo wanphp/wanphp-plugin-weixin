@@ -44,4 +44,9 @@ class MsgTemplateEntity implements JsonSerializable
    * @OA\Property(description="是否可用")
    */
   private $status;
+
+  public function jsonSerialize()
+  {
+    return get_object_vars($this);
+  }
 }

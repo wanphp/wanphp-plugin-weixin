@@ -17,7 +17,7 @@ use Wanphp\Plugins\Weixin\Domain\UserRoleInterface;
  * Class UserRoleApi
  * @title 用户角色
  * @route /api/manage/user/role
- * @package App\Application\Api\Manage\Users
+ * @package Wanphp\Plugins\Weixin\Application\Manage
  */
 class UserRoleApi extends Api
 {
