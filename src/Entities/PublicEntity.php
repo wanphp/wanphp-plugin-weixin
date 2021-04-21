@@ -79,4 +79,9 @@ class PublicEntity implements JsonSerializable
    * @OA\Property(description="最后来访时间，若在48小时内可以发客服信息")
    */
   private $lastop_time;
+
+  public function jsonSerialize()
+  {
+    return get_object_vars($this);
+  }
 }
