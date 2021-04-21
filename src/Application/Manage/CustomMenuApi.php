@@ -114,7 +114,7 @@ class CustomMenuApi extends Api
       case 'GET':
         $params = $this->request->getQueryParams();
         $tag_id = $params['tag_id'] ?? 0;
-        $where = ['tag_id' => $tag_id, 'parent_id' => 0, 'ORDER' => ['tag_id' => 'ASC', 'parent_id' => 'ASC', 'sort_order' => 'ASC']];
+        $where = ['tag_id' => $tag_id, 'parent_id' => 0, 'ORDER' => ['tag_id' => 'ASC', 'parent_id' => 'ASC', 'sortOrder' => 'ASC']];
         $menus = [];
         foreach ($this->customMenu->select('*', $where) as $item) {
           $where['parent_id'] = $item['id'];

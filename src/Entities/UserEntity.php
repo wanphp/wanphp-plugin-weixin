@@ -91,9 +91,4 @@ class UserEntity implements JsonSerializable
    * @OA\Property(description="用户充值余额")
    */
   private $money;
-
-  public function jsonSerialize()
-  {
-    return get_object_vars($this);
-  }
 }

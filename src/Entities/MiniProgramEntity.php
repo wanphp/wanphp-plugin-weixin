@@ -42,9 +42,4 @@ class MiniProgramEntity implements JsonSerializable
    * @OA\Property(description="推荐用户ID")
    */
   private $parent_id;
-
-  public function jsonSerialize()
-  {
-    return get_object_vars($this);
-  }
 }

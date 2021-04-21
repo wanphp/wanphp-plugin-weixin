@@ -849,7 +849,7 @@ components:
         pagepath:
           description: miniprogram类型必须；小程序的页面路径
           type: string
-        sort_order:
+        sortOrder:
           description: 排序
           type: integer
       type: object

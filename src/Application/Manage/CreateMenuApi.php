@@ -49,7 +49,7 @@ class CreateMenuApi extends Api
   {
     $data = $this->request->getParsedBody();
     $tag_id = $data['tag_id'] ?? 0;
-    $where = ['tag_id' => $tag_id, 'parent_id' => 0, 'ORDER' => ['tag_id' => 'ASC', 'parent_id' => 'ASC', 'sort_order' => 'ASC']];
+    $where = ['tag_id' => $tag_id, 'parent_id' => 0, 'ORDER' => ['tag_id' => 'ASC', 'parent_id' => 'ASC', 'sortOrder' => 'ASC']];
     $menus = [];
     foreach ($this->customMenu->select('*', $where) as $item) {
       $menu = ['name' => $item['name']];

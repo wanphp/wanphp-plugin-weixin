@@ -43,9 +43,4 @@ class UserRoleEntity implements JsonSerializable
    * @var int
    */
   private $sortOrder;
-
-  public function jsonSerialize()
-  {
-    return get_object_vars($this);
-  }
 }

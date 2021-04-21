@@ -78,12 +78,7 @@ class CustomMenuEntity implements JsonSerializable
    * @var integer
    * @OA\Property(description="排序")
    */
-  private $sort_order;
-
-  public function jsonSerialize()
-  {
-    return get_object_vars($this);
-  }
+  private $sortOrder;
 }
 
 /**
