@@ -19,7 +19,7 @@ use Wanphp\Plugins\Weixin\Domain\UserInterface;
  * Class UserApi
  * @title 用户管理
  * @route /api/manage/users
- * @package App\Application\Api\Manage\Users
+ * @package Wanphp\Plugins\Weixin\Application\Manage
  */
 class UserApi extends Api
 {
