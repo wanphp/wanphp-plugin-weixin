@@ -35,7 +35,7 @@ class WePublic extends Api
     if ($this->weChatBase->valid() === true) {
       $openid = $this->weChatBase->getRev()->getRevFrom();//获取每个微信用户的openid
       $time = $this->weChatBase->getRev()->getRevCtime();//获取消息发送时间
-      $msgid = $this->weChatBase->getRev()->getRevID();//获取消息ID
+      //$msgid = $this->weChatBase->getRev()->getRevID();//获取消息ID
       $type = $this->weChatBase->getRev()->getRevType();//获取消息类型
       //不是事件消息，更新最后操作时间
       if ($type != 'event') $this->public->update(['lastop_time' => $time], ['openid' => $openid]);
@@ -44,7 +44,7 @@ class WePublic extends Api
         case 'event':
           // 处理事件推送
           $eventArr = $this->weChatBase->getRev()->getRevEvent();
-          $event = $eventarr['event'] ?? '';//获得事件类型
+          $event = $eventArr['event'] ?? '';//获得事件类型
           if (in_array($event, array('CLICK', 'SCAN', 'scancode_push', 'scancode_waitmsg', 'merchant_order'))) {
             $this->public->update(['lastop_time' => $time], ['openid' => $openid]);
           }
