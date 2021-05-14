@@ -24,6 +24,22 @@ class ShareApi extends Api
   /**
    * @return Response
    * @throws \Exception
+   * @OA\Post(
+   *  path="/getSignPackage",
+   *  tags={"Public"},
+   *  summary="公众号分享取签名",
+   *  operationId="getSignPackage",
+   *  @OA\RequestBody(
+   *    description="验证地址",
+   *    required=true,
+   *    @OA\MediaType(
+   *      mediaType="application/json",
+   *      @OA\Schema(type="object",@OA\Property(property="url",type="string"))
+   *    )
+   *  ),
+   *  @OA\Response(response="200",description="请求成功",@OA\JsonContent(ref="#/components/schemas/Success")),
+   *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
+   * )
    */
   protected function action(): Response
   {

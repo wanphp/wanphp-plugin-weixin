@@ -22,6 +22,10 @@ namespace Wanphp\Plugins\Weixin\Application;
 
 /**
  * @OA\Tag(
+ *     name="Public",
+ *     description="公共操作接口",
+ * )
+ * @OA\Tag(
  *     name="UserRole",
  *     description="用户角色",
  * )

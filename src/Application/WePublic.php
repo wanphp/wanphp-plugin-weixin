@@ -15,7 +15,7 @@ use Psr\Log\LoggerInterface;
 use Wanphp\Plugins\Weixin\Domain\PublicInterface;
 use Wanphp\Plugins\Weixin\Domain\UserInterface;
 
-class WePublic extends Api
+abstract class WePublic extends Api
 {
   protected $weChatBase;
   protected $user;
@@ -30,6 +30,25 @@ class WePublic extends Api
     $this->logger = $logger;
   }
 
+  /**
+   * @return Response
+   * @throws \Exception
+   * @OA\Post(
+   *  path="/weixin",
+   *  tags={"Public"},
+   *  summary="微信服务地址，使用时按实际情况自行继承重写此方法",
+   *  operationId="weixinMsgEvent",
+   *  @OA\RequestBody(
+   *    description="接收微信消息、事件，当用户向公众账号发消息时或与公众号产生交互时，微信服务器将POST消息的XML数据包当前URL上进行处理。",
+   *    @OA\XmlContent(type="string")
+   *  ),
+   *  @OA\Response(
+   *    response=200,
+   *    description="返回结果",
+   *    @OA\XmlContent(type="string")
+   *  )
+   * )
+   */
   protected function action(): Response
   {
     if ($this->weChatBase->valid() === true) {

@@ -16,7 +16,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Wanphp\Plugins\Weixin\Domain\PublicInterface;
 use Wanphp\Plugins\Weixin\Domain\UserInterface;
 
-class PayNotice extends Api
+abstract class PayNotice extends Api
 {
   protected $weChatBase;
   protected $pay;
@@ -33,6 +33,29 @@ class PayNotice extends Api
     $this->logger = $logger;
   }
 
+  /**
+   * @return Response
+   * @throws \Exception
+   * @OA\Post(
+   *  path="/payNotice",
+   *  tags={"Public"},
+   *  summary="微信支付通知，使用时按实际情况自行继承重写此方法",
+   *  operationId="payNotice",
+   *  @OA\RequestBody(
+   *    description="通知数据，支付操作完成后由微信服务器返回",
+   *    required=true,
+   *    @OA\XmlContent(type="string")
+   *  ),
+   *  @OA\Response(
+   *    response=200,
+   *    description="返回结果",
+   *    @OA\XmlContent(
+   *     @OA\Property(property="return_code", type="string"),
+   *     @OA\Property(property="return_msg", type="string")
+   *    )
+   *  )
+   * )
+   */
   protected function action(): Response
   {
     if (!$xml = file_get_contents('php://input')) {

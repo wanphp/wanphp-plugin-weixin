@@ -6,10 +6,10 @@ use Slim\Interfaces\RouteCollectorProxyInterface as Group;
 use Psr\Http\Server\MiddlewareInterface as Middleware;
 
 return function (App $app, Middleware $PermissionMiddleware, Middleware $OAuthServerMiddleware) {
-  //公众号绑定
-  $app->map(['GET', 'POST'], '/weixin', \Wanphp\Plugins\Weixin\Application\WePublic::class);
-  //支付通知
-  $app->post('/paynotice', \Wanphp\Plugins\Weixin\Application\PayNotice::class);
+  //公众号绑定，使用时按实际情况重写方法
+  //$app->map(['GET', 'POST'], '/weixin', \Wanphp\Plugins\Weixin\Application\WePublic::class);
+  //支付通知，使用时按实际情况重写方法
+  //$app->post('/paynotice', \Wanphp\Plugins\Weixin\Application\PayNotice::class);
   //公众号分享签名
   $app->post('/getSignPackage', \Wanphp\Plugins\Weixin\Application\ShareApi::class);
 

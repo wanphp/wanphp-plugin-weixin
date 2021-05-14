@@ -724,6 +724,58 @@ paths:
       security:
         -
           bearerAuth: []
+  /payNotice:
+    post:
+      tags:
+        - Public
+      summary: 微信支付通知，使用时按实际情况自行继承重写此方法
+      operationId: payNotice
+      requestBody:
+        description: 通知数据，支付操作完成后由微信服务器返回
+        required: true
+        content:
+          application/xml:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: 返回结果
+          content:
+            application/xml:
+              schema:
+                properties:
+                  return_code: { type: string }
+                  return_msg: { type: string }
+                type: object
+  /getSignPackage:
+    post:
+      tags:
+        - Public
+      summary: 公众号分享取签名
+      operationId: getSignPackage
+      requestBody:
+        description: 验证地址
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                url:
+                  type: string
+              type: object
+      responses:
+        '200':
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /api/user:
     get:
       tags:
@@ -785,6 +837,25 @@ paths:
       security:
         -
           bearerAuth: []
+  /weixin:
+    post:
+      tags:
+        - Public
+      summary: 微信服务地址，使用时按实际情况自行继承重写此方法
+      operationId: weixinMsgEvent
+      requestBody:
+        description: 接收微信消息、事件，当用户向公众账号发消息时或与公众号产生交互时，微信服务器将POST消息的XML数据包当前URL上进行处理。
+        content:
+          application/xml:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: 返回结果
+          content:
+            application/xml:
+              schema:
+                type: string
 components:
   schemas:
     Error:
@@ -1025,6 +1096,9 @@ components:
       bearerFormat: JWT
       scheme: bearer
 tags:
+  -
+    name: Public
+    description: 公共操作接口
   -
     name: UserRole
     description: 用户角色
