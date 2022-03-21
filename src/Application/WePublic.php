@@ -13,19 +13,16 @@ use Wanphp\Libray\Weixin\WeChatBase;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Log\LoggerInterface;
 use Wanphp\Plugins\Weixin\Domain\PublicInterface;
-use Wanphp\Plugins\Weixin\Domain\UserInterface;
 
 abstract class WePublic extends Api
 {
   protected $weChatBase;
-  protected $user;
   protected $public;
   protected $logger;
 
-  public function __construct(WeChatBase $weChatBase, UserInterface $user, PublicInterface $public, LoggerInterface $logger)
+  public function __construct(WeChatBase $weChatBase, PublicInterface $public, LoggerInterface $logger)
   {
     $this->weChatBase = $weChatBase;
-    $this->user = $user;
     $this->public = $public;
     $this->logger = $logger;
   }
@@ -135,15 +132,8 @@ abstract class WePublic extends Api
     //保存用户信息
     $userinfo = $this->weChatBase->getUserInfo($openid);
     if (!is_array($userinfo)) $userinfo = [];
-    if (isset($userinfo['groupid'])) unset($userinfo['groupid']);
     //本地存储用户
     if (isset($info['id'])) {//二次关注
-      //更新用户信息
-      $this->user->update([
-        'nickname' => $userinfo['nickname'],
-        'headimgurl' => $userinfo['headimgurl'],
-        'sex' => $userinfo['sex']
-      ], ['id' => $info['id']]);
       //更新公众号信息
       $this->public->update([
         'subscribe' => 1,
@@ -154,34 +144,8 @@ abstract class WePublic extends Api
         'lastop_time' => $time
       ], ['id' => $info['id']]);
     } else {
-      //检查用户是否通过小程序等，存储到本地
-      if (isset($userinfo['unionid'])) {
-        $user_id = $this->user->get('id', ['unionid' => $userinfo['unionid']]);
-        if ($user_id > 0) {
-          //更新用户信息
-          $this->user->update([
-            'nickname' => $userinfo['nickname'],
-            'headimgurl' => $userinfo['headimgurl'],
-            'sex' => $userinfo['sex']
-          ], ['id' => $info['id']]);
-        } else {
-          $user_id = $this->user->insert([
-            'unionid' => $userinfo['unionid'],
-            'nickname' => $userinfo['nickname'],
-            'headimgurl' => $userinfo['headimgurl'],
-            'sex' => $userinfo['sex']
-          ]);
-        }
-      } else {
-        $user_id = $this->user->insert([
-          'nickname' => $userinfo['nickname'],
-          'headimgurl' => $userinfo['headimgurl'],
-          'sex' => $userinfo['sex']
-        ]);
-      }
       //添加公众号信息
       $this->public->insert([
-        'id' => $user_id,
         'openid' => $openid,
         'parent_id' => $userinfo['qr_scene'],
         'subscribe' => 1,

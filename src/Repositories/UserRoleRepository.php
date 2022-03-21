@@ -12,12 +12,12 @@ namespace Wanphp\Plugins\Weixin\Repositories;
 use Wanphp\Libray\Mysql\BaseRepository;
 use Wanphp\Libray\Mysql\Database;
 use Wanphp\Plugins\Weixin\Domain\UserRoleInterface;
-use Wanphp\Plugins\Weixin\Entities\UserEntity;
+use Wanphp\Plugins\Weixin\Entities\UserRoleEntity;
 
 class UserRoleRepository extends BaseRepository implements UserRoleInterface
 {
   public function __construct(Database $database)
   {
-    parent::__construct($database, self::TABLENAME, UserEntity::class);
+    parent::__construct($database, self::TABLENAME, UserRoleEntity::class);
   }
 }
