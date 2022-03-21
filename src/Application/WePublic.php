@@ -13,16 +13,19 @@ use Wanphp\Libray\Weixin\WeChatBase;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Log\LoggerInterface;
 use Wanphp\Plugins\Weixin\Domain\PublicInterface;
+use Wanphp\Plugins\Weixin\Domain\UserInterface;
 
 abstract class WePublic extends Api
 {
   protected $weChatBase;
+  protected $user;
   protected $public;
   protected $logger;
 
-  public function __construct(WeChatBase $weChatBase, PublicInterface $public, LoggerInterface $logger)
+  public function __construct(WeChatBase $weChatBase, UserInterface $user, PublicInterface $public, LoggerInterface $logger)
   {
     $this->weChatBase = $weChatBase;
+    $this->user = $user;
     $this->public = $public;
     $this->logger = $logger;
   }
@@ -120,6 +123,7 @@ abstract class WePublic extends Api
   }
 
   /**
+   * @return false|void
    * @throws \Exception
    */
   protected function updateUser()
@@ -133,27 +137,31 @@ abstract class WePublic extends Api
     $userinfo = $this->weChatBase->getUserInfo($openid);
     if (!is_array($userinfo)) $userinfo = [];
     //本地存储用户
+    $data = [
+      'subscribe' => 1,
+      'tagid_list[JSON]' => $userinfo['tagid_list'],
+      'subscribe_time' => $userinfo['subscribe_time'],
+      'subscribe_scene' => $userinfo['subscribe_scene'],
+      'lastop_time' => $time
+    ];
     if (isset($info['id'])) {//二次关注
       //更新公众号信息
-      $this->public->update([
-        'subscribe' => 1,
-        'tagid_list[JSON]' => $userinfo['tagid_list'],
-        'subscribe_time' => $userinfo['subscribe_time'],
-        'unsubscribe_time' => 0,
-        'subscribe_scene' => $userinfo['subscribe_scene'],
-        'lastop_time' => $time
-      ], ['id' => $info['id']]);
+      $data['unsubscribe_time'] = 0;
+      $this->public->update($data, ['id' => $info['id']]);
     } else {
+      $data['openid'] = $openid;
+      $data['parent_id'] = $userinfo['qr_scene'];
+      //检查用户是否通过小程序等，存储到本地
+      if (isset($userinfo['unionid']) && !empty($userinfo['unionid'])) {
+        $user_id = $this->user->get('id', ['unionid' => $userinfo['unionid']]);
+        if ($user_id > 0) {
+          $data['id'] = $user_id;
+        } else {
+          $data['id'] = $this->user->insert(['unionid' => $userinfo['unionid']]);
+        }
+      }
       //添加公众号信息
-      $this->public->insert([
-        'openid' => $openid,
-        'parent_id' => $userinfo['qr_scene'],
-        'subscribe' => 1,
-        'tagid_list[JSON]' => $userinfo['tagid_list'],
-        'subscribe_time' => $userinfo['subscribe_time'],
-        'subscribe_scene' => $userinfo['subscribe_scene'],
-        'lastop_time' => $time
-      ]);
+      $this->public->insert($data);
     }
   }
 
