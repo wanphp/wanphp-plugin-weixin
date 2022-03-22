@@ -11,23 +11,23 @@ namespace Wanphp\Plugins\Weixin\Application;
 
 use Wanphp\Libray\Weixin\WeChatBase;
 use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Log\LoggerInterface;
 use Wanphp\Plugins\Weixin\Domain\PublicInterface;
 use Wanphp\Plugins\Weixin\Domain\UserInterface;
+use Wanphp\Plugins\Weixin\Domain\UserLocationInterface;
 
 abstract class WePublic extends Api
 {
-  protected $weChatBase;
-  protected $user;
-  protected $public;
-  protected $logger;
+  protected WeChatBase $weChatBase;
+  protected UserInterface $user;
+  protected PublicInterface $public;
+  protected UserLocationInterface $userLocation;
 
-  public function __construct(WeChatBase $weChatBase, UserInterface $user, PublicInterface $public, LoggerInterface $logger)
+  public function __construct(WeChatBase $weChatBase, UserInterface $user, PublicInterface $public, UserLocationInterface $userLocation)
   {
     $this->weChatBase = $weChatBase;
     $this->user = $user;
     $this->public = $public;
-    $this->logger = $logger;
+    $this->userLocation = $userLocation;
   }
 
   /**
@@ -75,12 +75,26 @@ abstract class WePublic extends Api
               $body = $this->subscribe();
               break;
             case 'unsubscribe':
-              $data = array();
-              $data['subscribe'] = 0;
-              $data['unsubscribe_time'] = $time;
-              $data['integral'] = 0;
-              $data['lastop_time'] = 0;
-              $this->public->update($data, ['openid' => $openid]);
+              $this->public->update([
+                'subscribe' => 0,
+                'unsubscribe_time' => $time,
+                'integral' => 0,
+                'lastop_time' => 0],
+                ['openid' => $openid]);
+              break;
+            case 'LOCATION':
+              // 上报地理位置
+              $uid = $this->public->get('id', ['openid' => $openid]);
+              if ($uid > 0) {
+                $revData = $this->weChatBase->getRevData();
+                $this->userLocation->insert([
+                  'uid' => $uid,
+                  'lat' => $revData['Latitude'],
+                  'lng' => $revData['Longitude'],
+                  'precision' => $revData['Precision'],
+                  'ctime' => $time
+                ]);
+              }
               break;
             default:
               $body = $this->clickevent($this->weChatBase->getRevData());

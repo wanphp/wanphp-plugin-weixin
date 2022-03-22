@@ -63,14 +63,13 @@ namespace Wanphp\Plugins\Weixin\Application;
  *   required={"code", "message", "res"},
  *   @OA\Property(property="code", type="string", example="200"),
  *   @OA\Property(property="message", type="string", example="OK"),
- *   @OA\Property(property="datas", type="object",description="返回数据")
+ *   @OA\Property(property="res", type="object",description="返回数据")
  * )
  */
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpBadRequestException;
-use Slim\Exception\HttpNotFoundException;
 use Exception;
 
 abstract class Api
@@ -78,24 +77,23 @@ abstract class Api
   /**
    * @var Request
    */
-  protected $request;
+  protected Request $request;
 
   /**
    * @var Response
    */
-  protected $response;
+  protected Response $response;
 
   /**
    * @var array
    */
-  protected $args;
+  protected array $args;
 
   /**
    * @param Request $request
    * @param Response $response
    * @param array $args
    * @return Response
-   * @throws HttpNotFoundException
    * @throws HttpBadRequestException
    */
   public function __invoke(Request $request, Response $response, $args): Response
@@ -122,7 +120,7 @@ abstract class Api
    * @return array|object
    * @throws HttpBadRequestException
    */
-  protected function getFormData()
+  protected function getFormData(): object|array
   {
     $input = json_decode(file_get_contents('php://input'));
 
@@ -138,7 +136,7 @@ abstract class Api
    * @return mixed
    * @throws HttpBadRequestException
    */
-  protected function resolveArg(string $name)
+  protected function resolveArg(string $name): mixed
   {
     if (!isset($this->args[$name])) {
       throw new HttpBadRequestException($this->request, "找不到 `{$name}`.");
@@ -148,12 +146,13 @@ abstract class Api
   }
 
   /**
-   * @param array|object|null $data
+   * @param object|array|null $data
+   * @param int $statusCode
    * @return Response
    */
-  protected function respondWithData($data = null, int $statusCode = 200): Response
+  protected function respondWithData(object|array $data = null, int $statusCode = 200): Response
   {
-    $json = json_encode(['code' => $statusCode, 'msg' => 'OK', 'datas' => $data], JSON_PRETTY_PRINT);
+    $json = json_encode(['code' => $statusCode, 'msg' => 'OK', 'res' => $data], JSON_PRETTY_PRINT);
     $this->response->getBody()->write($json);
 
     return $this->respond($statusCode);
