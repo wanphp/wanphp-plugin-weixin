@@ -23,9 +23,9 @@ use Wanphp\Plugins\Weixin\Domain\UserInterface;
  */
 class UserApi extends Api
 {
-  private $user;
-  private $public;
-  private $weChatBase;
+  private UserInterface $user;
+  private PublicInterface $public;
+  private WeChatBase $weChatBase;
 
   public function __construct(UserInterface $user, PublicInterface $public, WeChatBase $weChatBase)
   {
@@ -65,9 +65,7 @@ class UserApi extends Api
    *  @OA\JsonContent(
    *     allOf={
    *      @OA\Schema(ref="#/components/schemas/Success"),
-   *      @OA\Schema(
-   *        @OA\Property(property="res", @OA\Property(property="up_num",type="integer",description="更新数量"))
-   *      )
+   *      @OA\Schema(@OA\Property(property="upNum",type="integer",description="更新数量"))
    *     }
    *   )
    *  ),
@@ -92,9 +90,7 @@ class UserApi extends Api
    *    @OA\JsonContent(
    *      allOf={
    *       @OA\Schema(ref="#/components/schemas/Success"),
-   *       @OA\Schema(
-   *         @OA\Property(property="res",ref="#/components/schemas/UserEntity")
-   *       )
+   *       @OA\Schema(ref="#/components/schemas/UserEntity")
    *      }
    *    )
    *  ),
@@ -131,15 +127,13 @@ class UserApi extends Api
    *    @OA\JsonContent(
    *      allOf={
    *       @OA\Schema(ref="#/components/schemas/Success"),
-   *       @OA\Schema(
-   *         @OA\Property(property="res",example={
+   *       @OA\Schema(example={
   "id": "",
   "headimgurl": "用户头像","nickname":"用户昵称",
   "role": "用色",
   "name": "Name",
   "tel": "Tel"
   })
-   *       )
    *      }
    *    )
    *  ),
@@ -153,7 +147,7 @@ class UserApi extends Api
         $data = $this->request->getParsedBody();
         if (empty($data)) return $this->respondWithError('无用户数据');
         $num = $this->user->update($data, ['id' => $this->args['id']]);
-        return $this->respondWithData(['up_num' => $num], 201);
+        return $this->respondWithData(['upNum' => $num], 201);
       case 'GET':
         $id = $this->args['id'] ?? 0;
         if ($id > 0) {

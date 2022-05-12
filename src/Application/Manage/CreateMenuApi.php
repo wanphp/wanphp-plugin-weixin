@@ -16,8 +16,8 @@ use Wanphp\Plugins\Weixin\Domain\CustomMenuInterface;
 
 class CreateMenuApi extends Api
 {
-  private $weChatBase;
-  private $customMenu;
+  private WeChatBase $weChatBase;
+  private CustomMenuInterface $customMenu;
 
   public function __construct(WeChatBase $weChatBase, CustomMenuInterface $customMenu)
   {
@@ -58,34 +58,11 @@ class CreateMenuApi extends Api
       if (count($subMenus) > 0) {
         foreach ($subMenus as $btn) {
           $subBtn = ['name' => $btn['name'], 'type' => $btn['type']];
-          switch ($btn['type']) {
-            case 'view':
-              $subBtn['url'] = $btn['url'];
-              break;
-            case 'miniprogram':
-              $subBtn['url'] = $btn['url'];
-              $subBtn['appid'] = $btn['appid'];
-              $subBtn['pagepath'] = $btn['pagepath'];
-              break;
-            default:
-              $subBtn['key'] = $btn['key'];
-          }
-          $menu['sub_button'][] = $subBtn;
+          $menu['sub_button'][] =  $this->getSubBtn($btn, $subBtn);
         }
       } else {
         $menu['type'] = $item['type'];
-        switch ($item['type']) {
-          case 'view':
-            $menu['url'] = $item['url'];
-            break;
-          case 'miniprogram':
-            $menu['url'] = $item['url'];
-            $menu['appid'] = $item['appid'];
-            $menu['pagepath'] = $item['pagepath'];
-            break;
-          default:
-            $menu['key'] = $item['key'];
-        }
+        $menu = $this->getSubBtn($item, $menu);
       }
       $menus[] = $menu;
     }
@@ -99,5 +76,27 @@ class CreateMenuApi extends Api
     } else {
       return $this->respondWithError('菜单为空！', 400);
     }
+  }
+
+  /**
+   * @param mixed $btn
+   * @param array $subBtn
+   * @return array
+   */
+  protected function getSubBtn(mixed $btn, array $subBtn): array
+  {
+    switch ($btn['type']) {
+      case 'view':
+        $subBtn['url'] = $btn['url'];
+        break;
+      case 'miniprogram':
+        $subBtn['url'] = $btn['url'];
+        $subBtn['appid'] = $btn['appid'];
+        $subBtn['pagepath'] = $btn['pagepath'];
+        break;
+      default:
+        $subBtn['key'] = $btn['key'];
+    }
+    return $subBtn;
   }
 }

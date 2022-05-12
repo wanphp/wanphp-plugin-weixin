@@ -14,7 +14,7 @@ use Wanphp\Libray\Weixin\WeChatBase;
 
 class ShareApi extends Api
 {
-  private $weChatBase;
+  private WeChatBase $weChatBase;
 
   public function __construct(WeChatBase $weChatBase)
   {

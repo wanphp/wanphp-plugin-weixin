@@ -26,7 +26,7 @@ class PublicEntity implements JsonSerializable
 {
   use EntityTrait;
   /**
-   * @DBType({"key":"PRI","type":"int NOT NULL"})
+   * @DBType({"key":"PRI","type":"int NOT NULL AUTO_INCREMENT"})
    * @var integer|null
    * @OA\Property(format="int64", description="用户ID")
    */

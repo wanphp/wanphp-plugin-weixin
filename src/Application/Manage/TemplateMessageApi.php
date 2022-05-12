@@ -22,8 +22,8 @@ use Wanphp\Plugins\Weixin\Domain\MsgTemplateInterface;
  */
 class TemplateMessageApi extends Api
 {
-  private $weChatBase;
-  private $msgTemplate;
+  private WeChatBase $weChatBase;
+  private MsgTemplateInterface $msgTemplate;
 
   public function __construct(WeChatBase $weChatBase, MsgTemplateInterface $msgTemplate)
   {

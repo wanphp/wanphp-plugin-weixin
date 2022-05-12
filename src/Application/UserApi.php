@@ -51,9 +51,7 @@ class UserApi extends Api
    *  @OA\JsonContent(
    *     allOf={
    *      @OA\Schema(ref="#/components/schemas/Success"),
-   *      @OA\Schema(
-   *        @OA\Property(property="datas", @OA\Property(property="up_num",type="integer",description="更新数量"))
-   *      )
+   *      @OA\Schema(@OA\Property(property="up_num",type="integer",description="更新数量"))
    *     }
    *   )
    *  ),
@@ -71,8 +69,7 @@ class UserApi extends Api
    *    @OA\JsonContent(
    *      allOf={
    *       @OA\Schema(ref="#/components/schemas/Success"),
-   *       @OA\Schema(
-   *         @OA\Property(property="datas",example={
+   *       @OA\Schema(example={
   "name": "",
   "tel": null,
   "address": "",
@@ -80,7 +77,6 @@ class UserApi extends Api
   "cash_back": "0.00",
   "money": "0.00"
   })
-   *       )
    *      }
    *    )
    *  ),
@@ -98,13 +94,11 @@ class UserApi extends Api
         if (empty($data)) return $this->respondWithError('无用户数据');
         $num = $this->user->update($data, ['id' => $uid]);
         return $this->respondWithData(['up_num' => $num], 201);
-        break;
       case 'GET':
         //id,openid,sex,role_id,cash_back,money,
         $user = $this->user->get('nickname,headimgurl,name,tel,address,integral', ['id' => $uid]);
         if ($user) return $this->respondWithData($user);
         else return $this->respondWithError('用户不存在');
-        break;
       default:
         return $this->respondWithError('禁止访问', 403);
     }

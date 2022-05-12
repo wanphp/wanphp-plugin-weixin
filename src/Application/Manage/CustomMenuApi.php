@@ -21,7 +21,7 @@ use Wanphp\Plugins\Weixin\Domain\CustomMenuInterface;
  */
 class CustomMenuApi extends Api
 {
-  private $customMenu;
+  private CustomMenuInterface $customMenu;
 
   public function __construct(CustomMenuInterface $customMenu)
   {
@@ -106,11 +106,11 @@ class CustomMenuApi extends Api
       case 'PUT':
         $data = $this->request->getParsedBody();
         $num = $this->customMenu->update($data, ['id' => $this->args['id']]);
-        return $this->respondWithData(['up_num' => $num], 201);
+        return $this->respondWithData(['upNum' => $num], 201);
       case 'DELETE':
-        $delnum = $this->customMenu->delete(['id' => $this->args['id']]);
-        $delnum += $this->customMenu->delete(['parent_id' => $this->args['id']]);
-        return $this->respondWithData(['del_num' => $delnum], 200);
+        $delNum = $this->customMenu->delete(['id' => $this->args['id']]);
+        $delNum += $this->customMenu->delete(['parent_id' => $this->args['id']]);
+        return $this->respondWithData(['delNum' => $delNum]);
       case 'GET':
         $params = $this->request->getQueryParams();
         $tag_id = $params['tag_id'] ?? 0;
@@ -118,7 +118,7 @@ class CustomMenuApi extends Api
         $menus = [];
         foreach ($this->customMenu->select('*', $where) as $item) {
           $where['parent_id'] = $item['id'];
-          $item['subBtns'] = $this->customMenu->select('*', $where);
+          $item['subBtn'] = $this->customMenu->select('*', $where);
           $menus[] = $item;
         }
         return $this->respondWithData($menus);

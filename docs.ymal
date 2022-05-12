@@ -3,10 +3,6 @@ info:
   title: 微信扩展接口
   description: 'wanphp 微信扩展接口'
   version: 1.0.0
-servers:
-  -
-    url: 'https://localhost'
-    description: 'OpenApi host'
 paths:
   /api/manage/weixin/createMenu:
     post:
@@ -390,7 +386,7 @@ paths:
               schema:
                 allOf:
                   - { $ref: '#/components/schemas/Success' }
-                  - { properties: { res: { $ref: '#/components/schemas/UserEntity' } }, type: object }
+                  - { $ref: '#/components/schemas/UserEntity' }
         '400':
           description: 请求失败
           content:
@@ -435,8 +431,8 @@ paths:
             application/json:
               schema:
                 allOf:
+                  - { properties: { upNum: { description: 更新数量, type: integer } }, type: object }
                   - { $ref: '#/components/schemas/Success' }
-                  - { properties: { res: { properties: { up_num: { description: 更新数量, type: integer } }, type: object } }, type: object }
         '400':
           description: 请求失败
           content:
@@ -484,7 +480,7 @@ paths:
               schema:
                 allOf:
                   - { $ref: '#/components/schemas/Success' }
-                  - { properties: { res: { example: { id: '', headimgurl: 用户头像, nickname: 用户昵称, role: 用色, name: Name, tel: Tel } } }, type: object }
+                  - { example: { id: '', headimgurl: 用户头像, nickname: 用户昵称, role: 用色, name: Name, tel: Tel } }
         '400':
           description: 请求失败
           content:
@@ -508,7 +504,7 @@ paths:
               schema:
                 allOf:
                   - { $ref: '#/components/schemas/Success' }
-                  - { properties: { datas: { type: array, items: { $ref: '#/components/schemas/UserRoleEntity' } } }, type: object }
+                  - { type: array, items: { $ref: '#/components/schemas/UserRoleEntity' } }
         '400':
           description: 请求失败
           content:
@@ -537,8 +533,8 @@ paths:
             application/json:
               schema:
                 allOf:
+                  - { properties: { id: { type: integer } }, type: object }
                   - { $ref: '#/components/schemas/Success' }
-                  - { properties: { datas: { properties: { id: { type: integer } }, type: object } }, type: object }
         '400':
           description: 请求失败
           content:
@@ -577,8 +573,8 @@ paths:
             application/json:
               schema:
                 allOf:
+                  - { properties: { up_num: { type: integer } }, type: object }
                   - { $ref: '#/components/schemas/Success' }
-                  - { properties: { datas: { properties: { up_num: { type: integer } }, type: object } }, type: object }
         '400':
           description: 请求失败
           content:
@@ -609,8 +605,8 @@ paths:
             application/json:
               schema:
                 allOf:
+                  - { properties: { del_num: { type: integer } }, type: object }
                   - { $ref: '#/components/schemas/Success' }
-                  - { properties: { datas: { properties: { del_num: { type: integer } }, type: object } }, type: object }
         '400':
           description: 请求失败
           content:
@@ -790,7 +786,7 @@ paths:
               schema:
                 allOf:
                   - { $ref: '#/components/schemas/Success' }
-                  - { properties: { datas: { example: { name: '', tel: null, address: '', integral: '0', cash_back: '0.00', money: '0.00' } } }, type: object }
+                  - { example: { name: '', tel: null, address: '', integral: '0', cash_back: '0.00', money: '0.00' } }
         '400':
           description: 请求失败
           content:
@@ -826,8 +822,8 @@ paths:
             application/json:
               schema:
                 allOf:
+                  - { properties: { up_num: { description: 更新数量, type: integer } }, type: object }
                   - { $ref: '#/components/schemas/Success' }
-                  - { properties: { datas: { properties: { up_num: { description: 更新数量, type: integer } }, type: object } }, type: object }
         '400':
           description: 请求失败
           content:
@@ -860,38 +856,12 @@ components:
   schemas:
     Error:
       title: 出错提示
-      properties:
-        code:
-          type: string
-          example: '400'
-        error:
-          type: string
-        error_description:
-          type: string
-        hint:
-          type: string
-        message:
-          type: string
-          example: 错误说明
       type: object
     Success:
       title: 成功提示
-      required:
-        - code
-        - message
-        - res
-      properties:
-        code:
-          type: string
-          example: '200'
-        message:
-          type: string
-          example: OK
-        datas:
-          description: 返回数据
-          type: object
       type: object
     NewCustomMenu:
+      description: 'Class CustomMenuEntity'
       required:
         - name
         - type
@@ -928,8 +898,6 @@ components:
       type: object
       allOf:
         -
-          $ref: '#/components/schemas/NewCustomMenu'
-        -
           required:
             - id
           properties:
@@ -938,6 +906,8 @@ components:
               type: integer
               format: int64
           type: object
+        -
+          $ref: '#/components/schemas/NewCustomMenu'
     MiniProgramEntity:
       title: 用户小程序关联信息
       description: 用户小程序关联信息
@@ -1071,6 +1041,31 @@ components:
           description: 用户充值余额
           type: number
           format: float
+      type: object
+    UserLocationEntity:
+      title: 用户位置上报
+      description: 用户位置上报
+      properties:
+        id:
+          description: ID
+          type: integer
+          format: int64
+          nullable: true
+        uid:
+          description: 用户ID
+          type: string
+        lat:
+          description: 纬度
+          type: string
+        lng:
+          description: 经度
+          type: string
+        precision:
+          description: 精度
+          type: string
+        ctime:
+          description: 位置上报时间
+          type: string
       type: object
     UserRoleEntity:
       title: 用户角色

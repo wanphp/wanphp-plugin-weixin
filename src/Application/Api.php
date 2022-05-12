@@ -14,10 +14,6 @@ namespace Wanphp\Plugins\Weixin\Application;
  *     version="1.0.0",
  *     title="微信扩展接口"
  * )
- * @OA\Server(
- *   description="OpenApi host",
- *   url="https://localhost"
- * )
  */
 
 /**
@@ -48,11 +44,7 @@ namespace Wanphp\Plugins\Weixin\Application;
  * @OA\Schema(
  *   title="出错提示",
  *   schema="Error",
- *   @OA\Property(property="code", type="string", example="400"),
- *   @OA\Property(property="error", type="string"),
- *   @OA\Property(property="error_description", type="string"),
- *   @OA\Property(property="hint", type="string"),
- *   @OA\Property(property="message", type="string", example="错误说明")
+ *   type="object"
  * )
  */
 
@@ -60,10 +52,7 @@ namespace Wanphp\Plugins\Weixin\Application;
  * @OA\Schema(
  *   title="成功提示",
  *   schema="Success",
- *   required={"code", "message", "res"},
- *   @OA\Property(property="code", type="string", example="200"),
- *   @OA\Property(property="message", type="string", example="OK"),
- *   @OA\Property(property="res", type="object",description="返回数据")
+ *   type="object"
  * )
  */
 
@@ -96,7 +85,7 @@ abstract class Api
    * @return Response
    * @throws HttpBadRequestException
    */
-  public function __invoke(Request $request, Response $response, $args): Response
+  public function __invoke(Request $request, Response $response, array $args): Response
   {
     $this->request = $request;
     $this->response = $response;
@@ -117,42 +106,13 @@ abstract class Api
   abstract protected function action(): Response;
 
   /**
-   * @return array|object
-   * @throws HttpBadRequestException
-   */
-  protected function getFormData(): object|array
-  {
-    $input = json_decode(file_get_contents('php://input'));
-
-    if (json_last_error() !== JSON_ERROR_NONE) {
-      throw new HttpBadRequestException($this->request, 'JSON输入格式错误.');
-    }
-
-    return $input;
-  }
-
-  /**
-   * @param string $name
-   * @return mixed
-   * @throws HttpBadRequestException
-   */
-  protected function resolveArg(string $name): mixed
-  {
-    if (!isset($this->args[$name])) {
-      throw new HttpBadRequestException($this->request, "找不到 `{$name}`.");
-    }
-
-    return $this->args[$name];
-  }
-
-  /**
-   * @param object|array|null $data
+   * @param array $data
    * @param int $statusCode
    * @return Response
    */
-  protected function respondWithData(object|array $data = null, int $statusCode = 200): Response
+  protected function respondWithData(array $data = [], int $statusCode = 200): Response
   {
-    $json = json_encode(['code' => $statusCode, 'msg' => 'OK', 'res' => $data], JSON_PRETTY_PRINT);
+    $json = json_encode($data, JSON_PRETTY_PRINT + JSON_UNESCAPED_UNICODE);
     $this->response->getBody()->write($json);
 
     return $this->respond($statusCode);
@@ -165,7 +125,7 @@ abstract class Api
    */
   protected function respondWithError($error = null, int $statusCode = 400): Response
   {
-    $json = json_encode(['code' => $statusCode, 'msg' => $error], JSON_PRETTY_PRINT);
+    $json = json_encode(['errMsg' => $error], JSON_PRETTY_PRINT + JSON_UNESCAPED_UNICODE);
     $this->response->getBody()->write($json);
 
     return $this->respond($statusCode);
@@ -177,8 +137,6 @@ abstract class Api
    */
   protected function respond($statusCode): Response
   {
-    return $this->response
-      ->withHeader('Content-Type', 'application/json')
-      ->withStatus($statusCode);
+    return $this->response->withHeader('Content-Type', 'application/json')->withStatus($statusCode);
   }
 }

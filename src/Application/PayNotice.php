@@ -18,11 +18,11 @@ use Wanphp\Plugins\Weixin\Domain\UserInterface;
 
 abstract class PayNotice extends Api
 {
-  protected $weChatBase;
-  protected $pay;
-  protected $user;
-  protected $public;
-  protected $logger;
+  protected WeChatBase $weChatBase;
+  protected Pay $pay;
+  protected UserInterface $user;
+  protected PublicInterface $public;
+  protected LoggerInterface $logger;
 
   public function __construct(WeChatBase $weChatBase, Pay $pay, UserInterface $user, PublicInterface $public, LoggerInterface $logger)
   {

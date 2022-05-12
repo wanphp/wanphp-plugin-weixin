@@ -21,7 +21,7 @@ use Wanphp\Plugins\Weixin\Domain\UserRoleInterface;
  */
 class UserRoleApi extends Api
 {
-  private $userRole;
+  private UserRoleInterface $userRole;
 
   public function __construct(UserRoleInterface $userRole)
   {
@@ -51,9 +51,7 @@ class UserRoleApi extends Api
    *    @OA\JsonContent(
    *      allOf={
    *       @OA\Schema(ref="#/components/schemas/Success"),
-   *       @OA\Schema(
-   *         @OA\Property(property="datas",@OA\Property(property="id",type="integer"))
-   *       )
+   *       @OA\Schema(@OA\Property(property="id",type="integer"))
    *      }
    *    )
    *  ),
@@ -86,9 +84,7 @@ class UserRoleApi extends Api
    *    @OA\JsonContent(
    *      allOf={
    *       @OA\Schema(ref="#/components/schemas/Success"),
-   *       @OA\Schema(
-   *         @OA\Property(property="datas",@OA\Property(property="up_num",type="integer"))
-   *       )
+   *       @OA\Schema(@OA\Property(property="up_num",type="integer"))
    *      }
    *    )
    *  ),
@@ -113,9 +109,7 @@ class UserRoleApi extends Api
    *    @OA\JsonContent(
    *      allOf={
    *       @OA\Schema(ref="#/components/schemas/Success"),
-   *       @OA\Schema(
-   *         @OA\Property(property="datas",@OA\Property(property="del_num",type="integer"))
-   *       )
+   *       @OA\Schema(@OA\Property(property="del_num",type="integer"))
    *      }
    *    )
    *  ),
@@ -133,9 +127,7 @@ class UserRoleApi extends Api
    *    @OA\JsonContent(
    *      allOf={
    *       @OA\Schema(ref="#/components/schemas/Success"),
-   *       @OA\Schema(
-   *         @OA\Property(property="datas",type="array",@OA\Items(ref="#/components/schemas/UserRoleEntity"))
-   *       )
+   *       @OA\Schema(type="array",@OA\Items(ref="#/components/schemas/UserRoleEntity"))
    *      }
    *    )
    *  ),
