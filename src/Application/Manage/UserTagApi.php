@@ -106,7 +106,7 @@ class UserTagApi extends Api
           $result = $this->weChatBase->membersTagging($data['tagid'], [$data['openid']]);
           if ($result['errcode'] == 0) {
             $tagid_list = $this->public->get('tagid_list[JSON]', ['openid' => $data['openid']]);
-            array_push($tagid_list, $data['tagid']);
+            $tagid_list[] = $data['tagid'];
             $this->public->update(['tagid_list[JSON]' => $tagid_list], ['openid' => $data['openid']]);
           }
           return $this->respondWithData($result, 201);
@@ -120,7 +120,7 @@ class UserTagApi extends Api
           $result = $this->weChatBase->membersUnTagging($tagid, [$openid]);
           if ($result['errcode'] == 0) {
             $tagid_list = $this->public->get('tagid_list[JSON]', ['openid' => $openid]);
-            $tagid_list = array_diff($tagid_list, [$tagid]);
+            $tagid_list = array_values(array_diff($tagid_list, [$tagid]));
             if (empty($tagid_list)) $this->public->update(['tagid_list' => ''], ['openid' => $openid]);
             else $this->public->update(['tagid_list[JSON]' => $tagid_list], ['openid' => $openid]);
           }
