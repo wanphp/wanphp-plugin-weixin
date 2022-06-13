@@ -9,6 +9,7 @@
 namespace Wanphp\Plugins\Weixin\Application\Manage;
 
 
+use Exception;
 use Psr\Http\Message\ResponseInterface as Response;
 use Wanphp\Plugins\Weixin\Application\Api;
 use Wanphp\Plugins\Weixin\Domain\CustomMenuInterface;
@@ -16,7 +17,7 @@ use Wanphp\Plugins\Weixin\Domain\CustomMenuInterface;
 /**
  * Class CustomMenuApi
  * @title 自定义菜单
- * @route /api/manage/weixin/menu
+ * @route /admin/weixin/menu
  * @package Wanphp\Plugins\Weixin\Application\Manage
  */
 class CustomMenuApi extends Api
@@ -30,9 +31,9 @@ class CustomMenuApi extends Api
 
   /**
    * @return Response
-   * @throws \Exception
+   * @throws Exception
    * @OA\Post(
-   *  path="/api/manage/weixin/menu",
+   *  path="/admin/weixin/menu",
    *  tags={"WeixinCustomMenu"},
    *  summary="添加公众号自定义菜单",
    *  operationId="addWeixinCustomMenu",
@@ -41,14 +42,14 @@ class CustomMenuApi extends Api
    *     description="自定义菜单",
    *     required=true,
    *     @OA\MediaType(
-   *       mediaType="application/json",@OA\Schema(ref="#/components/schemas/NewCustomMenu")
+   *       mediaType="application/json",@OA\Schema(ref="#/components/schemas/newCustomMenu")
    *     )
    *   ),
    *  @OA\Response(response="201",description="添加成功",@OA\JsonContent(ref="#/components/schemas/Success")),
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Put(
-   *  path="/api/manage/weixin/menu/{id}",
+   *  path="/admin/weixin/menu/{id}",
    *  tags={"WeixinCustomMenu"},
    *  summary="修改公众号自定义菜单",
    *  operationId="editWeixinCustomMenu",
@@ -64,14 +65,14 @@ class CustomMenuApi extends Api
    *     description="自定义菜单",
    *     required=true,
    *     @OA\MediaType(
-   *       mediaType="application/json",@OA\Schema(ref="#/components/schemas/NewCustomMenu")
+   *       mediaType="application/json",@OA\Schema(ref="#/components/schemas/newCustomMenu")
    *     )
    *   ),
    *  @OA\Response(response="201",description="更新成功",@OA\JsonContent(ref="#/components/schemas/Success")),
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Delete(
-   *  path="/api/manage/weixin/menu/{id}",
+   *  path="/admin/weixin/menu/{id}",
    *  tags={"WeixinCustomMenu"},
    *  summary="删除公众号自定义菜单",
    *  operationId="delWeixinCustomMenu",
@@ -87,7 +88,7 @@ class CustomMenuApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Get(
-   *  path="/api/manage/weixin/menu",
+   *  path="/admin/weixin/menu",
    *  tags={"WeixinCustomMenu"},
    *  summary="自定义菜单",
    *  operationId="listWeixinCustomMenu",

@@ -18,20 +18,7 @@ class UserRepository extends BaseRepository implements UserInterface
 {
   public function __construct(Database $database)
   {
-    parent::__construct($database, self::TABLENAME, UserEntity::class);
+    parent::__construct($database, self::TABLE_NAME, UserEntity::class);
   }
-
-  public function findAll(): array
-  {
-    return $this->select();
-  }
-
-  public function findUserOfId(int $id): UserEntity
-  {
-    $user = $this->get('*', ['id' => $id]);
-    if (empty($user)) throw new \Exception("找不到用户！");
-    return new UserEntity($user);
-  }
-
 
 }

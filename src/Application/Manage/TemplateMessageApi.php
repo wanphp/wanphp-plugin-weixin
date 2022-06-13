@@ -9,6 +9,7 @@
 namespace Wanphp\Plugins\Weixin\Application\Manage;
 
 
+use Exception;
 use Wanphp\Libray\Weixin\WeChatBase;
 use Psr\Http\Message\ResponseInterface as Response;
 use Wanphp\Plugins\Weixin\Application\Api;
@@ -17,7 +18,7 @@ use Wanphp\Plugins\Weixin\Domain\MsgTemplateInterface;
 /**
  * Class TemplateMessageApi
  * @title 消息模板
- * @route /api/manage/weixin/tplmsg
+ * @route /admin/weixin/tplmsg
  * @package Wanphp\Plugins\Weixin\Application\Manage
  */
 class TemplateMessageApi extends Api
@@ -33,9 +34,9 @@ class TemplateMessageApi extends Api
 
   /**
    * @return Response
-   * @throws \Exception
+   * @throws Exception
    * @OA\Post(
-   *  path="/api/manage/weixin/tplmsg",
+   *  path="/admin/weixin/tplmsg",
    *  tags={"TemplateMessage"},
    *  summary="添加消息模板",
    *  operationId="addTemplateMessage",
@@ -51,7 +52,7 @@ class TemplateMessageApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Delete(
-   *  path="/api/manage/weixin/tplmsg/{tplid}",
+   *  path="/admin/weixin/tplmsg/{tplid}",
    *  tags={"TemplateMessage"},
    *  summary="删除消息模板",
    *  operationId="delTemplateMessage",
@@ -67,7 +68,7 @@ class TemplateMessageApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Get(
-   *  path="/api/manage/weixin/tplmsg",
+   *  path="/admin/weixin/tplmsg",
    *  tags={"TemplateMessage"},
    *  summary="消息模板",
    *  operationId="listTemplateMessage",
@@ -99,7 +100,7 @@ class TemplateMessageApi extends Api
           $result = $this->weChatBase->delTemplateMessage($template_id);
           if ($result && $result['errcode'] == 0) {
             $this->msgTemplate->delete(['template_id' => $template_id]);
-            return $this->respondWithData($result, 200);
+            return $this->respondWithData($result);
           } else {
             return $this->respondWithError($result['errmsg']);
           }
@@ -108,7 +109,7 @@ class TemplateMessageApi extends Api
         }
       case 'GET':
         $msgtemplate = $this->weChatBase->templateMessage();
-        $list = $this->msgTemplate->select('*');
+        $list = $this->msgTemplate->select();
         $templates = [];
         if (is_array($msgtemplate['template_list'])) foreach ($msgtemplate['template_list'] as $vo) {
           $templates[$vo['template_id']] = $vo;
@@ -134,12 +135,12 @@ class TemplateMessageApi extends Api
           $list[] = $template;
         }
 
-        $datas = [
+        $data = [
           'industry' => $this->weChatBase->getIndustry(),
           'msg_templates' => $list ?? [],
         ];
 
-        return $this->respondWithData($datas);
+        return $this->respondWithData($data);
       default:
         return $this->respondWithError('禁止访问', 403);
     }

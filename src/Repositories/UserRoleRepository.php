@@ -18,6 +18,6 @@ class UserRoleRepository extends BaseRepository implements UserRoleInterface
 {
   public function __construct(Database $database)
   {
-    parent::__construct($database, self::TABLENAME, UserRoleEntity::class);
+    parent::__construct($database, self::TABLE_NAME, UserRoleEntity::class);
   }
 }

@@ -9,6 +9,7 @@
 namespace Wanphp\Plugins\Weixin\Repositories;
 
 
+use Exception;
 use Wanphp\Libray\Mysql\BaseRepository;
 use Wanphp\Libray\Mysql\Database;
 use Wanphp\Plugins\Weixin\Domain\MsgTemplateInterface;
@@ -18,11 +19,13 @@ class MsgTemplateRepository extends BaseRepository implements MsgTemplateInterfa
 {
   public function __construct(Database $database)
   {
-    parent::__construct($database, self::TABLENAME, MsgTemplateEntity::class);
+    parent::__construct($database, self::TABLE_NAME, MsgTemplateEntity::class);
   }
 
   /**
-   * {@inheritDoc}
+   * @param $id
+   * @return string
+   * @throws Exception
    */
   public function getTemplateId($id): string
   {

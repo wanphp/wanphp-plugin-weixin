@@ -9,7 +9,7 @@
 namespace Wanphp\Plugins\Weixin\Application;
 
 
-use Psr\Log\LoggerInterface;
+use Exception;
 use Wanphp\Libray\Weixin\Pay;
 use Wanphp\Libray\Weixin\WeChatBase;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -22,20 +22,18 @@ abstract class PayNotice extends Api
   protected Pay $pay;
   protected UserInterface $user;
   protected PublicInterface $public;
-  protected LoggerInterface $logger;
 
-  public function __construct(WeChatBase $weChatBase, Pay $pay, UserInterface $user, PublicInterface $public, LoggerInterface $logger)
+  public function __construct(WeChatBase $weChatBase, Pay $pay, UserInterface $user, PublicInterface $public)
   {
     $this->weChatBase = $weChatBase;
     $this->pay = $pay;
     $this->user = $user;
     $this->public = $public;
-    $this->logger = $logger;
   }
 
   /**
    * @return Response
-   * @throws \Exception
+   * @throws Exception
    * @OA\Post(
    *  path="/payNotice",
    *  tags={"Public"},
@@ -64,7 +62,7 @@ abstract class PayNotice extends Api
     // 将服务器返回的XML数据转化为数组
     $data = $this->pay->fromXml($xml);
     // 记录日志
-    $this->logger->info('data', $data);
+    //$this->logger->info('data', $data);
 
     //1.退款通知
     if ($data['return_code'] == 'SUCCESS' && isset($data['req_info'])) {
@@ -82,7 +80,7 @@ abstract class PayNotice extends Api
     return $this->returnCode(true, '订单不存在');
   }
 
-  protected function returnCode($is_success = true, $msg = null)
+  protected function returnCode($is_success = true, $msg = null): Response
   {
     $body = $this->pay->toXml([
       'return_code' => $is_success ? 'SUCCESS' : 'FAIL',

@@ -13,5 +13,5 @@ use Wanphp\Libray\Mysql\BaseInterface;
 
 interface UserRoleInterface extends BaseInterface
 {
-  const TABLENAME = "user_roles";
+  const TABLE_NAME = "user_roles";
 }

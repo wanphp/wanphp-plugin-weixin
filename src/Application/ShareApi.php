@@ -9,6 +9,7 @@
 namespace Wanphp\Plugins\Weixin\Application;
 
 
+use Exception;
 use Psr\Http\Message\ResponseInterface as Response;
 use Wanphp\Libray\Weixin\WeChatBase;
 
@@ -23,7 +24,7 @@ class ShareApi extends Api
 
   /**
    * @return Response
-   * @throws \Exception
+   * @throws Exception
    * @OA\Post(
    *  path="/getSignPackage",
    *  tags={"Public"},

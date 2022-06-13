@@ -9,6 +9,7 @@
 namespace  Wanphp\Plugins\Weixin\Application;
 
 
+use Exception;
 use Psr\Http\Message\ResponseInterface as Response;
 use Wanphp\Plugins\Weixin\Domain\UserInterface;
 
@@ -17,7 +18,7 @@ class UserApi extends Api
   /**
    * @var UserInterface
    */
-  protected $user;
+  protected UserInterface $user;
 
   /**
    * @param UserInterface $user
@@ -29,7 +30,7 @@ class UserApi extends Api
 
   /**
    * @return Response
-   * @throws \Exception
+   * @throws Exception
    * @OA\Patch(
    *  path="/api/user",
    *  tags={"User"},
@@ -102,7 +103,5 @@ class UserApi extends Api
       default:
         return $this->respondWithError('禁止访问', 403);
     }
-
-
   }
 }

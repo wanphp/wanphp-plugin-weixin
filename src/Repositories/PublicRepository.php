@@ -18,6 +18,6 @@ class PublicRepository extends BaseRepository implements PublicInterface
 {
   public function __construct(Database $database)
   {
-    parent::__construct($database, self::TABLENAME, PublicEntity::class);
+    parent::__construct($database, self::TABLE_NAME, PublicEntity::class);
   }
 }

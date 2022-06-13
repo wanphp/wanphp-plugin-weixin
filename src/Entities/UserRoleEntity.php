@@ -29,18 +29,18 @@ class UserRoleEntity implements JsonSerializable
    * @OA\Property(format="int32", description="角色ID")
    * @var int|null
    */
-  private $id;
+  private ?int $id;
   /**
    *
    * @DBType({"type":"varchar(20) NOT NULL DEFAULT ''"})
    * @OA\Property(description="角色名称")
    * @var string
    */
-  private $name;
+  private string $name;
   /**
    * @DBType({"type":"tinyint(4) NOT NULL DEFAULT 0"})
    * @OA\Property(description="显示排序")
    * @var int
    */
-  private $sortOrder;
+  private int $sortOrder;
 }

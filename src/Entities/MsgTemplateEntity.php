@@ -24,24 +24,24 @@ class MsgTemplateEntity implements JsonSerializable
    * @var integer|null
    * @OA\Property(description="ID")
    */
-  private $id;
+  private ?int $id;
   /**
    * @DBType({"key":"UNI","type":"varchar(30) NOT NULL DEFAULT ''"})
    * @var string
    * @OA\Property(description="模板消息编号")
    */
-  private $template_id_short;
+  private string $template_id_short;
   /**
    * "key":"UNI",
    * @DBType({"type":"varchar(50) NOT NULL DEFAULT ''"})
    * @var string
    * @OA\Property(description="模板消息ID")
    */
-  private $template_id;
+  private string $template_id;
   /**
    * @DBType({"type":"tinyint(1) NOT NULL DEFAULT '0'"})
    * @var integer
    * @OA\Property(description="是否可用")
    */
-  private $status;
+  private int $status;
 }

@@ -18,7 +18,7 @@ use Exception;
 /**
  * Class TagsApi
  * @title 用户标签
- * @route /api/manage/weixin/tag
+ * @route /admin/weixin/tag
  * @package Wanphp\Plugins\Weixin\Application\Manage
  */
 class TagsApi extends Api
@@ -36,7 +36,7 @@ class TagsApi extends Api
    * @return Response
    * @throws Exception
    * @OA\Post(
-   *  path="/api/manage/weixin/tag",
+   *  path="/admin/weixin/tag",
    *  tags={"WeixinTag"},
    *  summary="添加公众号用户标签",
    *  operationId="addWeixinTag",
@@ -53,7 +53,7 @@ class TagsApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Put(
-   *  path="/api/manage/weixin/tag/{id}",
+   *  path="/admin/weixin/tag/{id}",
    *  tags={"WeixinTag"},
    *  summary="修改公众号用户标签",
    *  operationId="editWeixinTag",
@@ -77,7 +77,7 @@ class TagsApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Delete(
-   *  path="/api/manage/weixin/tag/{id}",
+   *  path="/admin/weixin/tag/{id}",
    *  tags={"WeixinTag"},
    *  summary="删除公众号用户标签",
    *  operationId="delWeixinTag",
@@ -93,7 +93,7 @@ class TagsApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Get(
-   *  path="/api/manage/weixin/tag",
+   *  path="/admin/weixin/tag",
    *  tags={"WeixinTag"},
    *  summary="用户角色",
    *  operationId="listWeixinTag",
@@ -126,7 +126,7 @@ class TagsApi extends Api
         $id = $this->args['id'] ?? 0;
         if ($id > 0) {
           $result = $this->weChatBase->deleteTag($id);
-          return $this->respondWithData($result, 200);
+          return $this->respondWithData($result);
         } else {
           return $this->respondWithError('缺少ID');
         }
@@ -142,7 +142,7 @@ class TagsApi extends Api
         $userTags = $this->weChatBase->getTags();
         return $this->respondWithData([
           'tags' => $userTags['tags'] ?? [],
-          'total' => $user_total,
+          'total' => $user_total
         ]);
       default:
         return $this->respondWithError('禁止访问', 403);

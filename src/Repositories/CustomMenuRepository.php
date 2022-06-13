@@ -18,6 +18,6 @@ class CustomMenuRepository extends BaseRepository implements CustomMenuInterface
 {
   public function __construct(Database $database)
   {
-    parent::__construct($database, self::TABLENAME, CustomMenuEntity::class);
+    parent::__construct($database, self::TABLE_NAME, CustomMenuEntity::class);
   }
 }

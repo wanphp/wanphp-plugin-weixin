@@ -13,7 +13,7 @@ use Wanphp\Libray\Mysql\BaseInterface;
 
 interface MsgTemplateInterface extends BaseInterface
 {
-  const TABLENAME = "msg_template";
+  const TABLE_NAME = "msg_template";
 
   public function getTemplateId(int $id): string;
 }

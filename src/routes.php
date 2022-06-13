@@ -13,12 +13,12 @@ return function (App $app, Middleware $PermissionMiddleware, Middleware $OAuthSe
   //公众号分享签名
   $app->post('/getSignPackage', \Wanphp\Plugins\Weixin\Application\ShareApi::class);
 
-  $app->group('/api', function (Group $group) use ($PermissionMiddleware) {
+  $app->group('', function (Group $group) use ($PermissionMiddleware) {
     // 当前用户
-    $group->map(['GET', 'PATCH'], '/user', \Wanphp\Plugins\Weixin\Application\UserApi::class);
-    //
-    $group->group('/manage/weixin', function (Group $g) {
-      // 用户
+    $group->map(['GET', 'PATCH'], '/api/user', \Wanphp\Plugins\Weixin\Application\UserApi::class);
+    // 后台管理
+    $group->group('/admin/weixin', function (Group $g) {
+      // 用户基本信息管理
       $g->map(['GET', 'PATCH'], '/users[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\Manage\UserApi::class);
       // 用户角色
       $g->map(['GET', 'PUT', 'POST', 'DELETE'], '/user/role[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\Manage\UserRoleApi::class);

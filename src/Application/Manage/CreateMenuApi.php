@@ -9,6 +9,7 @@
 namespace Wanphp\Plugins\Weixin\Application\Manage;
 
 
+use Exception;
 use Psr\Http\Message\ResponseInterface as Response;
 use Wanphp\Libray\Weixin\WeChatBase;
 use Wanphp\Plugins\Weixin\Application\Api;
@@ -27,9 +28,9 @@ class CreateMenuApi extends Api
 
   /**
    * @return Response
-   * @throws \Exception
+   * @throws Exception
    * @OA\Post(
-   *  path="/api/manage/weixin/createMenu",
+   *  path="/admin/weixin/createMenu",
    *  tags={"WeixinCustomMenu"},
    *  summary="创建公众号自定义菜单",
    *  operationId="createWeixinCustomMenu",

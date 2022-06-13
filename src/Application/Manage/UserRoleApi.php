@@ -9,6 +9,7 @@
 namespace Wanphp\Plugins\Weixin\Application\Manage;
 
 
+use Exception;
 use Psr\Http\Message\ResponseInterface as Response;
 use Wanphp\Plugins\Weixin\Application\Api;
 use Wanphp\Plugins\Weixin\Domain\UserRoleInterface;
@@ -16,7 +17,7 @@ use Wanphp\Plugins\Weixin\Domain\UserRoleInterface;
 /**
  * Class UserRoleApi
  * @title 用户角色
- * @route /api/manage/user/role
+ * @route /admin/weixin/user/role
  * @package Wanphp\Plugins\Weixin\Application\Manage
  */
 class UserRoleApi extends Api
@@ -30,9 +31,9 @@ class UserRoleApi extends Api
 
   /**
    * @return Response
-   * @throws \Exception
+   * @throws Exception
    * @OA\Post(
-   *  path="/api/manage/weixin/user/role",
+   *  path="/admin/weixin/user/role",
    *  tags={"UserRole"},
    *  summary="添加用户角色",
    *  operationId="addUserRole",
@@ -58,7 +59,7 @@ class UserRoleApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Put(
-   *  path="/api/manage/weixin/user/role/{ID}",
+   *  path="/admin/weixin/user/role/{ID}",
    *  tags={"UserRole"},
    *  summary="修改用户角色",
    *  operationId="editUserRole",
@@ -91,7 +92,7 @@ class UserRoleApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Delete(
-   *  path="/api/manage/weixin/user/role/{ID}",
+   *  path="/admin/weixin/user/role/{ID}",
    *  tags={"UserRole"},
    *  summary="删除用户角色",
    *  operationId="delUserRole",
@@ -109,14 +110,14 @@ class UserRoleApi extends Api
    *    @OA\JsonContent(
    *      allOf={
    *       @OA\Schema(ref="#/components/schemas/Success"),
-   *       @OA\Schema(@OA\Property(property="del_num",type="integer"))
+   *       @OA\Schema(@OA\Property(property="delNum",type="integer"))
    *      }
    *    )
    *  ),
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Get(
-   *  path="/api/manage/weixin/user/role",
+   *  path="/admin/weixin/user/role",
    *  tags={"UserRole"},
    *  summary="用户角色",
    *  operationId="listUserRole",
@@ -146,10 +147,10 @@ class UserRoleApi extends Api
         $num = $this->userRole->update($data, ['id' => $this->args['id']]);
         return $this->respondWithData(['up_num' => $num], 201);
       case  'DELETE';
-        $delnum = $this->userRole->delete(['id' => $this->args['id']]);
-        return $this->respondWithData(['del_num' => $delnum], 200);
+        $delNum = $this->userRole->delete(['id' => $this->args['id']]);
+        return $this->respondWithData(['del_num' => $delNum]);
       case 'GET';
-        return $this->respondWithData($this->userRole->select('*'));
+        return $this->respondWithData($this->userRole->select());
       default:
         return $this->respondWithError('禁止访问', 403);
     }

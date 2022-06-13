@@ -9,6 +9,7 @@
 namespace Wanphp\Plugins\Weixin\Application\Manage;
 
 
+use Exception;
 use Wanphp\Libray\Weixin\WeChatBase;
 use Psr\Http\Message\ResponseInterface as Response;
 use Wanphp\Plugins\Weixin\Application\Api;
@@ -16,8 +17,8 @@ use Wanphp\Plugins\Weixin\Domain\PublicInterface;
 
 class UserTagApi extends Api
 {
-  private $weChatBase;
-  private $public;
+  private WeChatBase $weChatBase;
+  private PublicInterface $public;
 
   public function __construct(WeChatBase $weChatBase, PublicInterface $public)
   {
@@ -27,9 +28,9 @@ class UserTagApi extends Api
 
   /**
    * @return Response
-   * @throws \Exception
+   * @throws Exception
    * @OA\Post(
-   *  path="/api/manage/weixin/user/tag",
+   *  path="/admin/weixin/user/tag",
    *  tags={"WeixinUserTag"},
    *  summary="给粉丝添加标签",
    *  operationId="addWeixinUserTag",
@@ -58,7 +59,7 @@ class UserTagApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Delete(
-   *  path="/api/manage/weixin/user/{openid}/tag/{tagid}",
+   *  path="/admin/weixin/user/{openid}/tag/{tagid}",
    *  tags={"WeixinUserTag"},
    *  summary="删除粉丝标签",
    *  operationId="delWeixinUserTag",
@@ -81,9 +82,9 @@ class UserTagApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Get(
-   *  path="/api/manage/weixin/user/tag/{openid}",
+   *  path="/admin/weixin/user/tag/{openid}",
    *  tags={"WeixinUserTag"},
-   *  summary="用户角色",
+   *  summary="用户身上的标签",
    *  operationId="UserWeixinTagList",
    *  security={{"bearerAuth":{}}},
    *  @OA\Parameter(
@@ -107,7 +108,7 @@ class UserTagApi extends Api
           if ($result['errcode'] == 0) {
             $tagid_list = $this->public->get('tagid_list[JSON]', ['openid' => $data['openid']]);
             $tagid_list[] = $data['tagid'];
-            $this->public->update(['tagid_list[JSON]' => $tagid_list], ['openid' => $data['openid']]);
+            $this->public->update(['tagid_list' => $tagid_list], ['openid' => $data['openid']]);
           }
           return $this->respondWithData($result, 201);
         } else {
@@ -121,7 +122,7 @@ class UserTagApi extends Api
           if ($result['errcode'] == 0) {
             $tagid_list = $this->public->get('tagid_list[JSON]', ['openid' => $openid]);
             $tagid_list = array_values(array_diff($tagid_list, [$tagid]));
-            $this->public->update(['tagid_list[JSON]' => $tagid_list], ['openid' => $openid]);
+            $this->public->update(['tagid_list' => $tagid_list], ['openid' => $openid]);
           }
           return $this->respondWithData($result, 201);
         } else {

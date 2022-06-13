@@ -13,5 +13,5 @@ use Wanphp\Libray\Mysql\BaseInterface;
 
 interface CustomMenuInterface extends BaseInterface
 {
-  const TABLENAME = "wexin_custommenu";
+  const TABLE_NAME = "wexin_custommenu";
 }

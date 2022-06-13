@@ -13,5 +13,5 @@ use Wanphp\Libray\Mysql\BaseInterface;
 
 interface  PublicInterface extends BaseInterface
 {
-  const TABLENAME = "weixin_users_public";
+  const TABLE_NAME = "weixin_users_public";
 }

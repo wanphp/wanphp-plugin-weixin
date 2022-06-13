@@ -9,6 +9,7 @@
 namespace Wanphp\Plugins\Weixin\Application;
 
 
+use Exception;
 use Wanphp\Libray\Weixin\WeChatBase;
 use Psr\Http\Message\ResponseInterface as Response;
 use Wanphp\Plugins\Weixin\Domain\PublicInterface;
@@ -32,7 +33,7 @@ abstract class WePublic extends Api
 
   /**
    * @return Response
-   * @throws \Exception
+   * @throws Exception
    * @OA\Post(
    *  path="/weixin",
    *  tags={"Public"},
@@ -138,7 +139,7 @@ abstract class WePublic extends Api
 
   /**
    * @return false|void
-   * @throws \Exception
+   * @throws Exception
    */
   protected function updateUser()
   {
@@ -153,7 +154,7 @@ abstract class WePublic extends Api
     //本地存储用户
     $data = [
       'subscribe' => 1,
-      'tagid_list[JSON]' => $userinfo['tagid_list'],
+      'tagid_list' => $userinfo['tagid_list'],
       'subscribe_time' => $userinfo['subscribe_time'],
       'subscribe_scene' => $userinfo['subscribe_scene'],
       'lastop_time' => $time
@@ -182,9 +183,9 @@ abstract class WePublic extends Api
   /**
    * 接收文本消息
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
-  protected function text()
+  protected function text(): string
   {
     $text = $this->weChatBase->getRev()->getRevContent();//获取消息内容
     return $this->weChatBase->text($text)->reply();
@@ -193,9 +194,9 @@ abstract class WePublic extends Api
   /**
    * 接收图片
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
-  protected function image()
+  protected function image(): string
   {
     $image = $this->weChatBase->getRevPic();
     return $this->weChatBase->text(print_r($image, true))->reply();
@@ -204,9 +205,9 @@ abstract class WePublic extends Api
   /**
    * 接收语音
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
-  protected function voice()
+  protected function voice(): string
   {
     $voice = $this->weChatBase->getRevVoice();
     return $this->weChatBase->text(print_r($voice, true))->reply();
@@ -215,9 +216,9 @@ abstract class WePublic extends Api
   /**
    * 接收视频
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
-  protected function video()
+  protected function video(): string
   {
     $video = $this->weChatBase->getRevVideo();
     return $this->weChatBase->text(print_r($video, true))->reply();
@@ -226,9 +227,9 @@ abstract class WePublic extends Api
   /**
    * 接收短视频
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
-  protected function shortvideo()
+  protected function shortVideo(): string
   {
     $video = $this->weChatBase->getRevVideo();
     return $this->weChatBase->text(print_r($video, true))->reply();
@@ -237,9 +238,9 @@ abstract class WePublic extends Api
   /**
    * 用户关注自动回复
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
-  protected function subscribe()
+  protected function subscribe(): string
   {
     return $this->weChatBase->text('感谢关注！')->reply();
   }
@@ -248,9 +249,9 @@ abstract class WePublic extends Api
    * 用户点击自定义菜单
    * @param $data
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
-  protected function clickevent($data)
+  protected function clickEvent($data): string
   {
     return $this->weChatBase->text(print_r($data, true))->reply();
   }

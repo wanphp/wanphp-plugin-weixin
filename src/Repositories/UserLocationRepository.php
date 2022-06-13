@@ -18,6 +18,6 @@ class UserLocationRepository extends BaseRepository implements UserLocationInter
 {
   public function __construct(Database $database)
   {
-    parent::__construct($database, self::TABLENAME, UserLocationEntity::class);
+    parent::__construct($database, self::TABLE_NAME, UserLocationEntity::class);
   }
 }

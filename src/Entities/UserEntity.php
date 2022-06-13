@@ -24,71 +24,71 @@ class UserEntity implements JsonSerializable
    * @var integer|null
    * @OA\Property(format="int64", description="用户ID")
    */
-  private $id;
+  private ?int $id;
   /**
    * @DBType({"key":"UNI","type":"varchar(29) NULL DEFAULT NULL"})
    * @var string
    * @OA\Property(description="微信unionid")
    */
-  private $unionid;
+  private string $unionid;
   /**
    * @DBType({"type":"varchar(80) NOT NULL DEFAULT ''"})
    * @var string
    * @OA\Property(description="微信昵称")
    */
-  private $nickname;
+  private string $nickname;
   /**
    * @DBType({"type":"varchar(300) NOT NULL DEFAULT ''"})
    * @var string
    * @OA\Property(description="微信头像")
    */
-  private $headimgurl;
+  private string $headimgurl;
   /**
-   * @DBType({"type":"tinyint(1) NOT NULL DEFAULT '0'"})
+   * @DBType({"type":"char(1) NOT NULL DEFAULT '0'"})
    * @var integer
    * @OA\Property(enum={0, 1, 2},description="姓别（1男，2女，0保密）")
    */
-  private $sex;
+  private int $sex;
   /**
    * @DBType({"type":"tinyint(4) NOT NULL DEFAULT '0'"})
    * @var integer
    * @OA\Property(description="用户角色ID")
    */
-  private $role_id;
+  private int $role_id;
   /**
    * @DBType({"key":"MUL","type":"varchar(30) NOT NULL DEFAULT ''"})
    * @var string
    * @OA\Property(description="用户姓名")
    */
-  private $name;
+  private string $name;
   /**
    * @DBType({"key":"UNI","type":"varchar(30) NULL DEFAULT NULL"})
    * @var string
    * @OA\Property(description="用户联系电话")
    */
-  private $tel;
+  private string $tel;
   /**
    * @DBType({"type":"varchar(200) NOT NULL DEFAULT ''"})
    * @var string
    * @OA\Property(description="用户默认地址")
    */
-  private $address;
+  private string $address;
   /**
    * @DBType({"type":"int NOT NULL DEFAULT '0'"})
    * @var integer
    * @OA\Property(description="用户当前可用积分")
    */
-  private $integral;
+  private int $integral;
   /**
    * @DBType({"type":"decimal(15,2) NOT NULL DEFAULT '0'"})
    * @var  float
    * @OA\Property(description="用户当前可提现金额")
    */
-  private $cash_back;
+  private float $cash_back;
   /**
    * @DBType({"type":"decimal(15,2) NOT NULL DEFAULT '0'"})
    * @var  float
    * @OA\Property(description="用户充值余额")
    */
-  private $money;
+  private float $money;
 }

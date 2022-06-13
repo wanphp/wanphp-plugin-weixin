@@ -29,17 +29,17 @@ class MiniProgramEntity implements JsonSerializable
    * @var integer|null
    * @OA\Property(format="int64", description="用户ID")
    */
-  private $id;
+  private ?int $id;
   /**
    * @DBType({"key":"UNI","type":"varchar(29) NOT NULL DEFAULT ''"})
    * @var string
    * @OA\Property(description="微信openid")
    */
-  private $openid;
+  private string $openid;
   /**
    * @DBType({"type":"int NOT NULL DEFAULT '0'"})
    * @var integer
    * @OA\Property(description="推荐用户ID")
    */
-  private $parent_id;
+  private int $parent_id;
 }

@@ -18,6 +18,6 @@ class MiniProgramRepository extends BaseRepository implements MiniProgramInterfa
 {
   public function __construct(Database $database)
   {
-    parent::__construct($database, self::TABLENAME, MiniProgramEntity::class);
+    parent::__construct($database, self::TABLE_NAME, MiniProgramEntity::class);
   }
 }

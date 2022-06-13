@@ -7,5 +7,5 @@ use Wanphp\Libray\Mysql\BaseInterface;
 
 interface UserLocationInterface extends BaseInterface
 {
-  const TABLENAME = "weixin_user_location";
+  const TABLE_NAME = "weixin_user_location";
 }

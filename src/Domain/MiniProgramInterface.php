@@ -13,5 +13,5 @@ use Wanphp\Libray\Mysql\BaseInterface;
 
 interface MiniProgramInterface extends BaseInterface
 {
-  const TABLENAME = "weixin_users_minprogram";
+  const TABLE_NAME = "weixin_users_minprogram";
 }
