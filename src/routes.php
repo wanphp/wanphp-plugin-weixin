@@ -27,6 +27,7 @@ return function (App $app, Middleware $PermissionMiddleware, Middleware $OAuthSe
     //公众号粉丝打标签
     $group->map(['GET', 'POST'], '/user/tag[/{openid}]', \Wanphp\Plugins\Weixin\Application\Manage\UserTagApi::class);
     $group->delete('/user/{openid}/tag/{tagid}', \Wanphp\Plugins\Weixin\Application\Manage\UserTagApi::class);
+    $group->get('/users/search', \App\Application\Actions\Weixin\SearchUserAction::class);
   })->addMiddleware($PermissionMiddleware);
   // Api 接口
   $app->group('', function (Group $group) use ($PermissionMiddleware) {

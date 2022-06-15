@@ -18,7 +18,7 @@ use Exception;
 /**
  * Class TagsApi
  * @title 用户标签
- * @route /admin/weixin/tag
+ * @route /admin/weixin/tags
  * @package Wanphp\Plugins\Weixin\Application\Manage
  */
 class TagsApi extends Api
@@ -36,7 +36,7 @@ class TagsApi extends Api
    * @return Response
    * @throws Exception
    * @OA\Post(
-   *  path="/admin/weixin/tag",
+   *  path="/admin/weixin/tags",
    *  tags={"WeixinTag"},
    *  summary="添加公众号用户标签",
    *  operationId="addWeixinTag",
@@ -53,7 +53,7 @@ class TagsApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Put(
-   *  path="/admin/weixin/tag/{id}",
+   *  path="/admin/weixin/tags/{id}",
    *  tags={"WeixinTag"},
    *  summary="修改公众号用户标签",
    *  operationId="editWeixinTag",
@@ -77,7 +77,7 @@ class TagsApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Delete(
-   *  path="/admin/weixin/tag/{id}",
+   *  path="/admin/weixin/tags/{id}",
    *  tags={"WeixinTag"},
    *  summary="删除公众号用户标签",
    *  operationId="delWeixinTag",
@@ -93,7 +93,7 @@ class TagsApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Get(
-   *  path="/admin/weixin/tag",
+   *  path="/admin/weixin/tags",
    *  tags={"WeixinTag"},
    *  summary="用户角色",
    *  operationId="listWeixinTag",

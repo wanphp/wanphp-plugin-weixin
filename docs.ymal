@@ -155,7 +155,7 @@ paths:
       security:
         -
           bearerAuth: []
-  /admin/weixin/tag:
+  /admin/weixin/tags:
     get:
       tags:
         - WeixinTag
@@ -208,7 +208,7 @@ paths:
       security:
         -
           bearerAuth: []
-  '/admin/weixin/tag/{id}':
+  '/admin/weixin/tags/{id}':
     put:
       tags:
         - WeixinTag
