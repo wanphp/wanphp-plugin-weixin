@@ -10,10 +10,10 @@ namespace Wanphp\Plugins\Weixin\Application\Manage;
 
 
 use Exception;
+use Wanphp\Libray\Weixin\User\PublicInterface;
 use Wanphp\Libray\Weixin\WeChatBase;
 use Psr\Http\Message\ResponseInterface as Response;
 use Wanphp\Plugins\Weixin\Application\Api;
-use Wanphp\Plugins\Weixin\Domain\PublicInterface;
 
 class UserTagApi extends Api
 {

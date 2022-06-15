@@ -3,8 +3,8 @@
 namespace Wanphp\Plugins\Weixin\Application\Manage;
 
 use Psr\Http\Message\ResponseInterface as Response;
+use Wanphp\Libray\Weixin\User\UserInterface;
 use Wanphp\Plugins\Weixin\Application\Api;
-use Wanphp\Plugins\Weixin\Domain\UserInterface;
 
 class SearchUserApi extends Api
 {

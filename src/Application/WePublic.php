@@ -10,10 +10,10 @@ namespace Wanphp\Plugins\Weixin\Application;
 
 
 use Exception;
+use Wanphp\Libray\Weixin\User\PublicInterface;
+use Wanphp\Libray\Weixin\User\UserInterface;
 use Wanphp\Libray\Weixin\WeChatBase;
 use Psr\Http\Message\ResponseInterface as Response;
-use Wanphp\Plugins\Weixin\Domain\PublicInterface;
-use Wanphp\Plugins\Weixin\Domain\UserInterface;
 use Wanphp\Plugins\Weixin\Domain\UserLocationInterface;
 
 abstract class WePublic extends Api
