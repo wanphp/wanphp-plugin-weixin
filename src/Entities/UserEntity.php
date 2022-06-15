@@ -50,12 +50,6 @@ class UserEntity implements JsonSerializable
    */
   private int $sex;
   /**
-   * @DBType({"type":"tinyint(4) NOT NULL DEFAULT '0'"})
-   * @var integer
-   * @OA\Property(description="用户角色ID")
-   */
-  private int $role_id;
-  /**
    * @DBType({"key":"MUL","type":"varchar(30) NOT NULL DEFAULT ''"})
    * @var string
    * @OA\Property(description="用户姓名")

@@ -6,7 +6,7 @@
  * Time: 10:48
  */
 
-namespace  Wanphp\Plugins\Weixin\Application;
+namespace Wanphp\Plugins\Weixin\Application;
 
 
 use Exception;

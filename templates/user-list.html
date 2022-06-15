@@ -1,0 +1,120 @@
+{% extends "admin/common/base.html" %}
+{% block styles %}
+<!-- DataTables -->
+<link rel="stylesheet" href="/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+<link rel="stylesheet" href="/plugins/select2/css/select2.min.css">
+{% endblock %}
+{% block container %}
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">{{title}}</h3>
+  </div>
+  <div class="card-body">
+    <table id="userData" class="table table-sm table-bordered table-hover">
+      <thead>
+      <tr>
+        <th>微信</th>
+        <th>社区网格点</th>
+        <th>姓名</th>
+        <th>手机号</th>
+      </tr>
+      </thead>
+    </table>
+  </div>
+  <!-- /.card-body -->
+</div>
+<!-- /.card -->
+{% endblock %}
+
+{% block scripts %}
+<!-- DataTables -->
+<script src="/plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+<script src="/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+<script src="/js/dataTable.defaults.js"></script>
+<!-- Select2 -->
+<script src="/plugins/select2/js/select2.full.min.js"></script>
+<script src="/plugins/select2/js/i18n/zh-CN.js"></script>
+<script type="text/javascript">
+  var datatables;
+  var userTags = JSON.parse('{{userTags|raw}}');
+
+  $(document).ready(function () {
+    datatables = $('#userData').DataTable({
+      ajax: {
+        "url": "/admin/weixin/users",
+        "data": function (d) {
+          d.pid = '{{ pid }}';
+        }
+      },
+      rowId: 'id',
+      columns: [
+        {
+          data: "headimgurl", render: function (data, type, row, meta) {
+            var html = '<div class="btn-group dropup"><button type="button" class="btn btn-sm dropdown-toggle btn-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+            if (row.tagid_list && row.tagid_list.length > 0) {
+              for (const tag_id of row.tagid_list) {
+                html += '<span class="mr-2">' + userTags[tag_id] + '</span>';
+              }
+            } else {
+              html += '<span>无标签</span>';
+            }
+            html += '</button><div class="dropdown-menu p-2">';
+            for (const id in userTags) {
+              html += '<div class="form-check form-check-inline"><label class="form-check-label"><input class="form-check-input" type="checkbox"  value="' + id + '"';
+              if (row.tagid_list) console.log(row.tagid_list, row.tagid_list.includes(id));
+              if (row.tagid_list) html += (row.tagid_list.includes(id) ? ' checked' : '');
+              html += '>' + userTags[id] + '</label></div>';
+            }
+            html += '</div></div>';
+            return '<img src="' + data + '" class="img-thumbnail" style="padding:0;" width="30">' + row.nickname + html;
+          }
+        },
+        {data: "grid"},
+        {data: "name"},
+        {data: "tel"}
+      ]
+    });
+
+    $('#userData tbody').on('click', '.dropdown-menu input', function (event) {
+      var user = datatables.row($(this).parents('tr')).data();
+      var tagId = event.target.value;
+      console.log(tagId);
+      if (event.target.checked) {
+        if (!user.tagid_list || !user.tagid_list.includes(tagId)) {
+          // 添加标签
+          $.ajax({
+            url: '/admin/weixin/user/tag',
+            type: 'POST',
+            data: {openid: user.openid, tagid: tagId},
+            dataType: 'json',
+            success: (json) => {
+              console.log(json, user.tagid_list);
+              if (user.tagid_list) user.tagid_list.push(tagId);
+              else user.tagid_list = [tagId];
+              datatables.row($("tr[id='" + user.id + "']")).data(user).draw(false);
+            },
+            error: errorDialog
+          });
+        }
+      } else {
+        // 删除标签
+        $.ajax({
+          url: '/admin/weixin/user/' + user.openid + '/tag/' + tagId,
+          type: 'POST',
+          headers: {"X-HTTP-Method-Override": "DELETE"},
+          dataType: 'json',
+          success: function (json) {
+            user.tagid_list = user.tagid_list.filter(item => item !== tagId);
+            datatables.row($("tr[id='" + user.id + "']")).data(user).draw(false);
+          },
+          error: errorDialog
+        });
+      }
+    });
+
+  });
+</script>
+{% endblock %}

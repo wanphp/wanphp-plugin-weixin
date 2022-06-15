@@ -8,4 +8,8 @@ use Wanphp\Libray\Mysql\BaseInterface;
 interface UserInterface extends BaseInterface
 {
   const TABLE_NAME = "weixin_users";
+
+  public function getUser($id);
+
+  public function getUsers($where);
 }

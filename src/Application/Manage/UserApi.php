@@ -101,12 +101,40 @@ class UserApi extends Api
         $num = $this->user->update($data, ['id' => $this->args['id']]);
         return $this->respondWithData(['upNum' => $num], 201);
       case 'GET':
-        $id = (int)$this->resolveArg('id');
-        if ($id > 0) {
-          $user = $this->user->get('id,nickname,headimgurl,name,tel,role_id', ['id' => $id]);
-          return $this->respondWithData($user);
+        if ($this->request->getHeaderLine("X-Requested-With") == "XMLHttpRequest") {
+          $where = [];
+          $params = $this->request->getQueryParams();
+          if (!empty($params['search']['value'])) {
+            $keyword = trim($params['search']['value']);
+            $where['OR'] = [
+              'u.name[~]' => $keyword,
+              'u.nickname[~]' => $keyword,
+              'u.tel[~]' => $keyword
+            ];
+          }
+
+          // 推广用户
+          if (isset($params['pid']) && $params['pid'] > 0) {
+            $where['p.parent_id'] = intval($params['pid']);
+          }
+
+          $recordsFiltered = $this->user->count('id', $where);
+          $where['LIMIT'] = [$params['start'], $params['length']];
+          $where['ORDER'] = ["u.id" => "DESC"];
+
+          $data = [
+            "draw" => $params['draw'],
+            "recordsTotal" => $this->user->count('id'),
+            "recordsFiltered" => $recordsFiltered,
+            'data' => $this->user->getUsers($where)
+          ];
+          return $this->respondWithData($data);
         } else {
-          return $this->respondWithError('ID错误');
+          $data = [
+            'title' => '微信用户管理'
+          ];
+
+          return $this->respondView('@weixin/user-list.html', $data);
         }
       default:
         return $this->respondWithError('禁止访问', 403);

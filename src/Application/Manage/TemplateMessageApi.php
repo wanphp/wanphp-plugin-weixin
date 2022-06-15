@@ -108,39 +108,45 @@ class TemplateMessageApi extends Api
           return $this->respondWithError('缺少模板ID');
         }
       case 'GET':
-        $msgtemplate = $this->weChatBase->templateMessage();
-        $list = $this->msgTemplate->select();
-        $templates = [];
-        if (is_array($msgtemplate['template_list'])) foreach ($msgtemplate['template_list'] as $vo) {
-          $templates[$vo['template_id']] = $vo;
-        }
-
-        foreach ($list as &$item) {
-          if (isset($templates[$item['template_id']])) {
-            $item = array_merge($item, $templates[$item['template_id']]);
-            $item['content'] = nl2br($item['content']);
-            $item['example'] = nl2br($item['example']);
-            unset($templates[$item['template_id']]);
-          } else {
-            $this->msgTemplate->update(['status' => 0], ['id' => $item['id']]);
-            $item['template_id'] = '公众平台后台删除';
-            $item['status'] = 0;
+        if ($this->request->getHeaderLine("X-Requested-With") == "XMLHttpRequest") {
+          $msgtemplate = $this->weChatBase->templateMessage();
+          $list = $this->msgTemplate->select();
+          $templates = [];
+          if (is_array($msgtemplate['template_list'])) foreach ($msgtemplate['template_list'] as $vo) {
+            $templates[$vo['template_id']] = $vo;
           }
+
+          foreach ($list as &$item) {
+            if (isset($templates[$item['template_id']])) {
+              $item = array_merge($item, $templates[$item['template_id']]);
+              $item['content'] = nl2br($item['content']);
+              $item['example'] = nl2br($item['example']);
+              unset($templates[$item['template_id']]);
+            } else {
+              $this->msgTemplate->update(['status' => 0], ['id' => $item['id']]);
+              $item['template_id'] = '公众平台后台删除';
+              $item['status'] = 0;
+            }
+          }
+
+          if (count($templates) > 0) foreach ($templates as $template) {
+            $template['status'] = 1;
+            $template['content'] = nl2br($template['content']);
+            $template['example'] = nl2br($template['example']);
+            $list[] = $template;
+          }
+
+          return $this->respondWithData([
+            'data' => $list ?? []
+          ]);
+        } else {
+          $data = [
+            'title' => '消息模板管理',
+            'industry' => $this->weChatBase->getIndustry()
+          ];
+
+          return $this->respondView('@weixin/template.html', $data);
         }
-
-        if (count($templates) > 0) foreach ($templates as $template) {
-          $template['status'] = 1;
-          $template['content'] = nl2br($template['content']);
-          $template['example'] = nl2br($template['example']);
-          $list[] = $template;
-        }
-
-        $data = [
-          'industry' => $this->weChatBase->getIndustry(),
-          'msg_templates' => $list ?? [],
-        ];
-
-        return $this->respondWithData($data);
       default:
         return $this->respondWithError('禁止访问', 403);
     }

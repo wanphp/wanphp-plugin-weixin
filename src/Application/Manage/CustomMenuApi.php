@@ -11,6 +11,7 @@ namespace Wanphp\Plugins\Weixin\Application\Manage;
 
 use Exception;
 use Psr\Http\Message\ResponseInterface as Response;
+use Wanphp\Libray\Weixin\WeChatBase;
 use Wanphp\Plugins\Weixin\Application\Api;
 use Wanphp\Plugins\Weixin\Domain\CustomMenuInterface;
 
@@ -23,10 +24,12 @@ use Wanphp\Plugins\Weixin\Domain\CustomMenuInterface;
 class CustomMenuApi extends Api
 {
   private CustomMenuInterface $customMenu;
+  private WeChatBase $weChatBase;
 
-  public function __construct(CustomMenuInterface $customMenu)
+  public function __construct(CustomMenuInterface $customMenu, WeChatBase $weChatBase)
   {
     $this->customMenu = $customMenu;
+    $this->weChatBase = $weChatBase;
   }
 
   /**
@@ -113,16 +116,24 @@ class CustomMenuApi extends Api
         $delNum += $this->customMenu->delete(['parent_id' => $this->args['id']]);
         return $this->respondWithData(['delNum' => $delNum]);
       case 'GET':
-        $params = $this->request->getQueryParams();
-        $tag_id = $params['tag_id'] ?? 0;
-        $where = ['tag_id' => $tag_id, 'parent_id' => 0, 'ORDER' => ['tag_id' => 'ASC', 'parent_id' => 'ASC', 'sortOrder' => 'ASC']];
+        $userTags = $this->weChatBase->getTags();
+        $data = [
+          'tags' => $userTags['tags']
+        ];
+        $data['tag_id'] = intval($this->args['id'] ?? 0);
+        $where = ['tag_id' => $data['tag_id'], 'parent_id' => 0, 'ORDER' => ['tag_id' => 'ASC', 'parent_id' => 'ASC', 'sortOrder' => 'ASC']];
         $menus = [];
         foreach ($this->customMenu->select('*', $where) as $item) {
           $where['parent_id'] = $item['id'];
           $item['subBtn'] = $this->customMenu->select('*', $where);
           $menus[] = $item;
         }
-        return $this->respondWithData($menus);
+        $tags = array_column($data['tags'], 'name', 'id');
+        $data['tagTitle'] = $tags[$data['tag_id']] ?? '默认';
+        $data['menus'] = $menus;
+        $data['menuTitle'] = "添加{$data['tagTitle']}一级菜单";
+
+        return $this->respondView('@weixin/custom-menu.html', $data);
       default:
         return $this->respondWithError('禁止访问', 403);
     }

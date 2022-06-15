@@ -442,132 +442,6 @@ paths:
       security:
         -
           bearerAuth: []
-  /admin/weixin/user/role:
-    get:
-      tags:
-        - UserRole
-      summary: 用户角色
-      operationId: listUserRole
-      responses:
-        '200':
-          description: 请求成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - { $ref: '#/components/schemas/Success' }
-                  - { type: array, items: { $ref: '#/components/schemas/UserRoleEntity' } }
-        '400':
-          description: 请求失败
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      security:
-        -
-          bearerAuth: []
-    post:
-      tags:
-        - UserRole
-      summary: 添加用户角色
-      operationId: addUserRole
-      requestBody:
-        description: 用户角色数据
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserRoleEntity'
-      responses:
-        '201':
-          description: 添加成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - { properties: { id: { type: integer } }, type: object }
-                  - { $ref: '#/components/schemas/Success' }
-        '400':
-          description: 请求失败
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      security:
-        -
-          bearerAuth: []
-  '/admin/weixin/user/role/{ID}':
-    put:
-      tags:
-        - UserRole
-      summary: 修改用户角色
-      operationId: editUserRole
-      parameters:
-        -
-          name: ID
-          in: path
-          description: 用户角色ID
-          required: true
-          schema:
-            type: integer
-            format: int64
-      requestBody:
-        description: 指定需要更新数据
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserRoleEntity'
-      responses:
-        '201':
-          description: 更新成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - { properties: { up_num: { type: integer } }, type: object }
-                  - { $ref: '#/components/schemas/Success' }
-        '400':
-          description: 请求失败
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      security:
-        -
-          bearerAuth: []
-    delete:
-      tags:
-        - UserRole
-      summary: 删除用户角色
-      operationId: delUserRole
-      parameters:
-        -
-          name: ID
-          in: path
-          description: 用户角色ID
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: 删除成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - { properties: { delNum: { type: integer } }, type: object }
-                  - { $ref: '#/components/schemas/Success' }
-        '400':
-          description: 请求失败
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      security:
-        -
-          bearerAuth: []
   /admin/weixin/user/tag:
     post:
       tags:
@@ -970,9 +844,6 @@ components:
             - 0
             - 1
             - 2
-        role_id:
-          description: 用户角色ID
-          type: integer
         name:
           description: 用户姓名
           type: string
@@ -1018,24 +889,6 @@ components:
         ctime:
           description: 位置上报时间
           type: string
-      type: object
-    UserRoleEntity:
-      title: 用户角色
-      description: 用户角色数据结构
-      required:
-        - name
-      properties:
-        id:
-          description: 角色ID
-          type: integer
-          format: int32
-          nullable: true
-        name:
-          description: 角色名称
-          type: string
-        sortOrder:
-          description: 显示排序
-          type: integer
       type: object
   securitySchemes:
     bearerAuth:

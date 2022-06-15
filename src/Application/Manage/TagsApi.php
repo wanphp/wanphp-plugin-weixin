@@ -140,10 +140,13 @@ class TagsApi extends Api
         }
 
         $userTags = $this->weChatBase->getTags();
-        return $this->respondWithData([
+        $data = [
+          'title' => '粉丝标签管理',
           'tags' => $userTags['tags'] ?? [],
           'total' => $user_total
-        ]);
+        ];
+
+        return $this->respondView('@weixin/tags.html', $data);
       default:
         return $this->respondWithError('禁止访问', 403);
     }
