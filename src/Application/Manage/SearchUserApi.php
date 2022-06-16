@@ -17,6 +17,32 @@ class SearchUserApi extends Api
 
   /**
    * @inheritDoc
+   * @OA\Get(
+   *   path="/api/user/search",
+   *   tags={"Client"},
+   *   summary="客户端搜索用户",
+   *   operationId="SearchUser",
+   *   security={{"bearerAuth":{}}},
+   *   @OA\Parameter(
+   *         name="q",
+   *         in="query",
+   *         description="搜索关键词",
+   *         required=true,
+   *         @OA\Schema(type="string")
+   *     ),
+   *   @OA\Parameter(
+   *         name="page",
+   *         in="query",
+   *         description="分页",
+   *         required=false,
+   *         @OA\Schema(
+   *             type="integer",
+   *             format="int32"
+   *         )
+   *     ),
+   *   @OA\Response(response="200",description="用户信息",@OA\JsonContent(ref="#/components/schemas/Success")),
+   *   @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
+   * )
    */
   protected function action(): Response
   {

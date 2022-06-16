@@ -15,7 +15,12 @@ use Wanphp\Libray\Mysql\EntityTrait;
 /**
  * Class CustomMenuEntity
  * @package Wanphp\Plugins\Weixin\Entities
- * @OA\Schema(schema="newCustomMenu", required={"name","type"})
+ * @OA\Schema(
+ *   title="自定义菜单",
+ *   description="公众号自定义菜单",
+ *   schema="newCustomMenu",
+ *   required={"name","type"}
+ * )
  */
 class CustomMenuEntity implements JsonSerializable
 {
@@ -23,6 +28,7 @@ class CustomMenuEntity implements JsonSerializable
   /**
    * @DBType({"key":"PRI","type":"smallint(6) NOT NULL AUTO_INCREMENT"})
    * @var integer|null
+   * @OA\Property(description="菜单ID")
    */
   private ?int $id;
   /**
@@ -80,17 +86,3 @@ class CustomMenuEntity implements JsonSerializable
    */
   private int $sortOrder;
 }
-
-/**
- * @OA\Schema(
- *   schema="CustomMenu",
- *   type="object",
- *   allOf={
- *       @OA\Schema(ref="#/components/schemas/newCustomMenu"),
- *       @OA\Schema(
- *           required={"id"},
- *           @OA\Property(property="id",format="int64", type="integer", description="菜单ID")
- *       )
- *   }
- * )
- */

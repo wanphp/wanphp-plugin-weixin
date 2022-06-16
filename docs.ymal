@@ -4,6 +4,39 @@ info:
   description: 微信开发常用操作，插件不能单独运行
   version: 1.1.0
 paths:
+  /api/user/get:
+    post:
+      tags:
+        - Client
+      summary: 客户端通过用户id获取用户
+      operationId: clientGetUsers
+      requestBody:
+        description: 用户id
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                id:
+                  type: array
+                  items: { type: integer, format: int64 }
+              type: object
+      responses:
+        '200':
+          description: 用户信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
   /admin/weixin/createMenu:
     post:
       tags:
@@ -142,6 +175,44 @@ paths:
       responses:
         '200':
           description: 删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+  /api/user/search:
+    get:
+      tags:
+        - Client
+      summary: 客户端搜索用户
+      operationId: SearchUser
+      parameters:
+        -
+          name: q
+          in: query
+          description: 搜索关键词
+          required: true
+          schema:
+            type: string
+        -
+          name: page
+          in: query
+          description: 分页
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: 用户信息
           content:
             application/json:
               schema:
@@ -622,6 +693,43 @@ paths:
       security:
         -
           bearerAuth: []
+    post:
+      tags:
+        - Client
+      summary: 客户端添加用户，同一开放平台下的其它APP用户、小程序用户
+      operationId: clientInsertUser
+      requestBody:
+        description: 添加新用户
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserEntity'
+            example:
+              unionid: ''
+              nickname: ''
+              headimgurl: ''
+              sex: '0'
+              name: ''
+              tel: null
+      responses:
+        '201':
+          description: 用户更新成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { properties: { uid: { description: 用户ID, type: integer } }, type: object }
+                  - { $ref: '#/components/schemas/Success' }
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
     patch:
       tags:
         - User
@@ -649,6 +757,52 @@ paths:
               schema:
                 allOf:
                   - { properties: { up_num: { description: 更新数量, type: integer } }, type: object }
+                  - { $ref: '#/components/schemas/Success' }
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          bearerAuth: []
+  '/api/user/{id}':
+    put:
+      tags:
+        - Client
+      summary: 客户端更新用户
+      operationId: clientUpdateUser
+      parameters:
+        -
+          name: id
+          in: path
+          description: 用户ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: 更新用户数据
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserEntity'
+            example:
+              nickname: ''
+              headimgurl: ''
+              sex: '0'
+              name: ''
+              tel: null
+      responses:
+        '201':
+          description: 用户更新成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { properties: { upNum: { description: 更新数量, type: integer } }, type: object }
                   - { $ref: '#/components/schemas/Success' }
         '400':
           description: 请求失败
@@ -687,11 +841,16 @@ components:
       title: 成功提示
       type: object
     newCustomMenu:
-      description: 'Class CustomMenuEntity'
+      title: 自定义菜单
+      description: 公众号自定义菜单
       required:
         - name
         - type
       properties:
+        id:
+          description: 菜单ID
+          type: integer
+          nullable: true
         tag_id:
           description: 微信标签
           type: integer
@@ -720,20 +879,6 @@ components:
           description: 排序
           type: integer
       type: object
-    CustomMenu:
-      type: object
-      allOf:
-        -
-          required:
-            - id
-          properties:
-            id:
-              description: 菜单ID
-              type: integer
-              format: int64
-          type: object
-        -
-          $ref: '#/components/schemas/newCustomMenu'
     MiniProgramEntity:
       title: 用户小程序关联信息
       description: 用户小程序关联信息
@@ -900,8 +1045,8 @@ tags:
     name: Public
     description: 公共操作接口
   -
-    name: UserRole
-    description: 用户角色
+    name: Client
+    description: 客户端
   -
     name: User
     description: 用户操作接口

@@ -19,8 +19,8 @@ namespace Wanphp\Plugins\Weixin\Application;
  *     description="公共操作接口",
  * )
  * @OA\Tag(
- *     name="UserRole",
- *     description="用户角色",
+ *     name="Client",
+ *     description="客户端",
  * )
  * @OA\Tag(
  *     name="User",

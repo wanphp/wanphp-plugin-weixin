@@ -34,6 +34,12 @@ return function (App $app, Middleware $PermissionMiddleware, Middleware $OAuthSe
     // 当前用户
     $group->map(['GET', 'PATCH'], '/api/user', \Wanphp\Plugins\Weixin\Application\UserApi::class);
 
+    // 客户端添加修改用户
+    $group->map(['POST', 'PUT'], '/api/user[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\UserApi::class);
+    // 客户端搜索用户
+    $group->get('/api/user/search', \Wanphp\Plugins\Weixin\Application\Manage\SearchUserApi::class);
+    // 客户端通过用户id获取用户
+    $group->get('/api/user/get', \Wanphp\Plugins\Weixin\Application\GetUsersApi::class);
   })->addMiddleware($OAuthServerMiddleware);
 };
 
