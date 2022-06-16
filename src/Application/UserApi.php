@@ -11,7 +11,7 @@ namespace Wanphp\Plugins\Weixin\Application;
 
 use Exception;
 use Psr\Http\Message\ResponseInterface as Response;
-use Wanphp\Libray\Weixin\User\UserInterface;
+use Wanphp\Plugins\Weixin\Domain\UserInterface;
 
 class UserApi extends Api
 {

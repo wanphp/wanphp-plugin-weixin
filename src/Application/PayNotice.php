@@ -11,10 +11,10 @@ namespace Wanphp\Plugins\Weixin\Application;
 
 use Exception;
 use Wanphp\Libray\Weixin\Pay;
-use Wanphp\Libray\Weixin\User\PublicInterface;
-use Wanphp\Libray\Weixin\User\UserInterface;
 use Wanphp\Libray\Weixin\WeChatBase;
 use Psr\Http\Message\ResponseInterface as Response;
+use Wanphp\Plugins\Weixin\Domain\PublicInterface;
+use Wanphp\Plugins\Weixin\Domain\UserInterface;
 
 abstract class PayNotice extends Api
 {
