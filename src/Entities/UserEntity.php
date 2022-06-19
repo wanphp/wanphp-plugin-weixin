@@ -19,6 +19,7 @@ use Wanphp\Libray\Mysql\EntityTrait;
 class UserEntity implements JsonSerializable
 {
   use EntityTrait;
+
   /**
    * @DBType({"key":"PRI","type":"int NOT NULL AUTO_INCREMENT"})
    * @var integer|null
@@ -62,11 +63,35 @@ class UserEntity implements JsonSerializable
    */
   private string $tel;
   /**
+   * @DBType({"type":"varchar(50) NOT NULL DEFAULT ''"})
+   * @var string
+   * @OA\Property(description="联系邮箱")
+   */
+  private string $email;
+  /**
+   * @DBType({"type":"char(11) NOT NULL DEFAULT ''"})
+   * @OA\Property(description="加密密钥")
+   * @var string
+   */
+  private string $salt;
+  /**
+   * @DBType({"type":"char(32) NOT NULL DEFAULT ''"})
+   * @OA\Property(description="密码")
+   * @var string
+   */
+  private string $password;
+  /**
    * @DBType({"type":"varchar(200) NOT NULL DEFAULT ''"})
    * @var string
    * @OA\Property(description="用户默认地址")
    */
   private string $address;
+  /**
+   * @DBType({"type":"char(6) NOT NULL DEFAULT ''"})
+   * @OA\Property(description="邮编")
+   * @var string
+   */
+  private string $fox;
   /**
    * @DBType({"type":"int NOT NULL DEFAULT '0'"})
    * @var integer
@@ -85,4 +110,10 @@ class UserEntity implements JsonSerializable
    * @OA\Property(description="用户充值余额")
    */
   private float $money;
+  /**
+   * @DBType({"type":"char(1) NOT NULL DEFAULT '0'"})
+   * @OA\Property(description="用户状态，1为禁登录")
+   * @var string
+   */
+  private string $status;
 }
