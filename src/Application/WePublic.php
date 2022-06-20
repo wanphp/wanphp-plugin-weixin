@@ -169,7 +169,7 @@ abstract class WePublic extends Api
       //检查用户是否通过小程序等，存储到本地
       if (isset($userinfo['unionid']) && !empty($userinfo['unionid'])) {
         $user_id = $this->user->get('id', ['unionid' => $userinfo['unionid']]);
-        if ($user_id > 0) {
+        if ($user_id) {
           $data['id'] = $user_id;
         } else {
           $data['id'] = $this->user->insert(['unionid' => $userinfo['unionid']]);

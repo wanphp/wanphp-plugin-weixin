@@ -11,6 +11,7 @@ namespace Wanphp\Plugins\Weixin\Application\Manage;
 
 use Exception;
 use Psr\Http\Message\ResponseInterface as Response;
+use Wanphp\Libray\Weixin\WeChatBase;
 use Wanphp\Plugins\Weixin\Application\Api;
 use Wanphp\Plugins\Weixin\Domain\UserInterface;
 
@@ -23,10 +24,12 @@ use Wanphp\Plugins\Weixin\Domain\UserInterface;
 class UserApi extends Api
 {
   private UserInterface $user;
+  private WeChatBase $weChatBase;
 
-  public function __construct(UserInterface $user)
+  public function __construct(UserInterface $user, WeChatBase $weChatBase)
   {
     $this->user = $user;
+    $this->weChatBase = $weChatBase;
   }
 
   /**
@@ -133,6 +136,9 @@ class UserApi extends Api
           $data = [
             'title' => '微信用户管理'
           ];
+          $userTags = $this->weChatBase->getTags();
+          $userTags = array_column($userTags['tags'], 'name', 'id');
+          $data['userTags'] = json_encode($userTags ?? []);
 
           return $this->respondView('@weixin/user-list.html', $data);
         }

@@ -940,7 +940,8 @@ components:
           type: string
         tagid_list:
           description: 粉丝标签
-          type: string
+          type: array
+          items: {  }
         parent_id:
           description: 推荐用户ID
           type: integer
@@ -995,8 +996,20 @@ components:
         tel:
           description: 用户联系电话
           type: string
+        email:
+          description: 联系邮箱
+          type: string
+        salt:
+          description: 加密密钥
+          type: string
+        password:
+          description: 密码
+          type: string
         address:
           description: 用户默认地址
+          type: string
+        fox:
+          description: 邮编
           type: string
         integral:
           description: 用户当前可用积分
@@ -1009,6 +1022,9 @@ components:
           description: 用户充值余额
           type: number
           format: float
+        status:
+          description: 用户状态，1为禁登录
+          type: string
       type: object
     UserLocationEntity:
       title: 用户位置上报

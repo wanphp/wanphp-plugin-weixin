@@ -15,7 +15,7 @@
       <thead>
       <tr>
         <th>微信</th>
-        <th>社区网格点</th>
+        <th>openid</th>
         <th>姓名</th>
         <th>手机号</th>
       </tr>
@@ -44,7 +44,7 @@
   $(document).ready(function () {
     datatables = $('#userData').DataTable({
       ajax: {
-        "url": "/admin/weixin/users",
+        "url": "/admin/weixin/user",
         "data": function (d) {
           d.pid = '{{ pid }}';
         }
@@ -72,7 +72,7 @@
             return '<img src="' + data + '" class="img-thumbnail" style="padding:0;" width="30">' + row.nickname + html;
           }
         },
-        {data: "grid"},
+        {data: "openid"},
         {data: "name"},
         {data: "tel"}
       ]

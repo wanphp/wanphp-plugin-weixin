@@ -38,11 +38,11 @@ class PublicEntity implements JsonSerializable
    */
   private string $openid;
   /**
-   * @DBType({"key":"MUL","type":"varchar(50) NOT NULL DEFAULT ''"})
-   * @var string
-   * @OA\Property(description="粉丝标签")
+   * @DBType({"key":"MUL","type":"varchar(50) NOT NULL DEFAULT '[]'"})
+   * @var array
+   * @OA\Property(@OA\Items(),description="粉丝标签")
    */
-  private string $tagid_list;
+  private array $tagid_list;
   /**
    * @DBType({"type":"int NOT NULL DEFAULT '0'"})
    * @var integer

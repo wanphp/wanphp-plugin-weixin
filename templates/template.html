@@ -58,11 +58,7 @@
   $(document).ready(function () {
     var datatables = $('#msgTplData').DataTable({
       serverSide: false,
-      ajax: {
-        url: "/admin/weixin/tplmsg",
-        type: 'GET',
-        dataSrc: 'msg_templates',
-      },
+      ajax: "/admin/weixin/tplmsg",
       rowId: 'id',
       columns: [
         {
