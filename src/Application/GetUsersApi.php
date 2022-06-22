@@ -36,7 +36,17 @@ class GetUsersApi extends Api
    */
   protected function action(): Response
   {
-    $where = ['id' => $this->resolveArg('id')];
-    return $this->respondWithData($this->user->select('id,nickname,headimgurl,name,tel', $where));
+    switch ($this->request->getMethod()) {
+      case 'POST':
+        $data = $this->request->getParsedBody();
+        if (!isset($data['uid'])) return $this->respondWithError('无用户ID');
+        return $this->respondWithData($this->user->getUsers(['u.id' => $data['uid']]));
+      case 'GET':
+        $id = (int)$this->resolveArg('id');
+        if ($id > 0) return $this->user->getUser($id);
+        else return $this->respondWithError('用户ID错误！');
+      default:
+        return $this->respondWithError('非法请求！');
+    }
   }
 }

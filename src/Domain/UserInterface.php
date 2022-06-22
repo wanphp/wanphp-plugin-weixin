@@ -9,7 +9,7 @@ interface UserInterface extends BaseInterface
 {
   const TABLE_NAME = "weixin_users";
 
-  public function getUser($id);
+  public function getUser(int $id);
 
   public function getUsers($where);
 }

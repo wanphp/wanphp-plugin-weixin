@@ -22,12 +22,12 @@ class UserRepository extends BaseRepository implements UserInterface
     parent::__construct($database, self::TABLE_NAME, UserEntity::class);
   }
 
-  public function getUser($id): bool|array
+  public function getUser(int $id): array
   {
-    return $this->db->select(UserInterface::TABLE_NAME . '(u)', [
+    return $this->db->get(UserInterface::TABLE_NAME . '(u)', [
       '[>]' . PublicInterface::TABLE_NAME . '(p)' => ["u.id" => "id"]
     ],
-      ['u.nickname', 'u.headimgurl', 'u.name', 'u.tel', 'p.tagid_list[JSON]', 'p.parent_id'],
+      ['u.nickname', 'u.headimgurl', 'u.name', 'u.tel', 'p.tagid_list[JSON]', 'p.openid', 'p.parent_id'],
       ['u.id' => $id]
     ) ?: [];
   }

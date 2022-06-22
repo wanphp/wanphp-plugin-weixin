@@ -39,7 +39,7 @@ return function (App $app, Middleware $PermissionMiddleware, Middleware $OAuthSe
     // 客户端搜索用户
     $group->get('/api/user/search', \Wanphp\Plugins\Weixin\Application\Manage\SearchUserApi::class);
     // 客户端通过用户id获取用户
-    $group->get('/api/user/get', \Wanphp\Plugins\Weixin\Application\GetUsersApi::class);
+    $group->map(['POST', 'GET'], '/api/user/get[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\GetUsersApi::class);
   })->addMiddleware($OAuthServerMiddleware);
 };
 
