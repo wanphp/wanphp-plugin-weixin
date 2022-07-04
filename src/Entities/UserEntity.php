@@ -87,6 +87,12 @@ class UserEntity implements JsonSerializable
    */
   private string $address;
   /**
+   * @DBType({"type":"varchar(50) NOT NULL DEFAULT ''"})
+   * @var string
+   * @OA\Property(description="用户备注")
+   */
+  private string $remark;
+  /**
    * @DBType({"type":"char(6) NOT NULL DEFAULT ''"})
    * @OA\Property(description="邮编")
    * @var string

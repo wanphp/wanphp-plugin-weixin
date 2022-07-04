@@ -27,7 +27,7 @@ class UserRepository extends BaseRepository implements UserInterface
     return $this->db->get(UserInterface::TABLE_NAME . '(u)', [
       '[>]' . PublicInterface::TABLE_NAME . '(p)' => ["u.id" => "id"]
     ],
-      ['u.nickname', 'u.headimgurl', 'u.name', 'u.tel', 'p.tagid_list[JSON]', 'p.openid', 'p.parent_id'],
+      ['u.nickname', 'u.headimgurl', 'u.name', 'u.tel', 'u.remark', 'u.address', 'p.tagid_list[JSON]', 'p.openid', 'p.parent_id'],
       ['u.id' => $id]
     ) ?: [];
   }
@@ -37,7 +37,7 @@ class UserRepository extends BaseRepository implements UserInterface
     return $this->db->select(UserInterface::TABLE_NAME . '(u)', [
       '[>]' . PublicInterface::TABLE_NAME . '(p)' => ["u.id" => "id"]
     ],
-      ['u.id', 'u.nickname', 'u.headimgurl', 'u.name', 'u.tel', 'p.openid', 'p.tagid_list[JSON]', 'p.subscribe', 'p.parent_id'],
+      ['u.id', 'u.nickname', 'u.headimgurl', 'u.name', 'u.tel', 'u.remark', 'u.address', 'p.openid', 'p.tagid_list[JSON]', 'p.subscribe', 'p.parent_id'],
       $where
     ) ?: [];
   }
