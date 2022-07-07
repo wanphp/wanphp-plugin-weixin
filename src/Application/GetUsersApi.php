@@ -43,7 +43,7 @@ class GetUsersApi extends Api
         return $this->respondWithData($this->user->getUsers(['u.id' => $data['uid']]));
       case 'GET':
         $id = (int)$this->resolveArg('id');
-        if ($id > 0) return $this->user->getUser($id);
+        if ($id > 0) return $this->respondWithData($this->user->getUser($id));
         else return $this->respondWithError('用户ID错误！');
       default:
         return $this->respondWithError('非法请求！');
