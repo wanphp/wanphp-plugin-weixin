@@ -150,7 +150,6 @@ abstract class WePublic extends Api
 
     //保存用户信息
     $userinfo = $this->weChatBase->getUserInfo($openid);
-    if (!is_array($userinfo)) $userinfo = [];
     //本地存储用户
     $data = [
       'subscribe' => 1,
