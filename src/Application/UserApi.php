@@ -150,27 +150,15 @@ class UserApi extends Api
     switch ($this->request->getMethod()) {
       case 'POST':
         // 客户端添加用户
-        $data = $this->request->getParsedBody();
-        if (!isset($data['unionid']) || count($data['unionid']) != 28) return $this->respondWithError('unionid不正确');
-        $id = $this->user->get('id', ['unionid' => $data['unionid']]);
-        if ($id) {
-          $this->user->update($data, ['id' => $id]);
-        } else {
-          $id = $this->user->insert($data);
-        }
-        return $this->respondWithData(['uid' => $id], 201);
+        $res = $this->user->addUser($this->request->getParsedBody());
+        if (isset($res['errMsg'])) return $this->respondWithError($res['errMsg'] ?? 'error');
+        else return $this->respondWithData($res, 201);
       case 'PUT':
         // 客户端修改用户
-        $data = $this->request->getParsedBody();
-        if (isset($data['unionid'])) return $this->respondWithError('不可以修改unionid');
         $id = (int)$this->resolveArg('id');
-        if (isset($data['password']) && !empty($data['password'])) {
-          $password = md5(trim($data['password']));
-          $data['salt'] = substr(md5(uniqid(rand(), true)), 10, 11);
-          $data['password'] = md5(SHA1($data['salt'] . $password));
-        }
-        if ($id > 0) $upNum = $this->user->update($data, ['id' => $id]);
-        return $this->respondWithData(['upNum' => $upNum ?? 0], 201);
+        $res = $this->user->updateUser($id, $this->request->getParsedBody());
+        if (isset($res['errMsg'])) return $this->respondWithError($res['errMsg'] ?? 'error');
+        else return $this->respondWithData($res, 201);
       case 'PATCH':
         $uid = $this->request->getAttribute('oauth_user_id');
         if ($uid < 1) return $this->respondWithError('未知用户', 422);

@@ -46,23 +46,15 @@ class SearchUserApi extends Api
    */
   protected function action(): Response
   {
-    $where = [];
     $params = $this->request->getQueryParams();
     if (isset($params['q']) && $params['q'] != '') {
       $keyword = trim($params['q']);
-      $where['OR'] = [
-        'name[~]' => $keyword,
-        'nickname[~]' => $keyword,
-        'tel[~]' => $keyword
-      ];
+    } else {
+      return $this->respondWithError('关键词不能为空！');
     }
-    $page = (intval($params['page'] ?? 1) - 1) * 10;
-    $where['LIMIT'] = [$page, 10];
+    $page = intval($params['page'] ?? 1);
 
-    $data = [
-      'users' => $this->user->select('id,nickname,headimgurl,name,tel', $where),
-      'total' => $this->user->count('id', $where)
-    ];
+    $data = $this->user->searchUsers($keyword, $page);
     return $this->respondWithData($data);
   }
 }

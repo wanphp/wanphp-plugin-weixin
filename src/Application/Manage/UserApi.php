@@ -155,7 +155,7 @@ class UserApi extends Api
             "draw" => $params['draw'],
             "recordsTotal" => $this->user->count('id'),
             "recordsFiltered" => $recordsFiltered,
-            'data' => $this->user->getUsers($where)
+            'data' => $this->user->getUserList($where)
           ];
           return $this->respondWithData($data);
         } else {
