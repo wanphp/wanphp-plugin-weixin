@@ -28,10 +28,10 @@ class UserEntity implements JsonSerializable
   private ?int $id;
   /**
    * @DBType({"key":"UNI","type":"varchar(29) NULL DEFAULT NULL"})
-   * @var string
+   * @var string|null
    * @OA\Property(description="微信unionid")
    */
-  private string $unionid;
+  private ?string $unionid;
   /**
    * @DBType({"type":"varchar(80) NOT NULL DEFAULT ''"})
    * @var string
@@ -58,10 +58,10 @@ class UserEntity implements JsonSerializable
   private string $name;
   /**
    * @DBType({"key":"UNI","type":"varchar(30) NULL DEFAULT NULL"})
-   * @var string
+   * @var string|null
    * @OA\Property(description="用户联系电话")
    */
-  private string $tel;
+  private ?string $tel;
   /**
    * @DBType({"type":"varchar(50) NOT NULL DEFAULT ''"})
    * @var string

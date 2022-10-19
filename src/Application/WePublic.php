@@ -144,7 +144,7 @@ abstract class WePublic extends Api
   protected function updateUser()
   {
     $openid = $this->weChatBase->getRev()->getRevFrom();//获取每个微信用户的openid
-    $time = $this->weChatBase->getRev()->getRevCtime();
+    $time = time();
     $info = $this->public->get('id,lastop_time', ['openid' => $openid]);
     if (isset($info['lastop_time']) && $info['lastop_time'] > ($time - 172800)) return false; // 两天内已更新过用户信息
 

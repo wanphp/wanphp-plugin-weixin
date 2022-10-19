@@ -107,8 +107,8 @@ class UserTagApi extends Api
           $result = $this->weChatBase->membersTagging($data['tagid'], [$data['openid']]);
           if ($result['errcode'] == 0) {
             $tagid_list = $this->public->get('tagid_list[JSON]', ['openid' => $data['openid']]);
-            $tagid_list[] = $data['tagid'];
-            $this->public->update(['tagid_list' => $tagid_list], ['openid' => $data['openid']]);
+            $tagid_list[] = intval($data['tagid']);
+            $this->public->update(['tagid_list' => array_unique($tagid_list)], ['openid' => $data['openid']]);
           }
           return $this->respondWithData($result, 201);
         } else {

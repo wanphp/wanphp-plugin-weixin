@@ -10,24 +10,67 @@
   <div class="card-header">
     <h3 class="card-title">{{title}}</h3>
   </div>
+  <div id="tags" class="card-header">
+    <button class="btn btn-outline-info mr-2" data-id="">默认</button>
+    {% for tag in tags %}
+    <button class="btn btn-outline-info mr-2" data-id="{{tag.id}}">{{tag.name}}</button>
+    {% endfor %}
+  </div>
   <div class="card-body">
     <table id="userData" class="table table-sm table-bordered table-hover">
       <thead>
       <tr>
         <th>微信</th>
-        <th>openid</th>
         <th>姓名</th>
         <th>手机号</th>
+        <th>操作</th>
       </tr>
       </thead>
     </table>
   </div>
   <!-- /.card-body -->
+  <div class="modal fade" id="modal-editUser" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">用户信息</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="userForm" action="" method="POST" novalidate="novalidate">
+            <div class="form-group">
+              <label for="name">姓名</label>
+              <input id="name" name="name" type="text" class="form-control" placeholder="用户姓名" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label>手机号</label>
+              <input name="tel" type="text" class="form-control" placeholder="用户手机号" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label>所在单位</label>
+              <input name="remark" type="text" class="form-control" placeholder="用户所在单位" autocomplete="off">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer justify-content-between">
+          <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+          <button type="submit" form="userForm" class="btn btn-primary">提交</button>
+        </div>
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
 </div>
 <!-- /.card -->
 {% endblock %}
 
 {% block scripts %}
+<script src="/plugins/jquery-validation/jquery.validate.min.js"></script>
+<script src="/plugins/jquery-validation/additional-methods.min.js"></script>
+<script src="/plugins/jquery-validation/localization/messages_zh.min.js"></script>
 <!-- DataTables -->
 <script src="/plugins/datatables/jquery.dataTables.min.js"></script>
 <script src="/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
@@ -42,11 +85,20 @@
   var userTags = JSON.parse('{{userTags|raw}}');
 
   $(document).ready(function () {
+    $('#tags button[data-id]').on('click', function () {
+      if ($(this).hasClass('btn-outline-info')) {
+        $('.card-header button[data-id].btn-outline-success').removeClass('btn-outline-success').addClass('btn-outline-info');
+        $(this).removeClass('btn-outline-info').addClass('btn-outline-success');
+        datatables.ajax.reload();
+      }
+    });
+
     datatables = $('#userData').DataTable({
       ajax: {
         "url": "/admin/weixin/user",
         "data": function (d) {
           d.pid = '{{ pid }}';
+          d.tag_id = $('#tags button[data-id].btn-outline-success').attr('data-id');
         }
       },
       rowId: 'id',
@@ -64,24 +116,27 @@
             html += '</button><div class="dropdown-menu p-2">';
             for (const id in userTags) {
               html += '<div class="form-check form-check-inline"><label class="form-check-label"><input class="form-check-input" type="checkbox"  value="' + id + '"';
-              if (row.tagid_list) console.log(row.tagid_list, row.tagid_list.includes(id));
-              if (row.tagid_list) html += (row.tagid_list.includes(id) ? ' checked' : '');
+              //if (row.tagid_list) console.log(row.tagid_list,id, row.tagid_list.includes(parseInt(id)));
+              if (row.tagid_list) html += (row.tagid_list.includes(parseInt(id)) ? ' checked' : '');
               html += '>' + userTags[id] + '</label></div>';
             }
             html += '</div></div>';
             return '<img src="' + data + '" class="img-thumbnail" style="padding:0;" width="30">' + row.nickname + html;
           }
         },
-        {data: "openid"},
         {data: "name"},
-        {data: "tel"}
+        {data: "tel"}, {
+          data: "op",
+          defaultContent: '<button type="button" class="btn btn-tool edit" data-toggle="tooltip" title="修改用户信息"><i class="fas fa-edit"></i></button>' +
+            '<button type="button" class="btn btn-tool subscribe" data-toggle="tooltip" title="更新关注信息"><i class="fas fa-sync-alt"></i></button>'
+        }
       ]
     });
 
     $('#userData tbody').on('click', '.dropdown-menu input', function (event) {
       var user = datatables.row($(this).parents('tr')).data();
       var tagId = event.target.value;
-      console.log(tagId);
+      //console.log(tagId);
       if (event.target.checked) {
         if (!user.tagid_list || !user.tagid_list.includes(tagId)) {
           // 添加标签
@@ -115,6 +170,102 @@
       }
     });
 
+    $('#userData tbody').on('click', 'button.edit', function () {
+      var data = datatables.row($(this).parents('tr')).data();
+      //console.log(data);
+      $('#userForm').attr('action', '/admin/weixin/user/' + data.id);
+      $('#userForm').attr('method', 'PATCH');
+      $("#userForm input[name='name']").val(data.name);
+      $("#userForm input[name='tel']").val(data.tel);
+      $("#userForm input[name='remark']").val(data.remark);
+      $('#modal-editUser').modal('show');
+    });
+    $('#userData tbody').on('click', 'button.subscribe', function () {
+      var user = datatables.row($(this).parents('tr')).data();
+      $.ajax({
+        url: '/admin/weixin/user/' + user.id,
+        type: 'POST',
+        headers: {"X-HTTP-Method-Override": "PUT"},
+        data: {openid: user.openid},
+        dataType: 'json',
+        success: (json) => {
+          if (json && json.subscribe) {
+            user.subscribe = json.subscribe;
+            user.tagid_list = json.tagid_list;
+          }
+          datatables.row($("tr[id='" + user.id + "']")).data(user).draw(false);
+        },
+        error: errorDialog
+      });
+    });
+
+
+    $.validator.addMethod("mobileNo", function (value, element) {
+      var mobileNo = /^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[1589])\d{8}$/;
+      return this.optional(element) || (mobileNo.test(value));
+    }, "请输入正确的手机号码");
+
+    $('#userForm').validate({
+      submitHandler: function (e) {
+        $.ajax({
+          url: $(e).attr('action'),
+          data: new FormData(e),
+          type: 'POST',
+          cache: false,
+          contentType: false,
+          processData: false,
+          dataType: 'json',
+          beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-HTTP-Method-Override", $(e).attr('method'));
+          },
+          success: function (json) {
+            //console.log(data);
+            if ($(e).attr('method') == 'PUT') {
+              var id = $(e).attr('action').split('/').pop();
+              var data = datatables.row($("tr[id='" + id + "']")).data();
+              data['name'] = $("#userForm input[name='name']").val();
+              data['tel'] = $("#userForm input[name='tel']").val();
+              data['department'] = $("#userForm select[name='partment_id'] option:selected").text();
+              datatables.row($("tr[id='" + id + "']")).data(data).draw(false);
+            } else {
+              datatables.row.add(json).draw(false);
+            }
+            $('#modal-editUser').modal('hide');
+          },
+          error: errorDialog
+        });
+        return false;
+      },
+      rules: {
+        name: {
+          required: true
+        },
+        tel: {
+          required: true,
+          mobileNo: true
+        }
+      },
+      messages: {
+        name: {
+          required: "请输入用户姓名"
+        },
+        tel: {
+          required: "请输入用户手机号",
+          mobileNo: "手机号有误"
+        }
+      },
+      errorElement: 'span',
+      errorPlacement: function (error, element) {
+        error.addClass('invalid-feedback');
+        element.closest('.form-group').append(error);
+      },
+      highlight: function (element, errorClass, validClass) {
+        $(element).addClass('is-invalid');
+      },
+      unhighlight: function (element, errorClass, validClass) {
+        $(element).removeClass('is-invalid');
+      }
+    });
   });
 </script>
 {% endblock %}

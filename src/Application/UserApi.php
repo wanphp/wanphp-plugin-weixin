@@ -147,9 +147,6 @@ class UserApi extends Api
    */
   protected function action(): Response
   {
-    $uid = $this->request->getAttribute('oauth_user_id');
-    if ($uid < 1) return $this->respondWithError('未知用户', 422);
-
     switch ($this->request->getMethod()) {
       case 'POST':
         // 客户端添加用户
@@ -157,7 +154,7 @@ class UserApi extends Api
         if (!isset($data['unionid']) || count($data['unionid']) != 28) return $this->respondWithError('unionid不正确');
         $id = $this->user->get('id', ['unionid' => $data['unionid']]);
         if ($id) {
-          $this->user->update($data, ['id' => $uid]);
+          $this->user->update($data, ['id' => $id]);
         } else {
           $id = $this->user->insert($data);
         }
@@ -167,21 +164,33 @@ class UserApi extends Api
         $data = $this->request->getParsedBody();
         if (isset($data['unionid'])) return $this->respondWithError('不可以修改unionid');
         $id = (int)$this->resolveArg('id');
-        if ($id > 0) $upNum = $this->user->update($data, ['id' => $uid]);
+        if (isset($data['password']) && !empty($data['password'])) {
+          $password = md5(trim($data['password']));
+          $data['salt'] = substr(md5(uniqid(rand(), true)), 10, 11);
+          $data['password'] = md5(SHA1($data['salt'] . $password));
+        }
+        if ($id > 0) $upNum = $this->user->update($data, ['id' => $id]);
         return $this->respondWithData(['upNum' => $upNum ?? 0], 201);
       case 'PATCH':
+        $uid = $this->request->getAttribute('oauth_user_id');
+        if ($uid < 1) return $this->respondWithError('未知用户', 422);
         // 用户自己修改信息
         $data = $this->request->getParsedBody();
         if (empty($data)) return $this->respondWithError('无用户数据');
         $num = $this->user->update($data, ['id' => $uid]);
         return $this->respondWithData(['up_num' => $num], 201);
       case 'GET':
+        // 用户取自己的信息
+        $uid = $this->request->getAttribute('oauth_user_id');
+        if ($uid < 1) return $this->respondWithError('未知用户', 422);
         //id,openid,sex,role_id,cash_back,money,
-        $user = $this->user->get('id,nickname,headimgurl,name,tel,address,remark,integral', ['id' => $uid]);
+        $user = $this->user->get('id,unionid,nickname,headimgurl,name,tel,address,remark,integral', ['id' => $uid]);
         if ($user) return $this->respondWithData($user);
         else return $this->respondWithError('用户不存在');
       default:
         return $this->respondWithError('禁止访问', 403);
     }
   }
+
+
 }

@@ -10,9 +10,11 @@ namespace Wanphp\Plugins\Weixin\Application\Manage;
 
 
 use Exception;
+use Medoo\Medoo;
 use Psr\Http\Message\ResponseInterface as Response;
 use Wanphp\Libray\Weixin\WeChatBase;
 use Wanphp\Plugins\Weixin\Application\Api;
+use Wanphp\Plugins\Weixin\Domain\PublicInterface;
 use Wanphp\Plugins\Weixin\Domain\UserInterface;
 
 /**
@@ -24,11 +26,13 @@ use Wanphp\Plugins\Weixin\Domain\UserInterface;
 class UserApi extends Api
 {
   private UserInterface $user;
+  private PublicInterface $public;
   private WeChatBase $weChatBase;
 
-  public function __construct(UserInterface $user, WeChatBase $weChatBase)
+  public function __construct(UserInterface $user, PublicInterface $public, WeChatBase $weChatBase)
   {
     $this->user = $user;
+    $this->public = $public;
     $this->weChatBase = $weChatBase;
   }
 
@@ -98,6 +102,22 @@ class UserApi extends Api
   protected function action(): Response
   {
     switch ($this->request->getMethod()) {
+      case 'PUT':
+        $data = $this->request->getParsedBody();
+        if (empty($data) || empty($data['openid'])) return $this->respondWithError('用户还未关注公众号或未授权个人信息');
+        $userinfo = $this->weChatBase->getUserInfo($data['openid']);
+        if ($userinfo['subscribe']) {//用户已关注公众号
+          $pubData = [
+            'subscribe' => $userinfo['subscribe'],
+            'tagid_list' => $userinfo['tagid_list'],
+            'subscribe_time' => $userinfo['subscribe_time'],
+            'subscribe_scene' => $userinfo['subscribe_scene']
+          ];
+          $this->public->update($pubData, ['id' => $this->args['id']]);
+          return $this->respondWithData($pubData, 201);
+        } else {
+          return $this->respondWithError('用户还未关注公众号');
+        }
       case 'PATCH':
         $data = $this->request->getParsedBody();
         if (empty($data)) return $this->respondWithError('无用户数据');
@@ -120,9 +140,15 @@ class UserApi extends Api
           if (isset($params['pid']) && $params['pid'] > 0) {
             $where['p.parent_id'] = intval($params['pid']);
           }
+          if (isset($params['tag_id']) && $params['tag_id'] > 0) {
+            $tag_id = intval($params['tag_id']);
+            $where['u.id'] = $this->public->select('id', Medoo::raw("WHERE REPLACE(`tagid_list`, ',', '][') LIKE '%[$tag_id]%' LIMIT {$params['start']}, {$params['length']}"));
+            $recordsFiltered = $this->public->count('id', Medoo::raw("WHERE REPLACE(`tagid_list`, ',', '][') LIKE '%[$tag_id]%'"));
+          } else {
+            $recordsFiltered = $this->user->count('id', $where);
+            $where['LIMIT'] = [$params['start'], $params['length']];
+          }
 
-          $recordsFiltered = $this->user->count('id', $where);
-          $where['LIMIT'] = [$params['start'], $params['length']];
           $where['ORDER'] = ["u.id" => "DESC"];
 
           $data = [
@@ -133,10 +159,11 @@ class UserApi extends Api
           ];
           return $this->respondWithData($data);
         } else {
-          $data = [
-            'title' => '微信用户管理'
-          ];
           $userTags = $this->weChatBase->getTags();
+          $data = [
+            'title' => '微信用户管理',
+            'tags' => $userTags['tags']
+          ];
           $userTags = array_column($userTags['tags'], 'name', 'id');
           $data['userTags'] = json_encode($userTags ?? []);
 

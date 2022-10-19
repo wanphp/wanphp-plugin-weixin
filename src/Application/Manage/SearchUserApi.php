@@ -56,7 +56,7 @@ class SearchUserApi extends Api
         'tel[~]' => $keyword
       ];
     }
-    $page = (intval($params['page'] ?? 0) - 1) * 10;
+    $page = (intval($params['page'] ?? 1) - 1) * 10;
     $where['LIMIT'] = [$page, 10];
 
     $data = [

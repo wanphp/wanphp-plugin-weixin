@@ -16,7 +16,7 @@ return function (App $app, Middleware $PermissionMiddleware, Middleware $OAuthSe
   // 后台管理
   $app->group('/admin/weixin', function (Group $group) {
     // 用户基本信息管理
-    $group->map(['GET', 'PATCH'], '/user[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\Manage\UserApi::class);
+    $group->map(['GET', 'PUT', 'PATCH'], '/user[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\Manage\UserApi::class);
     //公众号自定义菜单
     $group->map(['GET', 'PUT', 'POST', 'DELETE'], '/menu[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\Manage\CustomMenuApi::class);
     $group->post('/createMenu', \Wanphp\Plugins\Weixin\Application\Manage\CreateMenuApi::class);
@@ -33,7 +33,8 @@ return function (App $app, Middleware $PermissionMiddleware, Middleware $OAuthSe
   $app->group('', function (Group $group) use ($PermissionMiddleware) {
     // 当前用户
     $group->map(['GET', 'PATCH'], '/api/user', \Wanphp\Plugins\Weixin\Application\UserApi::class);
-
+    // 发送消息
+    $group->post('api/user/sendMsg',\Wanphp\Plugins\Weixin\Application\SendTemplateMessageApi::class);
     // 客户端添加修改用户
     $group->map(['POST', 'PUT'], '/api/user[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\UserApi::class);
     // 客户端搜索用户
