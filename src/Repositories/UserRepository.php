@@ -15,6 +15,7 @@ use Psr\Log\LoggerInterface;
 use Wanphp\Libray\Mysql\BaseRepository;
 use Wanphp\Libray\Mysql\Database;
 use Wanphp\Libray\Weixin\WeChatBase;
+use Wanphp\Plugins\Weixin\Domain\MsgTemplateInterface;
 use Wanphp\Plugins\Weixin\Domain\PublicInterface;
 use Wanphp\Plugins\Weixin\Domain\UserInterface;
 use Wanphp\Plugins\Weixin\Entities\UserEntity;
@@ -129,6 +130,12 @@ class UserRepository extends BaseRepository implements UserInterface
     if (empty($msgData)) return ['errCode' => '1', 'msg' => '无模板信息内容'];
     //取用户openid
     if (!empty($uidArr)) {
+      // 取模板ID
+      if (isset($msgData['template_id_short'])) {
+        $msgData['template_id'] = $this->db->get(MsgTemplateInterface::TABLE_NAME, ['template_id'], ['template_id_short' => $msgData['template_id_short'], 'status' => 1]);
+        unset($msgData['template_id_short']);
+      }
+      if (empty($msgData['template_id'])) return ['errCode' => '1', 'msg' => '无模板ID,请先获取模板ID'];
       $openId = $this->db->get(PublicInterface::TABLE_NAME, ['openid'], ['id' => $uidArr, 'subscribe' => 1]);
       if ($openId) {
         if (is_string($openId)) $openId = [$openId];
