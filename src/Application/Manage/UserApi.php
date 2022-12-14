@@ -12,6 +12,7 @@ namespace Wanphp\Plugins\Weixin\Application\Manage;
 use Exception;
 use Medoo\Medoo;
 use Psr\Http\Message\ResponseInterface as Response;
+use Wanphp\Libray\Slim\Setting;
 use Wanphp\Libray\Weixin\WeChatBase;
 use Wanphp\Plugins\Weixin\Application\Api;
 use Wanphp\Plugins\Weixin\Domain\PublicInterface;
@@ -28,12 +29,14 @@ class UserApi extends Api
   private UserInterface $user;
   private PublicInterface $public;
   private WeChatBase $weChatBase;
+  private string $prefix;
 
-  public function __construct(UserInterface $user, PublicInterface $public, WeChatBase $weChatBase)
+  public function __construct(UserInterface $user, PublicInterface $public, Setting $setting, WeChatBase $weChatBase)
   {
     $this->user = $user;
     $this->public = $public;
     $this->weChatBase = $weChatBase;
+    $this->prefix = $setting->get('database')['prefix'];
   }
 
   /**
@@ -125,31 +128,30 @@ class UserApi extends Api
         return $this->respondWithData(['upNum' => $num], 201);
       case 'GET':
         if ($this->request->getHeaderLine("X-Requested-With") == "XMLHttpRequest") {
-          $where = [];
+          $whereRaw = [];
           $params = $this->request->getQueryParams();
           if (!empty($params['search']['value'])) {
             $keyword = trim($params['search']['value']);
-            $where['OR'] = [
-              'u.name[~]' => $keyword,
-              'u.nickname[~]' => $keyword,
-              'u.tel[~]' => $keyword
-            ];
+            $whereRaw[] = "(`{$this->prefix}u`.`name` LIKE '%{$keyword}%' OR `{$this->prefix}u`.`nickname` LIKE '%{$keyword}%' OR `{$this->prefix}u`.`tel` LIKE '%{$keyword}%')";
           }
 
           // 推广用户
           if (isset($params['pid']) && $params['pid'] > 0) {
-            $where['p.parent_id'] = intval($params['pid']);
+            $parent_id = intval($params['pid']);
+            $whereRaw[] = "`{$this->prefix}p`.`parent_id` = {$parent_id}";
           }
           if (isset($params['tag_id']) && $params['tag_id'] > 0) {
             $tag_id = intval($params['tag_id']);
-            $where['u.id'] = $this->public->select('id', Medoo::raw("WHERE REPLACE(`tagid_list`, ',', '][') LIKE '%[$tag_id]%' LIMIT {$params['start']}, {$params['length']}"));
-            $recordsFiltered = $this->public->count('id', Medoo::raw("WHERE REPLACE(`tagid_list`, ',', '][') LIKE '%[$tag_id]%'"));
-          } else {
-            $recordsFiltered = $this->user->count('id', $where);
-            $where['LIMIT'] = [$params['start'], $params['length']];
+            $whereRaw[] = "REPLACE(`{$this->prefix}p`.`tagid_list`, ',', '][') LIKE '%[{$tag_id}]%'";
           }
-
-          $where['ORDER'] = ["u.id" => "DESC"];
+          if ($whereRaw) {
+            $whereRawStr = join(' AND ', $whereRaw);
+            $recordsFiltered = $this->user->getUserCount(Medoo::raw("WHERE {$whereRawStr}"));
+            $where = Medoo::raw("WHERE {$whereRawStr} ORDER BY `{$this->prefix}u`.`id` DESC LIMIT {$params['start']}, {$params['length']}");
+          } else {
+            $recordsFiltered = $this->user->count('id');
+            $where = ['ORDER' => ["u.id" => "DESC"], 'LIMIT' => $this->getLimit()];
+          }
 
           $data = [
             "draw" => $params['draw'],
@@ -157,6 +159,7 @@ class UserApi extends Api
             "recordsFiltered" => $recordsFiltered,
             'data' => $this->user->getUserList($where)
           ];
+
           return $this->respondWithData($data);
         } else {
           $userTags = $this->weChatBase->getTags();

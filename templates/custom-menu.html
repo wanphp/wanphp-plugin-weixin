@@ -67,7 +67,7 @@
         <form id="menuForm" action="/admin/weixin/menu" method="POST"
               novalidate="novalidate">
           <div class="form-group">
-            <input name="parent_id" type="hidden">
+            <input name="parent_id" type="hidden" value="0">
             <input name="tag_id" type="hidden" value="{{tag_id}}">
             <label for="name">菜单名称</label>
             <input name="name" type="text" class="form-control required" placeholder="菜单名称" id="name" autocomplete="off">
@@ -124,9 +124,9 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/adminlte/plugins/jquery-validation/jquery.validate.min.js"></script>
-<script src="/adminlte/plugins/jquery-validation/additional-methods.min.js"></script>
-<script src="/adminlte/plugins/jquery-validation/localization/messages_zh.min.js"></script>
+<script src="/plugins/jquery-validation/jquery.validate.min.js"></script>
+<script src="/plugins/jquery-validation/additional-methods.min.js"></script>
+<script src="/plugins/jquery-validation/localization/messages_zh.min.js"></script>
 <script type="text/javascript">
   $(document).ready(function () {
     $("#menuForm select[name='type']").on('change', function () {

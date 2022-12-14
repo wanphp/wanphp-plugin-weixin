@@ -62,6 +62,16 @@ class UserRepository extends BaseRepository implements UserInterface
     ) ?: [];
   }
 
+  public function getUserCount($where): int
+  {
+    return $this->db->count(UserInterface::TABLE_NAME . '(u)', [
+      '[>]' . PublicInterface::TABLE_NAME . '(p)' => ["u.id" => "id"]
+    ],
+      ['u.id'],
+      $where
+    ) ?: 0;
+  }
+
   /**
    * @param array $data
    * @return array
@@ -132,11 +142,11 @@ class UserRepository extends BaseRepository implements UserInterface
     if (!empty($uidArr)) {
       // 取模板ID
       if (isset($msgData['template_id_short'])) {
-        $msgData['template_id'] = $this->db->get(MsgTemplateInterface::TABLE_NAME, ['template_id'], ['template_id_short' => $msgData['template_id_short'], 'status' => 1]);
+        $msgData['template_id'] = $this->db->get(MsgTemplateInterface::TABLE_NAME, 'template_id', ['template_id_short' => $msgData['template_id_short'], 'status' => 1]);
         unset($msgData['template_id_short']);
       }
       if (empty($msgData['template_id'])) return ['errCode' => '1', 'msg' => '无模板ID,请先获取模板ID'];
-      $openId = $this->db->get(PublicInterface::TABLE_NAME, ['openid'], ['id' => $uidArr, 'subscribe' => 1]);
+      $openId = $this->db->select(PublicInterface::TABLE_NAME, 'openid', ['id' => $uidArr, 'subscribe' => 1]);
       if ($openId) {
         if (is_string($openId)) $openId = [$openId];
 

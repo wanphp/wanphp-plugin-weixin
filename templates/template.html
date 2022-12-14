@@ -31,6 +31,7 @@
         <th></th>
         <th>模板ID</th>
         <th>模板标题</th>
+        <th>所属行业</th>
         <th>操作</th>
       </tr>
       </thead>
@@ -52,7 +53,7 @@
 <script src="/js/dataTable.defaults.js"></script>
 <script type="text/javascript">
   function format(d) {
-    return '<div class="row"><div class="col-sm-6">' + d.content + '</div><div class="col-sm-6">' + d.example + '</div></div>';
+    return d.template_id + '<div class="row"><div class="col-sm-6">' + d.content + '</div><div class="col-sm-6">' + d.example + '</div></div>';
   }
 
   $(document).ready(function () {
@@ -67,8 +68,9 @@
           "data": null,
           "defaultContent": '<i class="fas fa-plus-circle"></i>'
         },
-        {data: "template_id", defaultContent: ''},
+        {data: "template_id_short", defaultContent: ''},
         {data: "title"},
+        {data: "primary_industry"},
         {
           data: "op", defaultContent: '<button type="button" class="btn btn-tool del"><i class="fas fa-trash-alt"></i></button>'
         }
