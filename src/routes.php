@@ -30,17 +30,17 @@ return function (App $app, Middleware $PermissionMiddleware, Middleware $OAuthSe
     $group->get('/users/search', \Wanphp\Plugins\Weixin\Application\Manage\SearchUserApi::class);
   })->addMiddleware($PermissionMiddleware);
   // Api 接口
-  $app->group('', function (Group $group) use ($PermissionMiddleware) {
+  $app->group('/api', function (Group $group) use ($PermissionMiddleware) {
     // 当前用户
-    $group->map(['GET', 'PATCH'], '/api/user', \Wanphp\Plugins\Weixin\Application\UserApi::class);
+    $group->map(['GET', 'PATCH'], '/user', \Wanphp\Plugins\Weixin\Application\UserApi::class);
     // 发送消息
-    $group->post('api/user/sendMsg',\Wanphp\Plugins\Weixin\Application\SendTemplateMessageApi::class);
+    $group->post('/user/sendMsg',\Wanphp\Plugins\Weixin\Application\SendTemplateMessageApi::class);
     // 客户端添加修改用户
-    $group->map(['POST', 'PUT'], '/api/user[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\UserApi::class);
+    $group->map(['POST', 'PUT'], '/user[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\UserApi::class);
     // 客户端搜索用户
-    $group->get('/api/user/search', \Wanphp\Plugins\Weixin\Application\Manage\SearchUserApi::class);
+    $group->get('/user/search', \Wanphp\Plugins\Weixin\Application\Manage\SearchUserApi::class);
     // 客户端通过用户id获取用户
-    $group->map(['POST', 'GET'], '/api/user/get[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\GetUsersApi::class);
+    $group->map(['POST', 'GET'], '/user/get[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\GetUsersApi::class);
   })->addMiddleware($OAuthServerMiddleware);
 };
 

@@ -37,7 +37,7 @@ class UserRepository extends BaseRepository implements UserInterface
     return $this->db->get(UserInterface::TABLE_NAME . '(u)', [
       '[>]' . PublicInterface::TABLE_NAME . '(p)' => ["u.id" => "id"]
     ],
-      ['u.unionid', 'u.nickname', 'u.headimgurl', 'u.name', 'u.tel', 'u.email', 'u.fox', 'u.remark', 'u.address', 'u.status', 'p.tagid_list[JSON]', 'p.openid', 'p.parent_id'],
+      ['u.unionid', 'u.nickname', 'u.headimgurl', 'u.name', 'u.tel', 'u.remark', 'u.address', 'p.tagid_list[JSON]', 'p.openid', 'p.parent_id'],
       ['u.id' => $uid]
     ) ?: [];
   }
@@ -148,8 +148,6 @@ class UserRepository extends BaseRepository implements UserInterface
       if (empty($msgData['template_id'])) return ['errCode' => '1', 'msg' => '无模板ID,请先获取模板ID'];
       $openId = $this->db->select(PublicInterface::TABLE_NAME, 'openid', ['id' => $uidArr, 'subscribe' => 1]);
       if ($openId) {
-        if (is_string($openId)) $openId = [$openId];
-
         $ok = 0;
         foreach ($openId as $openid) {
           $msgData['touser'] = $openid;

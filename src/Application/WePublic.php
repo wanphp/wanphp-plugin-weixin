@@ -14,21 +14,18 @@ use Wanphp\Libray\Weixin\WeChatBase;
 use Psr\Http\Message\ResponseInterface as Response;
 use Wanphp\Plugins\Weixin\Domain\PublicInterface;
 use Wanphp\Plugins\Weixin\Domain\UserInterface;
-use Wanphp\Plugins\Weixin\Domain\UserLocationInterface;
 
 abstract class WePublic extends Api
 {
   protected WeChatBase $weChatBase;
   protected UserInterface $user;
   protected PublicInterface $public;
-  protected UserLocationInterface $userLocation;
 
-  public function __construct(WeChatBase $weChatBase, UserInterface $user, PublicInterface $public, UserLocationInterface $userLocation)
+  public function __construct(WeChatBase $weChatBase, UserInterface $user, PublicInterface $public)
   {
     $this->weChatBase = $weChatBase;
     $this->user = $user;
     $this->public = $public;
-    $this->userLocation = $userLocation;
   }
 
   /**
@@ -55,20 +52,14 @@ abstract class WePublic extends Api
     if ($this->weChatBase->valid() === true) {
       $openid = $this->weChatBase->getRev()->getRevFrom();//获取每个微信用户的openid
       $time = $this->weChatBase->getRev()->getRevCtime();//获取消息发送时间
-      //$msgid = $this->weChatBase->getRev()->getRevID();//获取消息ID
       $type = $this->weChatBase->getRev()->getRevType();//获取消息类型
-      //不是事件消息，更新最后操作时间
-      if ($type != 'event') $this->public->update(['lastop_time' => $time], ['openid' => $openid]);
+
       $body = '';
       switch ($type) {
         case 'event':
           // 处理事件推送
           $eventArr = $this->weChatBase->getRev()->getRevEvent();
           $event = $eventArr['event'] ?? '';//获得事件类型
-          if (in_array($event, array('CLICK', 'SCAN', 'scancode_push', 'scancode_waitmsg', 'merchant_order'))) {
-            $this->public->update(['lastop_time' => $time], ['openid' => $openid]);
-          }
-
           switch ($event) {
             case 'subscribe':
               $this->updateUser();
@@ -83,18 +74,10 @@ abstract class WePublic extends Api
                 'lastop_time' => 0],
                 ['openid' => $openid]);
               break;
-            case 'LOCATION':
-              // 上报地理位置
-              $uid = $this->public->get('id', ['openid' => $openid]);
-              if ($uid > 0) {
-                $revData = $this->weChatBase->getRevData();
-                $this->userLocation->insert([
-                  'uid' => $uid,
-                  'lat' => $revData['Latitude'],
-                  'lng' => $revData['Longitude'],
-                  'precision' => $revData['Precision'],
-                  'ctime' => $time
-                ]);
+            case 'SCAN':
+              // 扫码
+              if ($eventArr['key']) {
+                $body = $this->userScan($eventArr['key'], $openid);
               }
               break;
             default:
@@ -102,27 +85,27 @@ abstract class WePublic extends Api
           }
           break;
         case 'text':
-          $this->updateUser();
+          $this->endMsgTime($openid);
           // 处理关键词回复
           $body = $this->text();
           break;
         case 'image':
-          $this->updateUser();
+          $$this->endMsgTime($openid);
           // 接收图片
           $body = $this->image();
           break;
         case 'voice':
-          $this->updateUser();
+          $this->endMsgTime($openid);
           // 接收语音
           $body = $this->voice();
           break;
         case 'video':
-          $this->updateUser();
+          $this->endMsgTime($openid);
           // 接收视频
           $body = $this->video();
           break;
         case 'shortvideo':
-          $this->updateUser();
+          $this->endMsgTime($openid);
           // 接收短视频
           $body = $this->shortvideo();
           break;
@@ -255,4 +238,35 @@ abstract class WePublic extends Api
     return $this->weChatBase->text(print_r($data, true))->reply();
   }
 
+  /**
+   * 记录用户最后发送信息的时间，用断断是否可发服消息
+   * @param $openid
+   * @return void
+   * @throws Exception
+   */
+  private function endMsgTime($openid)
+  {
+    $this->public->update(['lastop_time' => time()], ['openid' => $openid]);
+  }
+
+  /**
+   * 扫码执行操作
+   * @param string $scan_key
+   * @param string $openid
+   * @return string
+   * @throws Exception
+   */
+  private function userScan(string $scan_key, string $openid): string
+  {
+    $uid = $this->public->get('id', ['openid' => $openid]);
+    $qrRes = explode('_', $scan_key);
+    $body = '';
+    switch ($qrRes['0']) {
+      case 'shareUid':
+        // 用户邀请用户
+        break;
+      default:
+    }
+    return $body;
+  }
 }
