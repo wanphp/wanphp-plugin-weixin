@@ -19,7 +19,9 @@
     "wanphp/installers": "*",
     "wanphp/libray-slim": "^1.0.0",
     "wanphp/libray-mysql": "^1.1.0",
-    "wanphp/libray-weixin": "^1.0.0"
+    "wanphp/libray-weixin": "^1.0.0",
+    "league/oauth2-server": "^8.0",
+    "bacon/bacon-qr-code": "^2.0.0"
   },
   "require-dev": {
     "zircote/swagger-php": "^3.1"
@@ -27,12 +29,6 @@
   "autoload": {
     "psr-4": {
       "Wanphp\\Plugins\\Weixin\\": "/src"
-    }
-  },
-  "repositories": {
-    "packagist": {
-      "type": "composer",
-      "url": "https://mirrors.aliyun.com/composer/"
     }
   }
 }

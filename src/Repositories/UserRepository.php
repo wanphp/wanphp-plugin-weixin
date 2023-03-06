@@ -25,9 +25,9 @@ class UserRepository extends BaseRepository implements UserInterface
   private WeChatBase $weChatBase;
   private LoggerInterface $logger;
 
-  public function __construct(Database $database, WeChatBase $weChatBase, LoggerInterface $logger)
+  public function __construct(Database $database, WeChatBase $weChatBase, LoggerInterface $logger, string $table = '', string $userEntity = '')
   {
-    parent::__construct($database, self::TABLE_NAME, UserEntity::class);
+    parent::__construct($database, $table ?: self::TABLE_NAME, $userEntity ?: UserEntity::class);
     $this->weChatBase = $weChatBase;
     $this->logger = $logger;
   }
@@ -165,5 +165,48 @@ class UserRepository extends BaseRepository implements UserInterface
     } else {
       return ['errCode' => '1', 'msg' => '未检测到用户ID'];
     }
+  }
+
+  /**
+   * @throws Exception
+   */
+  public function membersTagging(string $uid, int $tagId): array
+  {
+    $openid = $this->db->get(PublicInterface::TABLE_NAME, 'openid', ['id' => $uid]);
+    if ($openid) {
+      $result = $this->weChatBase->membersTagging($tagId, [$openid]);
+      if ($result['errcode'] == 0) {
+        $tagid_list = $this->db->get(PublicInterface::TABLE_NAME, 'tagid_list[JSON]', ['openid' => $openid]);
+        $tagid_list[] = $tagId;
+        $this->db->update(PublicInterface::TABLE_NAME, ['tagid_list' => array_unique($tagid_list)], ['id' => $uid]);
+      }
+      return $result;
+    } else {
+      return ['errcode' => 1, 'errmsg' => '未找到用户'];
+    }
+  }
+
+  /**
+   * @throws Exception
+   */
+  public function membersUnTagging(string $uid, int $tagId): array
+  {
+    $openid = $this->db->get(PublicInterface::TABLE_NAME, 'openid', ['id' => $uid]);
+    if ($openid) {
+      $result = $this->weChatBase->membersUnTagging($tagId, [$openid]);
+      if ($result['errcode'] == 0) {
+        $tagid_list = $this->db->get(PublicInterface::TABLE_NAME, 'tagid_list[JSON]', ['openid' => $openid]);
+        $tagid_list = array_values(array_diff($tagid_list, [$tagId]));
+        $this->db->update(PublicInterface::TABLE_NAME, ['tagid_list' => $tagid_list], ['openid' => $openid]);
+      }
+      return $result;
+    } else {
+      return ['errcode' => 1, 'errmsg' => '未找到用户'];
+    }
+  }
+
+  public function userLogin(string $account, string $password): int|string
+  {
+    return '系统是默认使用微信授权用户，无注册用户，需要注册用户，需继承后重写';
   }
 }

@@ -74,4 +74,10 @@ class UserEntity implements JsonSerializable
    * @OA\Property(description="用户备注")
    */
   protected string $remark;
+  /**
+   * @DBType({"type":"char(1) NOT NULL DEFAULT '0'"})
+   * @OA\Property(description="用户状态，1为禁登录")
+   * @var string
+   */
+  protected string $status;
 }

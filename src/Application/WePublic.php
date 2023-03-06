@@ -90,7 +90,7 @@ abstract class WePublic extends Api
           $body = $this->text();
           break;
         case 'image':
-          $$this->endMsgTime($openid);
+          $this->endMsgTime($openid);
           // 接收图片
           $body = $this->image();
           break;

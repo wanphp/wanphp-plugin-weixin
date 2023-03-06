@@ -13,6 +13,17 @@ return function (App $app, Middleware $PermissionMiddleware, Middleware $OAuthSe
   //公众号分享签名
   $app->post('/getSignPackage', \Wanphp\Plugins\Weixin\Application\ShareApi::class);
 
+  $app->group('/admin', function (Group $group) {
+    // 客户端管理
+    $group->map(['GET', 'PUT', 'POST', 'DELETE'], '/clients[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\Manage\ClientsApi::class);
+  })->addMiddleware($PermissionMiddleware);
+  $app->group('/auth', function (Group $group) {
+    $group->map(['GET', 'POST'], '/authorize', \Wanphp\Plugins\Weixin\Application\Auth\AuthorizeApi::class);
+    $group->post('/accessToken', \Wanphp\Plugins\Weixin\Application\Auth\AccessTokenApi::class);
+    $group->post('/passwordAccessToken', \Wanphp\Plugins\Weixin\Application\Auth\PasswordAccessTokenApi::class);
+    $group->post('/refreshAccessToken', \Wanphp\Plugins\Weixin\Application\Auth\RefreshAccessTokenApi::class);
+    $group->map(['GET', 'POST'], '/qrlogin', \Wanphp\Plugins\Weixin\Application\Auth\QrLoginApi::class);
+  });
   // 后台管理
   $app->group('/admin/weixin', function (Group $group) {
     // 用户基本信息管理
@@ -34,7 +45,7 @@ return function (App $app, Middleware $PermissionMiddleware, Middleware $OAuthSe
     // 当前用户
     $group->map(['GET', 'PATCH'], '/user', \Wanphp\Plugins\Weixin\Application\UserApi::class);
     // 发送消息
-    $group->post('/user/sendMsg',\Wanphp\Plugins\Weixin\Application\SendTemplateMessageApi::class);
+    $group->post('/user/sendMsg', \Wanphp\Plugins\Weixin\Application\SendTemplateMessageApi::class);
     // 客户端添加修改用户
     $group->map(['POST', 'PUT'], '/user[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\UserApi::class);
     // 客户端搜索用户

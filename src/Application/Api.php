@@ -15,6 +15,10 @@ namespace Wanphp\Plugins\Weixin\Application;
  *     title="微信开发插件"
  * )
  * @OA\Tag(
+ *     name="Auth",
+ *     description="OAuth 2.0 授权服务器,认证授权,获取访问令牌"
+ * )
+ * @OA\Tag(
  *     name="Public",
  *     description="公共操作接口",
  * )
@@ -47,10 +51,6 @@ namespace Wanphp\Plugins\Weixin\Application;
  * )
  */
 
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
-use Slim\Exception\HttpBadRequestException;
-use Exception;
 use Wanphp\Libray\Slim\Action;
 
 abstract class Api extends Action
