@@ -11,8 +11,8 @@ use Exception;
 use Predis\Client;
 use Wanphp\Libray\Mysql\Database;
 use Wanphp\Libray\Slim\Setting;
+use Wanphp\Libray\Slim\WpUserInterface;
 use Wanphp\Plugins\Weixin\Application\Api;
-use Wanphp\Plugins\Weixin\Domain\UserInterface;
 use Wanphp\Plugins\Weixin\Repositories\OAuth2\AccessTokenRepository;
 use Wanphp\Plugins\Weixin\Repositories\OAuth2\AuthCodeRepository;
 use Wanphp\Plugins\Weixin\Repositories\OAuth2\ClientRepository;
@@ -33,17 +33,17 @@ abstract class OAuth2Api extends Api
   protected AuthorizationServer $server;
   protected Database $database;
   protected Client $redis;
-  protected UserInterface $user;
+  protected WpUserInterface $user;
   protected Key $encryptionKey;
 
   /**
    * @param Database $database
    * @param Setting $setting
-   * @param UserInterface $user
+   * @param WpUserInterface $user
    * @throws BadFormatException
    * @throws EnvironmentIsBrokenException
    */
-  public function __construct(Database $database, Setting $setting, UserInterface $user)
+  public function __construct(Database $database, Setting $setting, WpUserInterface $user)
   {
     $this->database = $database;
     $config = $setting->get('oauth2Config');

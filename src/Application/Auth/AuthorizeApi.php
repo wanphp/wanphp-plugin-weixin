@@ -10,27 +10,26 @@ use BaconQrCode\Writer;
 use Defuse\Crypto\Crypto;
 use Exception;
 use League\OAuth2\Server\Exception\OAuthServerException;
-use Wanphp\Libray\Mysql\BaseInterface;
 use Wanphp\Libray\Mysql\Database;
 use Wanphp\Libray\Slim\Setting;
+use Wanphp\Libray\Slim\WpUserInterface;
 use Wanphp\Libray\Weixin\WeChatBase;
 use Psr\Http\Message\ResponseInterface as Response;
 use Slim\Psr7\Stream;
 use Wanphp\Plugins\Weixin\Application\WePublicUserHandler;
 use Wanphp\Plugins\Weixin\Domain\PublicInterface;
-use Wanphp\Plugins\Weixin\Domain\UserInterface;
 use Wanphp\Plugins\Weixin\Entities\OAuth2\UserEntity;
 
 class AuthorizeApi extends OAuth2Api
 {
   private WeChatBase $weChatBase;
-  private BaseInterface $publicUser;//用户关注公众号信息
+  private PublicInterface $publicUser;//用户关注公众号信息
 
   public function __construct(
     WeChatBase      $weChatBase,
     Database        $database,
     Setting         $setting,
-    UserInterface   $user,
+    WpUserInterface $user,
     PublicInterface $public)
   {
     parent::__construct($database, $setting, $user);
@@ -115,21 +114,13 @@ class AuthorizeApi extends OAuth2Api
               $data = $this->getFormData();
               if (!isset($data['account']) || $data['account'] == '') return $this->respondWithError('帐号为绑定手机号或邮箱！');
               if (!isset($data['password']) || $data['password'] == '') return $this->respondWithError('密码不能为空！');
-              $password = md5(trim($data['password']));
 
-              $user = $this->user->get('id,tel,password,salt,status', ['OR' => ['tel' => $data['account'], 'email' => $data['account']]]);
-              if ($user) {
-                if ($user['password'] !== md5(SHA1($user['salt'] . $password))) {
-                  return $this->respondWithError('帐号密码不正确,请核实！');
-                }
-                if ($user['status'] == 0) {
-                  $_SESSION['login_user_id'] = $user['id'];
-                  return $this->respondWithData(['res' => 'OK']);
-                } else {
-                  return $this->respondWithError('帐号已被锁定,无法认证，请联系管理员！');
-                }
+              $res = $this->user->userLogin($data['account'], $data['password']);
+              if (is_numeric($res) && $res > 0) {
+                $_SESSION['login_user_id'] = $res;
+                return $this->respondWithData(['res' => 'OK']);
               } else {
-                return $this->respondWithError('帐号不存在,请核实！');
+                return $this->respondWithError($res);
               }
             }
             break;

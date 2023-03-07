@@ -38,14 +38,9 @@ class UserRepository implements UserRepositoryInterface
 
     $res = $this->user->userLogin($username, $password);
     if (is_numeric($res) && $res > 0) {
-      $status = $this->user->get('status', ['id' => $res]);
-      if ($status) {
-        $user = new UserEntity();
-        $user->setIdentifier($user['id']);
-        return $user;
-      } else {
-        throw new OAuthServerException('帐号已被锁定,无法认证，请联系管理员！', 3, 'invalid_request', 400);
-      }
+      $user = new UserEntity();
+      $user->setIdentifier($user['id']);
+      return $user;
     } else {
       throw new OAuthServerException($res, 3, 'invalid_request', 400);
     }
