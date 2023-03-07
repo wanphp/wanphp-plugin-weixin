@@ -143,7 +143,7 @@ class AuthorizeApi extends OAuth2Api
             $renderer = new ImageRenderer(new RendererStyle(480), new SvgImageBackEnd());
             $writer = new Writer($renderer);
             $data['loginQr'] = $writer->writeString($this->request->getUri()->getScheme() . '://' . $this->request->getUri()->getHost() . '/auth/qrlogin?tk=' . $code);
-            //return $this->respondView('@oauth2-authorization/login.html', $data);
+            //return $this->respondView('@weixin/login.html', $data);
             //使用自定义模板
             return $this->respondView('oauth2/login.html', $data);
         }

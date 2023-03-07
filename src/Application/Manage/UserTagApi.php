@@ -10,26 +10,26 @@ namespace Wanphp\Plugins\Weixin\Application\Manage;
 
 
 use Exception;
-use Wanphp\Libray\Weixin\WeChatBase;
 use Psr\Http\Message\ResponseInterface as Response;
+use Wanphp\Libray\Weixin\WeChatBase;
 use Wanphp\Plugins\Weixin\Application\Api;
-use Wanphp\Plugins\Weixin\Domain\PublicInterface;
+use Wanphp\Plugins\Weixin\Domain\UserInterface;
 
 class UserTagApi extends Api
 {
+  private UserInterface $user;
   private WeChatBase $weChatBase;
-  private PublicInterface $public;
 
-  public function __construct(WeChatBase $weChatBase, PublicInterface $public)
+  public function __construct(UserInterface $user, WeChatBase $weChatBase)
   {
+    $this->user = $user;
     $this->weChatBase = $weChatBase;
-    $this->public = $public;
   }
 
   /**
    * @return Response
    * @throws Exception
-   * @OA\Post(
+   * @OA\Patch(
    *  path="/admin/weixin/user/tag",
    *  tags={"WeixinUserTag"},
    *  summary="给粉丝添加标签",
@@ -43,12 +43,12 @@ class UserTagApi extends Api
    *       @OA\Schema(
    *         type="object",
    *         @OA\Property(
-   *           property="openid",
+   *           property="uid",
    *           type="string",
-   *           description="粉丝OPENID"
+   *           description="用户ID"
    *         ),
    *         @OA\Property(
-   *           property="tagid",
+   *           property="tagId",
    *           type="string",
    *           description="标签ID"
    *         )
@@ -59,25 +59,31 @@ class UserTagApi extends Api
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
    * @OA\Delete(
-   *  path="/admin/weixin/user/{openid}/tag/{tagid}",
+   *  path="/admin/weixin/user/tag",
    *  tags={"WeixinUserTag"},
    *  summary="删除粉丝标签",
    *  operationId="delWeixinUserTag",
    *  security={{"bearerAuth":{}}},
-   *  @OA\Parameter(
-   *    name="openid",
-   *    in="path",
-   *    description="粉丝OPENID",
-   *    required=true,
-   *    @OA\Schema(type="string")
-   *  ),
-   *  @OA\Parameter(
-   *    name="tagid",
-   *    in="path",
-   *    description="标签ID",
-   *    required=true,
-   *    @OA\Schema(format="int64",type="integer")
-   *  ),
+   *  @OA\RequestBody(
+   *     description="用户标签",
+   *     required=true,
+   *     @OA\MediaType(
+   *       mediaType="application/json",
+   *       @OA\Schema(
+   *         type="object",
+   *         @OA\Property(
+   *           property="uid",
+   *           type="string",
+   *           description="用户ID"
+   *         ),
+   *         @OA\Property(
+   *           property="tagId",
+   *           type="string",
+   *           description="标签ID"
+   *         )
+   *       )
+   *     )
+   *   ),
    *  @OA\Response(response="200",description="删除成功",@OA\JsonContent(ref="#/components/schemas/Success")),
    *  @OA\Response(response="400",description="请求失败",@OA\JsonContent(ref="#/components/schemas/Error"))
    * )
@@ -101,29 +107,18 @@ class UserTagApi extends Api
   protected function action(): Response
   {
     switch ($this->request->getMethod()) {
-      case 'POST':
+      case 'PATCH':
         $data = $this->request->getParsedBody();
-        if ($data['openid'] != '') {
-          $result = $this->weChatBase->membersTagging($data['tagid'], [$data['openid']]);
-          if ($result['errcode'] == 0) {
-            $tagid_list = $this->public->get('tagid_list[JSON]', ['openid' => $data['openid']]);
-            $tagid_list[] = intval($data['tagid']);
-            $this->public->update(['tagid_list' => array_unique($tagid_list)], ['openid' => $data['openid']]);
-          }
+        if ($data['uid'] != '') {
+          $result = $this->user->membersTagging($data['uid'], $data['tagId']);
           return $this->respondWithData($result, 201);
         } else {
           return $this->respondWithError('未知用户');
         }
       case 'DELETE':
-        $openid = $this->args['openid'] ?? '';
-        $tagid = $this->args['tagid'] ?? '';
-        if ($openid) {
-          $result = $this->weChatBase->membersUnTagging($tagid, [$openid]);
-          if ($result['errcode'] == 0) {
-            $tagid_list = $this->public->get('tagid_list[JSON]', ['openid' => $openid]);
-            $tagid_list = array_values(array_diff($tagid_list, [$tagid]));
-            $this->public->update(['tagid_list' => $tagid_list], ['openid' => $openid]);
-          }
+        $data = $this->request->getParsedBody();
+        if ($data['uid'] != '') {
+          $result = $this->user->membersUnTagging($data['uid'], $data['tagId']);
           return $this->respondWithData($result, 201);
         } else {
           return $this->respondWithError('未知用户');

@@ -143,7 +143,8 @@
           $.ajax({
             url: '/admin/weixin/user/tag',
             type: 'POST',
-            data: {openid: user.openid, tagid: tagId},
+            headers: {"X-HTTP-Method-Override": "PATCH"},
+            data: {uid: user.id, tagId: tagId},
             dataType: 'json',
             success: (json) => {
               console.log(json, user.tagid_list);
@@ -157,9 +158,10 @@
       } else {
         // 删除标签
         $.ajax({
-          url: '/admin/weixin/user/' + user.openid + '/tag/' + tagId,
+          url: '/admin/weixin/user/tag',
           type: 'POST',
           headers: {"X-HTTP-Method-Override": "DELETE"},
+          data: {uid: user.id, tagId: tagId},
           dataType: 'json',
           success: function (json) {
             user.tagid_list = user.tagid_list.filter(item => item !== tagId);

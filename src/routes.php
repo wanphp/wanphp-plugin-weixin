@@ -36,8 +36,7 @@ return function (App $app, Middleware $PermissionMiddleware, Middleware $OAuthSe
     //公众号模板消息
     $group->map(['GET', 'POST', 'DELETE'], '/tplmsg[/{tplid}]', \Wanphp\Plugins\Weixin\Application\Manage\TemplateMessageApi::class);
     //公众号粉丝打标签
-    $group->map(['GET', 'POST'], '/user/tag[/{openid}]', \Wanphp\Plugins\Weixin\Application\Manage\UserTagApi::class);
-    $group->delete('/user/{openid}/tag/{tagid}', \Wanphp\Plugins\Weixin\Application\Manage\UserTagApi::class);
+    $group->map(['GET', 'PATCH', 'DELETE'], '/user/tag[/{openid}]', \Wanphp\Plugins\Weixin\Application\Manage\UserTagApi::class);
     $group->get('/users/search', \Wanphp\Plugins\Weixin\Application\Manage\SearchUserApi::class);
   })->addMiddleware($PermissionMiddleware);
   // Api 接口
@@ -52,6 +51,8 @@ return function (App $app, Middleware $PermissionMiddleware, Middleware $OAuthSe
     $group->get('/user/search', \Wanphp\Plugins\Weixin\Application\Manage\SearchUserApi::class);
     // 客户端通过用户id获取用户
     $group->map(['POST', 'GET'], '/user/get[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\GetUsersApi::class);
+    // 客户端给公众号粉丝打标签
+    $group->map(['PATCH', 'DELETE'], '/user/tag', \Wanphp\Plugins\Weixin\Application\Manage\UserTagApi::class);
   })->addMiddleware($OAuthServerMiddleware);
 };
 

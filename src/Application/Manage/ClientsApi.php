@@ -50,7 +50,7 @@ class ClientsApi extends \Wanphp\Plugins\Weixin\Application\Api
             'title' => '客户端管理'
           ];
 
-          return $this->respondView('@oauth2-authorization/clients.html', $data);
+          return $this->respondView('@weixin/clients.html', $data);
         }
       default:
         return $this->respondWithError('禁止访问', 403);
