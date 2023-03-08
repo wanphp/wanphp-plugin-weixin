@@ -109,7 +109,7 @@
     $('#modal-qrLogin').on('shown.bs.modal', function () {
       timer = setInterval(function () {
         checkNum++;
-        $.post('/auth/qrlogin', function (data) {
+        $.post('/auth/qrLogin', function (data) {
           if (data.res == 'OK') {
             $('body').prepend('<form id="login" action="" method="post"></form>');
             $('#login').submit();

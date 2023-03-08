@@ -10,33 +10,12 @@ use BaconQrCode\Writer;
 use Defuse\Crypto\Crypto;
 use Exception;
 use League\OAuth2\Server\Exception\OAuthServerException;
-use Wanphp\Libray\Mysql\Database;
-use Wanphp\Libray\Slim\Setting;
-use Wanphp\Libray\Slim\WpUserInterface;
-use Wanphp\Libray\Weixin\WeChatBase;
 use Psr\Http\Message\ResponseInterface as Response;
 use Slim\Psr7\Stream;
-use Wanphp\Plugins\Weixin\Application\WePublicUserHandler;
-use Wanphp\Plugins\Weixin\Domain\PublicInterface;
 use Wanphp\Plugins\Weixin\Entities\OAuth2\UserEntity;
 
 class AuthorizeApi extends OAuth2Api
 {
-  private WeChatBase $weChatBase;
-  private PublicInterface $publicUser;//用户关注公众号信息
-
-  public function __construct(
-    WeChatBase      $weChatBase,
-    Database        $database,
-    Setting         $setting,
-    WpUserInterface $user,
-    PublicInterface $public)
-  {
-    parent::__construct($database, $setting, $user);
-    $this->weChatBase = $weChatBase;
-    $this->publicUser = $public;
-  }
-
   /**
    * @return Response
    * @throws Exception
@@ -99,10 +78,14 @@ class AuthorizeApi extends OAuth2Api
         $_SESSION['authRequest'] = serialize($authRequest);
 
         // 跳转到微信，获取OPENID
-        return WePublicUserHandler::publicOauthRedirect($this->request, $this->response, $this->weChatBase);
+        return $this->user->oauthRedirect($this->request, $this->response);
       }
       if (isset($queryParams['code'])) {//微信公众号认证回调
-        $user_id = WePublicUserHandler::getUserId($this->publicUser, $this->user, $this->weChatBase);
+        $access_token = $this->user->getOauthAccessToken($queryParams['code'], '');
+        if ($access_token) {
+          $user = $this->user->getOauthUserinfo($access_token);
+          $user_id = $user['id'];
+        }
       } else {
         //用户自定义登录方式
         switch ($this->request->getMethod()) {
@@ -133,7 +116,7 @@ class AuthorizeApi extends OAuth2Api
             $code = Crypto::encrypt(session_id(), $this->encryptionKey);
             $renderer = new ImageRenderer(new RendererStyle(480), new SvgImageBackEnd());
             $writer = new Writer($renderer);
-            $data['loginQr'] = $writer->writeString($this->request->getUri()->getScheme() . '://' . $this->request->getUri()->getHost() . '/auth/qrlogin?tk=' . $code);
+            $data['loginQr'] = $writer->writeString($this->request->getUri()->getScheme() . '://' . $this->request->getUri()->getHost() . '/auth/qrLogin?tk=' . $code);
             //return $this->respondView('@weixin/login.html', $data);
             //使用自定义模板
             return $this->respondView('oauth2/login.html', $data);

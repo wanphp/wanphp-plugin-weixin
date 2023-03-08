@@ -113,7 +113,7 @@ class UserApi extends Api
    *  @OA\JsonContent(
    *     allOf={
    *      @OA\Schema(ref="#/components/schemas/Success"),
-   *      @OA\Schema(@OA\Property(property="up_num",type="integer",description="更新数量"))
+   *      @OA\Schema(@OA\Property(property="upNum",type="integer",description="更新数量"))
    *     }
    *   )
    *  ),
@@ -166,13 +166,13 @@ class UserApi extends Api
         $data = $this->request->getParsedBody();
         if (empty($data)) return $this->respondWithError('无用户数据');
         $num = $this->user->update($data, ['id' => $uid]);
-        return $this->respondWithData(['up_num' => $num], 201);
+        return $this->respondWithData(['upNum' => $num], 201);
       case 'GET':
         // 用户取自己的信息
         $uid = $this->request->getAttribute('oauth_user_id');
         if ($uid < 1) return $this->respondWithError('未知用户', 422);
         //id,openid,sex,role_id,cash_back,money,
-        $user = $this->user->get('id,unionid,nickname,headimgurl,name,tel,address,remark,integral', ['id' => $uid]);
+        $user = $this->user->get('id,unionid,nickname,headimgurl,name,tel,address,remark', ['id' => $uid]);
         if ($user) return $this->respondWithData($user);
         else return $this->respondWithError('用户不存在');
       default:

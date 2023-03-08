@@ -11,6 +11,8 @@ namespace Wanphp\Plugins\Weixin\Repositories;
 
 use Exception;
 use JetBrains\PhpStorm\ArrayShape;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Wanphp\Libray\Mysql\BaseRepository;
 use Wanphp\Libray\Mysql\Database;
@@ -208,5 +210,97 @@ class UserRepository extends BaseRepository implements UserInterface
   public function userLogin(string $account, string $password): int|string
   {
     return '系统是默认使用微信授权用户，无注册用户，需要注册用户，需继承后重写';
+  }
+
+  public function oauthRedirect(Request $request, Response $response): Response
+  {
+    $redirectUri = $request->getUri()->getScheme() . '://' . $request->getUri()->getHost() . $request->getUri()->getPath();
+    $queryParams = $request->getQueryParams();
+    $response_type = $queryParams['response_type'] ?? $queryParams['state'] ?? '';
+    $url = $this->weChatBase->getOauthRedirect($redirectUri, $response_type);
+    return $response->withHeader('Location', $url)->withStatus(301);
+  }
+
+  public function getOauthAccessToken(string $code, string $redirect_uri): string
+  {
+    $accessToken = $this->weChatBase->getOauthAccessToken($code);
+    return json_encode($accessToken);
+  }
+
+  public function getOauthUserinfo(string $access_token): array
+  {
+    $accessToken = json_decode($access_token);
+    //需要用户授权
+    $weUser = $this->weChatBase->getOauthUserinfo($accessToken['access_token'], $accessToken['openid']);
+    if (isset($weUser['openid'])) {
+      //用户基本数据
+      $data = [
+        'unionid' => $weUser['unionid'] ?? null,
+        'nickname' => $weUser['nickname'],
+        'headimgurl' => $weUser['headimgurl'],
+        'sex' => $weUser['sex']
+      ];
+      $userinfo = $this->weChatBase->getUserInfo($weUser['openid']);
+      if ($userinfo['subscribe']) {//用户已关注公众号
+        $pubData = [
+          'subscribe' => $userinfo['subscribe'],
+          'tagid_list' => $userinfo['tagid_list'],
+          'subscribe_time' => $userinfo['subscribe_time'],
+          'subscribe_scene' => $userinfo['subscribe_scene']
+        ];
+      }
+      //检查数据库是否存在用户数据
+      $user_id = $this->db->get(PublicInterface::TABLE_NAME, 'id', ['openid' => $accessToken['openid']]);
+      if ($user_id) {// 已存在公众号关注信息
+        if ($data['unionid']) $uid = $this->get('id', ['unionid' => $data['unionid']]);
+        else $uid = $this->get('id', ['id' => $user_id]);
+        if ($uid) {
+          //更新用户
+          if ($uid != $user_id) $data['id'] = $user_id;
+          $this->update($data, ['id' => $uid]);
+        } else {
+          //添加用户
+          $data['id'] = $user_id;
+          $this->insert($data);
+        }
+        if (isset($pubData)) $this->db->update(PublicInterface::TABLE_NAME, $pubData, ['id' => $user_id]);
+      } else {
+        // 不存在公众号关注信息
+        //检查用户是否通过小程序等，存储到本地
+        if ($data['unionid']) {
+          $uid = $this->get('id', ['unionid' => $data['unionid']]);
+          if ($uid) {
+            $this->update($data, ['id' => $uid]);
+            $user_id = $uid;
+          } else {
+            //添加用户
+            $user_id = $this->insert($data);
+          }
+          //添加公众号数据
+          if (isset($pubData)) {
+            $pubData['id'] = $user_id;
+            $pubData['openid'] = $weUser['openid'];
+          } else {
+            $pubData = ['id' => $user_id, 'openid' => $weUser['openid']];
+          }
+          $this->db->insert(PublicInterface::TABLE_NAME, $pubData);
+        } else {
+          //添加公众号数据
+          if (isset($pubData)) $pubData['openid'] = $weUser['openid'];
+          else $pubData = ['openid' => $weUser['openid']];
+          $data['id'] = $this->db->insert(PublicInterface::TABLE_NAME, $pubData);
+          //添加用户
+          $user_id = $this->insert($data);
+        }
+      }
+      return $this->get('id,unionid,nickname,headimgurl,name,tel,address,remark', ['id' => $user_id]);
+    } else {
+      return [];
+    }
+  }
+
+  public function updateOauthUser(string $access_token, array $data): array
+  {
+    throw new Exception('微信端未提供用户更新操作接口！');
   }
 }

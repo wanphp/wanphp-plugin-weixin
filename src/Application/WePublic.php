@@ -49,7 +49,7 @@ abstract class WePublic extends Api
    */
   protected function action(): Response
   {
-    if ($this->weChatBase->valid() === true) {
+    if ($this->weChatBase->valid($this->request->getQueryParams()) === true) {
       $openid = $this->weChatBase->getRev()->getRevFrom();//获取每个微信用户的openid
       $time = $this->weChatBase->getRev()->getRevCtime();//获取消息发送时间
       $type = $this->weChatBase->getRev()->getRevType();//获取消息类型
@@ -115,7 +115,7 @@ abstract class WePublic extends Api
       $this->response->getBody()->write($body);
       return $this->response->withHeader('Content-Type', 'text/xml')->withStatus(200);
     } else {
-      $this->response->getBody()->write($this->weChatBase->valid());
+      $this->response->getBody()->write($this->weChatBase->valid($this->request->getQueryParams()));
       return $this->response->withHeader('Content-Type', 'text/plain')->withStatus(200);
     }
   }
