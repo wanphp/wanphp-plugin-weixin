@@ -127,7 +127,7 @@ class UserRepository extends BaseRepository implements UserInterface
     $where['LIMIT'] = [$page, 10];
 
     return [
-      'users' => $this->select('id,nickname,headimgurl,name,tel', $where),
+      'users' => $this->select('id,unionid,nickname,headimgurl,name,tel', $where),
       'total' => $this->count('id', $where)
     ];
   }
@@ -229,7 +229,7 @@ class UserRepository extends BaseRepository implements UserInterface
 
   public function getOauthUserinfo(string $access_token): array
   {
-    $accessToken = json_decode($access_token);
+    $accessToken = json_decode($access_token, true);
     //需要用户授权
     $weUser = $this->weChatBase->getOauthUserinfo($accessToken['access_token'], $accessToken['openid']);
     if (isset($weUser['openid'])) {
