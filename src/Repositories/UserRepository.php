@@ -180,7 +180,7 @@ class UserRepository extends BaseRepository implements UserInterface
       if ($result['errcode'] == 0) {
         $tagid_list = $this->db->get(PublicInterface::TABLE_NAME, 'tagid_list[JSON]', ['openid' => $openid]);
         $tagid_list[] = $tagId;
-        $this->db->update(PublicInterface::TABLE_NAME, ['tagid_list' => array_unique($tagid_list)], ['id' => $uid]);
+        $this->db->update(PublicInterface::TABLE_NAME, ['tagid_list[JSON]' => array_unique($tagid_list)], ['id' => $uid]);
       }
       return $result;
     } else {
@@ -199,7 +199,7 @@ class UserRepository extends BaseRepository implements UserInterface
       if ($result['errcode'] == 0) {
         $tagid_list = $this->db->get(PublicInterface::TABLE_NAME, 'tagid_list[JSON]', ['openid' => $openid]);
         $tagid_list = array_values(array_diff($tagid_list, [$tagId]));
-        $this->db->update(PublicInterface::TABLE_NAME, ['tagid_list' => $tagid_list], ['openid' => $openid]);
+        $this->db->update(PublicInterface::TABLE_NAME, ['tagid_list[JSON]' => $tagid_list], ['openid' => $openid]);
       }
       return $result;
     } else {
@@ -244,7 +244,7 @@ class UserRepository extends BaseRepository implements UserInterface
       if ($userinfo['subscribe']) {//用户已关注公众号
         $pubData = [
           'subscribe' => $userinfo['subscribe'],
-          'tagid_list' => $userinfo['tagid_list'],
+          'tagid_list[JSON]' => $userinfo['tagid_list'],
           'subscribe_time' => $userinfo['subscribe_time'],
           'subscribe_scene' => $userinfo['subscribe_scene']
         ];
