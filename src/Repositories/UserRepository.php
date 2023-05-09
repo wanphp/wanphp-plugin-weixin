@@ -174,7 +174,7 @@ class UserRepository extends BaseRepository implements UserInterface
    */
   public function membersTagging(string $uid, int $tagId): array
   {
-    $openid = $this->db->get(PublicInterface::TABLE_NAME, 'openid', ['id' => $uid]);
+    $openid = $this->db->get(PublicInterface::TABLE_NAME, 'openid', ['id' => $uid, 'subscribe' => 1]);
     if ($openid) {
       $result = $this->weChatBase->membersTagging($tagId, [$openid]);
       if ($result['errcode'] == 0) {
@@ -193,7 +193,7 @@ class UserRepository extends BaseRepository implements UserInterface
    */
   public function membersUnTagging(string $uid, int $tagId): array
   {
-    $openid = $this->db->get(PublicInterface::TABLE_NAME, 'openid', ['id' => $uid]);
+    $openid = $this->db->get(PublicInterface::TABLE_NAME, 'openid', ['id' => $uid, 'subscribe' => 1]);
     if ($openid) {
       $result = $this->weChatBase->membersUnTagging($tagId, [$openid]);
       if ($result['errcode'] == 0) {

@@ -15,6 +15,7 @@ return function (ContainerBuilder $containerBuilder) {
     \Wanphp\Plugins\Weixin\Domain\PublicInterface::class => \DI\autowire(\Wanphp\Plugins\Weixin\Repositories\PublicRepository::class),
     \Wanphp\Plugins\Weixin\Domain\UserInterface::class => \DI\autowire(\Wanphp\Plugins\Weixin\Repositories\UserRepository::class),
     \Wanphp\Plugins\Weixin\Domain\UserLocationInterface::class => \DI\autowire(\Wanphp\Plugins\Weixin\Repositories\UserLocationRepository::class),
-    \Wanphp\Plugins\Weixin\Repositories\OAuth2\ClientRepository::class => \DI\autowire(\Wanphp\Plugins\Weixin\Repositories\OAuth2\ClientRepository::class)
+    \Wanphp\Plugins\Weixin\Repositories\OAuth2\ClientRepository::class => \DI\autowire(\Wanphp\Plugins\Weixin\Repositories\OAuth2\ClientRepository::class),
+    \Wanphp\Plugins\Weixin\Domain\AuthCodeInterface::class => \DI\autowire(\Wanphp\Plugins\Weixin\Repositories\AuthCodeRepository::class)
   ]);
 };

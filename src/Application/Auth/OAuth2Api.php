@@ -9,6 +9,7 @@ use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Defuse\Crypto\Key;
 use Exception;
 use Predis\Client;
+use Predis\ClientInterface;
 use Wanphp\Libray\Mysql\Database;
 use Wanphp\Libray\Slim\Setting;
 use Wanphp\Libray\Slim\WpUserInterface;
@@ -32,28 +33,33 @@ abstract class OAuth2Api extends Api
 {
   protected AuthorizationServer $server;
   protected Database $database;
-  protected Client $redis;
+  protected ClientInterface|Database $storage;
   protected WpUserInterface $user;
   protected Key $encryptionKey;
 
   /**
    * @param Database $database
+   * @param ClientInterface $client
    * @param Setting $setting
    * @param WpUserInterface $user
    * @throws BadFormatException
    * @throws EnvironmentIsBrokenException
+   * @throws Exception
    */
-  public function __construct(Database $database, Setting $setting, WpUserInterface $user)
+  public function __construct(Database $database, ClientInterface $client, Setting $setting, WpUserInterface $user)
   {
     $this->database = $database;
-    $config = $setting->get('oauth2Config');
-    $this->redis = new Client($config['redis']['parameters'], $config['redis']['options']);
+    $config = $setting->get('oauth2Config')['storage'];
+    if (!$config || isset($config['database'])) throw new Exception('存储服务器未配置！');
+    if ($config['type'] == 'mysql') $this->storage = new Database($config['database']);
+    else  $this->storage = new Client($config['database']['parameters'], $config['database']['options']);
+
     $this->user = $user;
 
     // 初始化存储库
     $clientRepository = new ClientRepository($this->database);
     $scopeRepository = new ScopeRepository();
-    $accessTokenRepository = new AccessTokenRepository($this->redis);
+    $accessTokenRepository = new AccessTokenRepository($this->storage);
 
     // 私钥与加密密钥
     $privateKey = new CryptKey($config['privateKey'], $config['privateKeyPass'] ?: null); // 如果私钥文件有密码
@@ -83,8 +89,8 @@ abstract class OAuth2Api extends Api
   protected function authorization_code()
   {
     // 授权码授权类型初始化
-    $authCodeRepository = new AuthCodeRepository($this->redis);
-    $refreshTokenRepository = new RefreshTokenRepository($this->redis);
+    $authCodeRepository = new AuthCodeRepository($this->storage);
+    $refreshTokenRepository = new RefreshTokenRepository($this->storage);
     try {
       $grant = new AuthCodeGrant(
         $authCodeRepository,
@@ -115,7 +121,7 @@ abstract class OAuth2Api extends Api
   protected function password()
   {
     $userRepository = new UserRepository($this->user);
-    $refreshTokenRepository = new RefreshTokenRepository($this->redis);
+    $refreshTokenRepository = new RefreshTokenRepository($this->storage);
 
     $grant = new PasswordGrant(
       $userRepository,
@@ -132,7 +138,7 @@ abstract class OAuth2Api extends Api
 
   protected function refresh_token()
   {
-    $refreshTokenRepository = new RefreshTokenRepository($this->redis);
+    $refreshTokenRepository = new RefreshTokenRepository($this->storage);
     $grant = new RefreshTokenGrant($refreshTokenRepository);
     $grant->setRefreshTokenTTL(new DateInterval('P1M')); // new refresh tokens will expire after 1 month
 
