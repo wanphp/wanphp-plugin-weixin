@@ -26,9 +26,9 @@ class OAuthServerMiddleware implements MiddlewareInterface
    */
   public function __construct(array $config)
   {
-    if (!$config || isset($config['database'])) throw new \Exception('存储服务器未配置！');
-    if ($config['type'] == 'mysql') $this->storage = new Database($config['database']);
-    else  $this->storage = new Client($config['database']['parameters'], $config['database']['options']);
+    if (!isset($config['storage']) || !isset($config['storage']['database'])) throw new \Exception('存储服务器未配置！');
+    if ($config['storage']['type'] == 'mysql') $this->storage = new Database($config['storage']['database']);
+    else  $this->storage = new Client($config['storage']['database']['parameters'], $config['storage']['database']['options']);
     //授权服务器分发的公钥
     $this->publicKeyPath = realpath($config['publicKey']);
   }

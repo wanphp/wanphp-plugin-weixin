@@ -49,10 +49,10 @@ abstract class OAuth2Api extends Api
   public function __construct(Database $database, ClientInterface $client, Setting $setting, WpUserInterface $user)
   {
     $this->database = $database;
-    $config = $setting->get('oauth2Config')['storage'];
-    if (!$config || isset($config['database'])) throw new Exception('存储服务器未配置！');
-    if ($config['type'] == 'mysql') $this->storage = new Database($config['database']);
-    else  $this->storage = new Client($config['database']['parameters'], $config['database']['options']);
+    $config = $setting->get('oauth2Config');
+    if (!isset($config['storage']) || !isset($config['storage']['database'])) throw new Exception('存储服务器未配置！');
+    if ($config['storage']['type'] == 'mysql') $this->storage = new Database($config['storage']['database']);
+    else  $this->storage = new Client($config['storage']['database']['parameters'], $config['storage']['database']['options']);
 
     $this->user = $user;
 
