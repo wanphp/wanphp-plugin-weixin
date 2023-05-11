@@ -9,8 +9,8 @@
 namespace Wanphp\Plugins\Weixin\Application\Manage;
 
 
+use Wanphp\Libray\Slim\CacheInterface;
 use Wanphp\Libray\Weixin\WeChatBase;
-use Predis\ClientInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Wanphp\Plugins\Weixin\Application\Api;
 use Exception;
@@ -24,12 +24,12 @@ use Exception;
 class TagsApi extends Api
 {
   private WeChatBase $weChatBase;
-  private ClientInterface $redis;
+  private CacheInterface $cache;
 
-  public function __construct(WeChatBase $weChatBase, ClientInterface $redis)
+  public function __construct(WeChatBase $weChatBase, CacheInterface $cache)
   {
     $this->weChatBase = $weChatBase;
-    $this->redis = $redis;
+    $this->cache = $cache;
   }
 
   /**
@@ -132,11 +132,11 @@ class TagsApi extends Api
         }
       case 'GET':
         //公众号粉丝数
-        $user_total = $this->redis->get('wxuser_total');
+        $user_total = $this->cache->get('wxuser_total');
         if (!$user_total) {
           $list = $this->weChatBase->getUserList();
           $user_total = $list['total'];
-          $this->redis->setex('wxuser_total', 3600, $user_total);
+          $this->cache->set('wxuser_total', 3600, $user_total);
         }
 
         $userTags = $this->weChatBase->getTags();
