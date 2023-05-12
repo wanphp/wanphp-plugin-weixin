@@ -10,19 +10,19 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Psr7\Response;
-use Wanphp\Plugins\Weixin\Domain\AuthCodeStorageInterface;
+use Wanphp\Libray\Slim\CacheInterface;
 use Wanphp\Plugins\Weixin\Repositories\OAuth2\AccessTokenRepository;
 
 class OAuthServerMiddleware implements MiddlewareInterface
 {
-  protected AuthCodeStorageInterface $storage;
+  protected CacheInterface $storage;
   private string $publicKeyPath;
 
   /**
    * @param array $config
    * @throws \Exception
    */
-  public function __construct(array $config, AuthCodeStorageInterface $storage)
+  public function __construct(array $config, CacheInterface $storage)
   {
     $this->storage = $storage;
     //授权服务器分发的公钥

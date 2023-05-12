@@ -6,14 +6,14 @@ namespace Wanphp\Plugins\Weixin\Repositories\OAuth2;
 use Exception;
 use League\OAuth2\Server\Entities\AuthCodeEntityInterface;
 use League\OAuth2\Server\Repositories\AuthCodeRepositoryInterface;
-use Wanphp\Plugins\Weixin\Domain\AuthCodeStorageInterface;
+use Wanphp\Libray\Slim\CacheInterface;
 use Wanphp\Plugins\Weixin\Entities\OAuth2\AuthCodeEntity;
 
 class AuthCodeRepository implements AuthCodeRepositoryInterface
 {
-  private AuthCodeStorageInterface $storage;
+  private CacheInterface $storage;
 
-  public function __construct(AuthCodeStorageInterface $storage)
+  public function __construct(CacheInterface $storage)
   {
     $this->storage = $storage;
   }

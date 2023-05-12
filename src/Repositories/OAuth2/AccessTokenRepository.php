@@ -7,14 +7,14 @@ use Exception;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
-use Wanphp\Plugins\Weixin\Domain\AuthCodeStorageInterface;
+use Wanphp\Libray\Slim\CacheInterface;
 use Wanphp\Plugins\Weixin\Entities\OAuth2\AccessTokenEntity;
 
 class AccessTokenRepository implements AccessTokenRepositoryInterface
 {
-  private AuthCodeStorageInterface $storage;
+  private CacheInterface $storage;
 
-  public function __construct(AuthCodeStorageInterface $storage)
+  public function __construct(CacheInterface $storage)
   {
     $this->storage = $storage;
   }

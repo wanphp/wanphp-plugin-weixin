@@ -9,10 +9,10 @@ use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Defuse\Crypto\Key;
 use Exception;
 use Wanphp\Libray\Mysql\Database;
+use Wanphp\Libray\Slim\CacheInterface;
 use Wanphp\Libray\Slim\Setting;
 use Wanphp\Libray\Slim\WpUserInterface;
 use Wanphp\Plugins\Weixin\Application\Api;
-use Wanphp\Plugins\Weixin\Domain\AuthCodeStorageInterface;
 use Wanphp\Plugins\Weixin\Repositories\OAuth2\AccessTokenRepository;
 use Wanphp\Plugins\Weixin\Repositories\OAuth2\AuthCodeRepository;
 use Wanphp\Plugins\Weixin\Repositories\OAuth2\ClientRepository;
@@ -32,23 +32,22 @@ abstract class OAuth2Api extends Api
 {
   protected AuthorizationServer $server;
   protected Database $database;
-  protected AuthCodeStorageInterface $storage;
+  protected CacheInterface $storage;
   protected WpUserInterface $user;
   protected Key $encryptionKey;
 
   /**
    * @param Database $database
-   * @param AuthCodeStorageInterface $storage
    * @param Setting $setting
    * @param WpUserInterface $user
    * @throws BadFormatException
    * @throws EnvironmentIsBrokenException
    * @throws Exception
    */
-  public function __construct(Database $database, AuthCodeStorageInterface $storage, Setting $setting, WpUserInterface $user)
+  public function __construct(Database $database, Setting $setting, WpUserInterface $user)
   {
     $this->database = $database;
-    $this->storage = $storage;
+    $this->storage = $setting->get('AuthCodeStorage');
     $config = $setting->get('oauth2Config');
 
     $this->user = $user;
