@@ -136,7 +136,7 @@ class TagsApi extends Api
         if (!$user_total) {
           $list = $this->weChatBase->getUserList();
           $user_total = $list['total'];
-          $this->cache->set('wxuser_total', 3600, $user_total);
+          $this->cache->set('wxuser_total', $user_total, 3600);
         }
 
         $userTags = $this->weChatBase->getTags();

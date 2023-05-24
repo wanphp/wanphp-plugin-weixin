@@ -35,7 +35,7 @@ class AuthCodeRepository implements AuthCodeRepositoryInterface
       'type' => 'auth_codes',
       'user_id' => $authCodeEntity->getUserIdentifier(), // 获得用户标识符
       'client_id' => $authCodeEntity->getClient()->getIdentifier(), // 获得客户端标识符
-      'scopes[JSON]' => $authCodeEntity->getScopes(), // 获得权限范围
+      'scopes' => $authCodeEntity->getScopes(), // 获得权限范围
     ];
     $this->storage->set($authCodeEntity->getIdentifier(), $data, $authCodeEntity->getExpiryDateTime()->getTimestamp() - time());
   }

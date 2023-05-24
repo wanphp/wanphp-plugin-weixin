@@ -20,7 +20,7 @@ class OAuthServerMiddleware implements MiddlewareInterface
 
   /**
    * @param array $config
-   * @throws \Exception
+   * @param CacheInterface $storage
    */
   public function __construct(array $config, CacheInterface $storage)
   {
