@@ -11,6 +11,7 @@ namespace Wanphp\Plugins\Weixin\Application;
 
 use Exception;
 use Psr\Http\Message\ResponseInterface as Response;
+use Wanphp\Plugins\Weixin\Domain\PublicInterface;
 use Wanphp\Plugins\Weixin\Domain\UserInterface;
 
 class UserApi extends Api
@@ -19,13 +20,16 @@ class UserApi extends Api
    * @var UserInterface
    */
   protected UserInterface $user;
+  protected PublicInterface $public;
 
   /**
    * @param UserInterface $user
+   * @param PublicInterface $public
    */
-  public function __construct(UserInterface $user)
+  public function __construct(UserInterface $user, PublicInterface $public)
   {
     $this->user = $user;
+    $this->public = $public;
   }
 
   /**
@@ -173,8 +177,11 @@ class UserApi extends Api
         if ($uid < 1) return $this->respondWithError('未知用户', 422);
         //id,openid,sex,role_id,cash_back,money,
         $user = $this->user->get('id,unionid,nickname,headimgurl,name,tel,address,remark', ['id' => $uid]);
-        if ($user) return $this->respondWithData($user);
-        else return $this->respondWithError('用户不存在');
+
+        if ($user) {
+          $user['tagId'] = $this->public->get('tagid_list[JSON]', ['id' => $uid]);
+          return $this->respondWithData($user);
+        } else return $this->respondWithError('用户不存在');
       default:
         return $this->respondWithError('禁止访问', 403);
     }
