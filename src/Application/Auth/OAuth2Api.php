@@ -39,12 +39,12 @@ abstract class OAuth2Api extends Api
   /**
    * @param Database $database
    * @param Setting $setting
+   * @param ClientRepository $clientRepository
    * @param WpUserInterface $user
    * @throws BadFormatException
    * @throws EnvironmentIsBrokenException
-   * @throws Exception
    */
-  public function __construct(Database $database, Setting $setting, WpUserInterface $user)
+  public function __construct(Database $database, Setting $setting, ClientRepository $clientRepository, WpUserInterface $user)
   {
     $this->database = $database;
     $this->storage = $setting->get('AuthCodeStorage');
@@ -53,7 +53,6 @@ abstract class OAuth2Api extends Api
     $this->user = $user;
 
     // 初始化存储库
-    $clientRepository = new ClientRepository($this->database);
     $scopeRepository = new ScopeRepository();
     $accessTokenRepository = new AccessTokenRepository($this->storage);
 
@@ -97,7 +96,7 @@ abstract class OAuth2Api extends Api
       throw new HttpNotFoundException($this->request, $e->getMessage());
     }
 
-    $grant->setRefreshTokenTTL(new DateInterval('P1M')); // 设置刷新令牌过期时间1个月
+    $grant->setRefreshTokenTTL(new DateInterval('PT2H')); // 设置刷新令牌过期时间2小时
 
     // 将授权码授权类型添加进 server
     $this->server->enableGrantType(
@@ -110,7 +109,7 @@ abstract class OAuth2Api extends Api
   {
     $this->server->enableGrantType(
       new ClientCredentialsGrant(),
-      new DateInterval('PT1H') // access tokens will expire after 1 hour
+      new DateInterval('PT1H') // 设置访问令牌过期时间1小时
     );
   }
 
@@ -124,11 +123,11 @@ abstract class OAuth2Api extends Api
       $refreshTokenRepository
     );
 
-    $grant->setRefreshTokenTTL(new DateInterval('PT2H')); //两个小时过期 refresh tokens will expire after 1 month P1M
+    $grant->setRefreshTokenTTL(new DateInterval('PT2H')); // 设置刷新令牌过期时间2小时
 
     $this->server->enableGrantType(
       $grant,
-      new DateInterval('PT1H') // access tokens will expire after 1 hour
+      new DateInterval('PT1H') // 设置访问令牌过期时间1小时
     );
   }
 
@@ -136,11 +135,11 @@ abstract class OAuth2Api extends Api
   {
     $refreshTokenRepository = new RefreshTokenRepository($this->storage);
     $grant = new RefreshTokenGrant($refreshTokenRepository);
-    $grant->setRefreshTokenTTL(new DateInterval('P1M')); // new refresh tokens will expire after 1 month
+    $grant->setRefreshTokenTTL(new DateInterval('PT2H')); // 设置刷新令牌过期时间2小时
 
     $this->server->enableGrantType(
       $grant,
-      new DateInterval('PT1H') // new access tokens will expire after an hour
+      new DateInterval('PT1H') // 设置访问令牌过期时间1小时
     );
   }
 }

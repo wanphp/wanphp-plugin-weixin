@@ -86,6 +86,9 @@ class AccessTokenApi extends OAuth2Api
       if (isset($post['grant_type']) && $post['grant_type'] == 'client_credentials') {
         $this->client_credentials();
       }
+      if (isset($post['grant_type']) && $post['grant_type'] == 'refresh_token') {
+        $this->refresh_token();
+      }
       // 这里只需要这一行就可以，具体的判断在 Repositories 中
       return $this->server->respondToAccessTokenRequest($this->request, $this->response);
     } catch (OAuthServerException $exception) {

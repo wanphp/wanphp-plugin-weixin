@@ -72,10 +72,8 @@ class AuthorizeApi extends OAuth2Api
         is_string($queryParams['state']) &&
         !in_array($queryParams['state'], ['code', 'token']) &&
         str_contains($this->request->getServerParams()['HTTP_USER_AGENT'], 'MicroMessenger')) {
-        // 验证 HTTP 请求，并返回 authRequest 对象
-        $authRequest = $this->server->validateAuthorizationRequest($this->request);
-        // 此时应将 authRequest 对象序列化后存在当前会话(session)中
-        $_SESSION['authRequest'] = serialize($authRequest);
+        // 将 $queryParams 存放在当前会话(session)中，用于验证完回调回来时验证 HTTP 请求
+        $_SESSION['authQueryParams'] = $queryParams;
 
         // 跳转到微信，获取OPENID
         return $this->user->oauthRedirect($this->request, $this->response);
@@ -108,10 +106,8 @@ class AuthorizeApi extends OAuth2Api
             }
             break;
           case 'GET';
-            // 验证 HTTP 请求，并返回 authRequest 对象
-            $authRequest = $this->server->validateAuthorizationRequest($this->request);
-            // 此时应将 authRequest 对象序列化后存在当前会话(session)中
-            $_SESSION['authRequest'] = serialize($authRequest);
+            // 将 $queryParams 存放在当前会话(session)中，用于POST提交登录验证完成后验证 HTTP 请求
+            $_SESSION['authQueryParams'] = $queryParams;
 
             $code = Crypto::encrypt(session_id(), $this->encryptionKey);
             $renderer = new ImageRenderer(new RendererStyle(480), new SvgImageBackEnd());
@@ -123,13 +119,12 @@ class AuthorizeApi extends OAuth2Api
         }
       }
 
-      // 在会话(session)中取出 authRequest 对象
-      if (isset($_SESSION['authRequest'])) {
-        $authRequest = unserialize($_SESSION['authRequest']);
+      // 在会话(session)中取出验证的用户queryParams
+      if (isset($_SESSION['authQueryParams'])) {
+        $this->request = $this->request->withQueryParams($_SESSION['authQueryParams']);
         unset($_SESSION['authRequest']);
-      } else {
-        $authRequest = $this->server->validateAuthorizationRequest($this->request);
       }
+      $authRequest = $this->server->validateAuthorizationRequest($this->request);
 
       // 设置用户实体(userEntity)
       if (isset($user_id) && $user_id > 0) {

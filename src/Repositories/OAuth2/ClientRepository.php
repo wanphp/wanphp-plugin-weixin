@@ -28,13 +28,13 @@ class ClientRepository extends BaseRepository implements ClientRepositoryInterfa
   {
     $client = $this->get('client_id,name,redirect_uri,confidential', ['client_id' => $clientIdentifier]);
     if (!$client) return null;
-    if (isset($_GET['redirect_uri']) && str_starts_with($_GET['redirect_uri'], $client['redirect_uri'])) $client['redirect_uri'] = $_GET['redirect_uri'];
+    if (isset($_GET['redirect_uri'])) $redirect_uri = $_GET['redirect_uri'];
+    if (isset($_SESSION['authQueryParams']) && isset($_SESSION['authQueryParams']['redirect_uri'])) $redirect_uri = $_SESSION['authQueryParams']['redirect_uri'];
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-      $post = json_decode(file_get_contents('php://input'), true);
-      if (json_last_error() === JSON_ERROR_NONE) {
-        if (isset($post['redirect_uri']) && str_starts_with($post['redirect_uri'], $client['redirect_uri'])) $client['redirect_uri'] = $post['redirect_uri'];
-      }
+      $post = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+      if (isset($post['redirect_uri'])) $redirect_uri = $post['redirect_uri'];
     }
+    if (isset($redirect_uri) && !empty($redirect_uri) && str_starts_with($redirect_uri, $client['redirect_uri'])) $client['redirect_uri'] = $redirect_uri;
     return new ClientEntity($client);
   }
 
@@ -48,11 +48,9 @@ class ClientRepository extends BaseRepository implements ClientRepositoryInterfa
   public function validateClient($clientIdentifier, $clientSecret, $grantType): bool
   {
     $client_secret = $this->get('client_secret', ['client_id' => $clientIdentifier]);
-    if (in_array($grantType, ['authorization_code', 'client_credentials', 'password', 'refresh_token'])) {
-      return $client_secret == $clientSecret;
-    } else {
-      if ($client_secret) return true;
-      else return false;
-    }
+    if (!$client_secret) return false;
+    if (!empty($clientSecret) && $client_secret !== $clientSecret) return false;
+    if (!in_array($grantType, ['authorization_code', 'client_credentials', 'password', 'refresh_token'])) return false;
+    return true;
   }
 }
