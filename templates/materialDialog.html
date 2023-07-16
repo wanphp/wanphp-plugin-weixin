@@ -1,0 +1,64 @@
+<table id="materialData" class="table table-borderless"></table>
+<script type="text/javascript">
+  $(document).ready(function () {
+    var materialData = $('#materialData').DataTable({
+      searching: false,
+      lengthChange: false,
+      bInfo: false,
+      pageLength: 20,
+      ajax: "/admin/weixin/material/list/image",
+      columns: [
+        {data: 0, render: formatData},
+        {data: 1, render: formatData},
+        {data: 2, render: formatData},
+        {data: 3, render: formatData},
+        {data: 4, render: formatData}
+      ]
+    });
+    $('#modal-dialog .modal-title button').click(function () {
+      if ($(this).hasClass('btn-outline-info')) {
+        $('#modal-dialog .modal-title button[data-type].btn-outline-success').removeClass('btn-outline-success').addClass('btn-outline-info');
+        $(this).removeClass('btn-outline-info').addClass('btn-outline-success');
+        if ($.fn.DataTable.isDataTable('#materialData')) {
+          materialData.destroy();
+          $('#materialData').empty();
+        }
+        materialData = $('#materialData').DataTable({
+          searching: false,
+          lengthChange: false,
+          bInfo: false,
+          pageLength: 20,
+          ajax: "/admin/weixin/material/list/" + $(this).attr('data-type'),
+          columns: [
+            {data: 0, render: formatData},
+            {data: 1, render: formatData},
+            {data: 2, render: formatData},
+            {data: 3, render: formatData},
+            {data: 4, render: formatData}
+          ]
+        });
+      }
+    });
+
+    function formatData(data) {
+      if (data) {
+        let image;
+        if (data.url) image = data.url;
+        if (data.cover_url) image = data.cover_url;
+
+        if (image) {
+          return '<div class="card mb-0" data-toggle="tooltip" title="' + data.name + '">\n' +
+            '  <div style="background-image:url(' + image.replace('mmbiz.qpic.cn', 'imgs.ztnews.net') + ')" class="card-img-top">\n' +
+            '</div>';
+        } else {
+          return '<div class="card mb-0 p-2">' + data.name + '</div>';
+        }
+      }
+    }
+
+    $('#modal-dialog').off('click', '.card').on('click', '.card', function () {
+      selMaterial(materialData.row($(this).parents('tr')).data()[$(this).parents('td').index()]);
+      $('#modal-dialog').modal('hide');
+    });
+  });
+</script>

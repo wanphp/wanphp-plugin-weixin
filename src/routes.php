@@ -38,6 +38,18 @@ return function (App $app, Middleware $PermissionMiddleware, Middleware $OAuthSe
     //公众号粉丝打标签
     $group->map(['GET', 'PATCH', 'DELETE'], '/user/tag[/{openid}]', \Wanphp\Plugins\Weixin\Application\Manage\UserTagApi::class);
     $group->get('/users/search', \Wanphp\Plugins\Weixin\Application\Manage\SearchUserApi::class);
+    // 关键词自动回复
+    $group->map(['GET', 'PUT', 'POST', 'DELETE'], '/autoReply[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\Manage\AutoReplyApi::class);
+    // 取自定义菜单事件
+    $group->get('/autoReply/getEvent[/{type:click|view}]', \Wanphp\Plugins\Weixin\Application\Manage\AutoReplyApi::class . ':getEvent');
+    // 素材管理
+    $group->post('/material/add/{type:image|voice|video|thumb}', \Wanphp\Plugins\Weixin\Application\Manage\MaterialApi::class);
+    $group->delete('/material/del/{media_id}', \Wanphp\Plugins\Weixin\Application\Manage\MaterialApi::class);
+    $group->get('/material/list[/{type:image|video|voice}]', \Wanphp\Plugins\Weixin\Application\Manage\MaterialApi::class);
+    $group->get('/materialDialog[/{type:image|video|voice}]', \Wanphp\Plugins\Weixin\Application\Manage\MaterialApi::class . ':dialog');
+    $group->get('/material/voice/{media_id}', \Wanphp\Plugins\Weixin\Application\Manage\MaterialApi::class . ':media');
+    $group->get('/material/image/{media_id}', \Wanphp\Plugins\Weixin\Application\Manage\MaterialApi::class . ':media');
+    $group->get('/material/video/{media_id}', \Wanphp\Plugins\Weixin\Application\Manage\MaterialApi::class . ':video');
   })->addMiddleware($PermissionMiddleware);
   // Api 接口
   $app->group('/api', function (Group $group) use ($PermissionMiddleware) {

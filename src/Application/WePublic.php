@@ -12,6 +12,7 @@ namespace Wanphp\Plugins\Weixin\Application;
 use Exception;
 use Wanphp\Libray\Weixin\WeChatBase;
 use Psr\Http\Message\ResponseInterface as Response;
+use Wanphp\Plugins\Weixin\Domain\AutoReplyInterface;
 use Wanphp\Plugins\Weixin\Domain\PublicInterface;
 use Wanphp\Plugins\Weixin\Domain\UserInterface;
 
@@ -20,12 +21,14 @@ abstract class WePublic extends Api
   protected WeChatBase $weChatBase;
   protected UserInterface $user;
   protected PublicInterface $public;
+  protected AutoReplyInterface $autoReply;
 
-  public function __construct(WeChatBase $weChatBase, UserInterface $user, PublicInterface $public)
+  public function __construct(WeChatBase $weChatBase, UserInterface $user, PublicInterface $public, AutoReplyInterface $autoReply)
   {
     $this->weChatBase = $weChatBase;
     $this->user = $user;
     $this->public = $public;
+    $this->autoReply = $autoReply;
   }
 
   /**
@@ -81,7 +84,7 @@ abstract class WePublic extends Api
               }
               break;
             default:
-              $body = $this->clickevent($this->weChatBase->getRevData());
+              $body = $this->clickevent();
           }
           break;
         case 'text':
@@ -110,7 +113,7 @@ abstract class WePublic extends Api
           $body = $this->shortvideo();
           break;
         default:
-          $body = $this->weChatBase->text('收到')->reply();
+          $body = $this->weChatBase->Message('text', ['Content' => '收到']);
       }
       $this->response->getBody()->write($body);
       return $this->response->withHeader('Content-Type', 'text/xml')->withStatus(200);
@@ -170,7 +173,12 @@ abstract class WePublic extends Api
   protected function text(): string
   {
     $text = $this->weChatBase->getRev()->getRevContent();//获取消息内容
-    return $this->weChatBase->text($text)->reply();
+    $msgData = $this->autoReply->get('msgContent[JSON],replyType', ['key' => $text]);
+    if ($msgData['replyType'] == 'music' && !isset($msgData['msgContent']['Music']['HQMusicUrl'])) {
+      $msgData['msgContent']['Music']['HQMusicUrl'] = $msgData['msgContent']['Music']['MusicUrl'];
+    }
+    if ($msgData) return $this->weChatBase->Message($msgData['replyType'], $msgData['msgContent']);
+    return '';
   }
 
   /**
@@ -180,8 +188,9 @@ abstract class WePublic extends Api
    */
   protected function image(): string
   {
-    $image = $this->weChatBase->getRevPic();
-    return $this->weChatBase->text(print_r($image, true))->reply();
+    $msgData = $this->autoReply->get('msgContent[JSON],replyType', ['key' => 'image']);
+    if ($msgData) return $this->weChatBase->Message($msgData['replyType'], $msgData['msgContent']);
+    return '';
   }
 
   /**
@@ -191,8 +200,9 @@ abstract class WePublic extends Api
    */
   protected function voice(): string
   {
-    $voice = $this->weChatBase->getRevVoice();
-    return $this->weChatBase->text(print_r($voice, true))->reply();
+    $msgData = $this->autoReply->get('msgContent[JSON],replyType', ['key' => 'voice']);
+    if ($msgData) return $this->weChatBase->Message($msgData['replyType'], $msgData['msgContent']);
+    return '';
   }
 
   /**
@@ -202,8 +212,13 @@ abstract class WePublic extends Api
    */
   protected function video(): string
   {
-    $video = $this->weChatBase->getRevVideo();
-    return $this->weChatBase->text(print_r($video, true))->reply();
+    $msgData = $this->autoReply->get('msgContent[JSON],replyType', ['key' => 'video']);
+    if ($msgData) {
+      // 删除封面
+      unset($msgData['msgContent']['Cover']);
+      return $this->weChatBase->Message($msgData['replyType'], $msgData['msgContent']);
+    }
+    return '';
   }
 
   /**
@@ -213,8 +228,9 @@ abstract class WePublic extends Api
    */
   protected function shortVideo(): string
   {
-    $video = $this->weChatBase->getRevVideo();
-    return $this->weChatBase->text(print_r($video, true))->reply();
+    $msgData = $this->autoReply->get('msgContent[JSON],replyType', ['key' => 'shortvideo']);
+    if ($msgData) return $this->weChatBase->Message($msgData['replyType'], $msgData['msgContent']);
+    return '';
   }
 
   /**
@@ -224,18 +240,23 @@ abstract class WePublic extends Api
    */
   protected function subscribe(): string
   {
-    return $this->weChatBase->text('感谢关注！')->reply();
+    $msgData = $this->autoReply->get('msgContent[JSON],replyType', ['key' => 'subscribe']);
+    if ($msgData) return $this->weChatBase->Message($msgData['replyType'], $msgData['msgContent']);
+    return '';
   }
 
   /**
    * 用户点击自定义菜单
-   * @param $data
    * @return string
    * @throws Exception
    */
-  protected function clickEvent($data): string
+  protected function clickEvent(): string
   {
-    return $this->weChatBase->text(print_r($data, true))->reply();
+    $event = $this->weChatBase->getRevEvent();
+    if (!$event) return '';
+    $msgData = $this->autoReply->get('msgContent[JSON],replyType', ['key' => $event['key']]);
+    if ($msgData) return $this->weChatBase->Message($msgData['replyType'], $msgData['msgContent']);
+    return '';
   }
 
   /**
