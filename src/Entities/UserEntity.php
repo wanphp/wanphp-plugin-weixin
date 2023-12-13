@@ -76,7 +76,7 @@ class UserEntity implements JsonSerializable
   protected string $remark;
   /**
    * @DBType({"type":"char(1) NOT NULL DEFAULT '0'"})
-   * @OA\Property(description="用户状态，1为禁登录")
+   * @OA\Property(description="用户状态，1为禁登录,-为用户注销")
    * @var string
    */
   protected string $status;

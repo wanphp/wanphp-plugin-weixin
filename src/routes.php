@@ -65,6 +65,8 @@ return function (App $app, Middleware $PermissionMiddleware, Middleware $OAuthSe
     $group->map(['POST', 'GET'], '/user/get[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\GetUsersApi::class);
     // 客户端给公众号粉丝打标签
     $group->map(['PATCH', 'DELETE'], '/user/tag', \Wanphp\Plugins\Weixin\Application\Manage\UserTagApi::class);
+    // 用户注销账号
+    $group->post('/logOutAccount', \Wanphp\Plugins\Weixin\Application\UserApi::class . ':logOutAccount');
   })->addMiddleware($OAuthServerMiddleware);
 };
 

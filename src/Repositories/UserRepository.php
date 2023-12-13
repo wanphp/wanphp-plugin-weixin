@@ -81,7 +81,7 @@ class UserRepository extends BaseRepository implements UserInterface
    */
   public function addUser(array $data): array
   {
-    if (!isset($data['unionid']) || count($data['unionid']) != 28) return ['errMsg' => 'unionid不正确'];
+    if (!isset($data['unionid']) || strlen($data['unionid']) != 28) return ['errMsg' => 'unionid不正确'];
     $id = $this->get('id', ['unionid' => $data['unionid']]);
     if ($id) {
       $this->update($data, ['id' => $id]);
@@ -100,11 +100,6 @@ class UserRepository extends BaseRepository implements UserInterface
   public function updateUser(int $uid, array $data): array
   {
     if (isset($data['unionid'])) return ['errMsg' => '不可以修改unionid'];
-    if (isset($data['password']) && !empty($data['password'])) {
-      $password = md5(trim($data['password']));
-      $data['salt'] = substr(md5(uniqid(rand(), true)), 10, 11);
-      $data['password'] = md5(SHA1($data['salt'] . $password));
-    }
     if ($uid > 0) $upNum = $this->update($data, ['id' => $uid]);
     return ['upNum' => $upNum ?? 0];
   }
@@ -256,6 +251,8 @@ class UserRepository extends BaseRepository implements UserInterface
         else $uid = $this->get('id', ['id' => $user_id]);
         if ($uid) {
           //更新用户
+          $status = $this->get('status', ['id' => $uid]);
+          if ($status == '-') $data['status'] = 0; // 用户自助注销后，又重新登录
           if ($uid != $user_id) $data['id'] = $user_id;
           $this->update($data, ['id' => $uid]);
         } else {

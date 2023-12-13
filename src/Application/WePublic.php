@@ -174,10 +174,12 @@ abstract class WePublic extends Api
   {
     $text = $this->weChatBase->getRev()->getRevContent();//获取消息内容
     $msgData = $this->autoReply->get('msgContent[JSON],replyType', ['key' => $text]);
-    if ($msgData['replyType'] == 'music' && !isset($msgData['msgContent']['Music']['HQMusicUrl'])) {
-      $msgData['msgContent']['Music']['HQMusicUrl'] = $msgData['msgContent']['Music']['MusicUrl'];
+    if ($msgData) {
+      if ($msgData['replyType'] == 'music' && !isset($msgData['msgContent']['Music']['HQMusicUrl'])) {
+        $msgData['msgContent']['Music']['HQMusicUrl'] = $msgData['msgContent']['Music']['MusicUrl'];
+      }
+      return $this->weChatBase->Message($msgData['replyType'], $msgData['msgContent']);
     }
-    if ($msgData) return $this->weChatBase->Message($msgData['replyType'], $msgData['msgContent']);
     return '';
   }
 

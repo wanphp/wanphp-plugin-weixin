@@ -11,6 +11,7 @@ namespace Wanphp\Plugins\Weixin\Application;
 
 use Exception;
 use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Wanphp\Plugins\Weixin\Domain\PublicInterface;
 use Wanphp\Plugins\Weixin\Domain\UserInterface;
 
@@ -176,7 +177,7 @@ class UserApi extends Api
         $uid = $this->request->getAttribute('oauth_user_id');
         if ($uid < 1) return $this->respondWithError('未知用户', 422);
         //id,openid,sex,role_id,cash_back,money,
-        $user = $this->user->get('id,unionid,nickname,headimgurl,name,tel,address,remark', ['id' => $uid]);
+        $user = $this->user->get('unionid,nickname,headimgurl,name,tel,address,remark', ['id' => $uid]);
 
         if ($user) {
           $user['tagId'] = $this->public->get('tagid_list[JSON]', ['id' => $uid]);
@@ -187,5 +188,19 @@ class UserApi extends Api
     }
   }
 
+  /**
+   * 用户自助注销账号
+   * @throws Exception
+   */
+  public function logOutAccount(Request $request, Response $response, array $args): Response
+  {
+    $this->request = $request;
+    $this->response = $response;
+    $this->args = $args;
+
+    $res = $this->user->updateUser($this->getUid(), ['name' => '', 'tel' => '', 'address' => '', 'remark' => '', 'status' => '-']);
+    if (isset($res['errMsg'])) return $this->respondWithError($res['errMsg'] ?? 'error');
+    else return $this->respondWithData($res, 201);
+  }
 
 }
