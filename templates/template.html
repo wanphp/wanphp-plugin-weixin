@@ -1,22 +1,11 @@
-{% extends "admin/common/base.html" %}
-{% block styles %}
-<!-- DataTables -->
-<link rel="stylesheet" href="/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
-<link rel="stylesheet" href="/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
-{% endblock %}
-{% block container %}
 <div class="card">
   <div class="card-header">
-    <h3 class="card-title">用户管理</h3>
+    <h3 class="card-title">模板消息管理</h3>
 
     <div class="card-tools">
       <div class="input-group">
         <input type="text" name="tmpid" value="" placeholder="模板编号：TM*或OPEN*" class="form-control">
-        <div class="input-group-append">
-        <span class="input-group-btn">
-            <button type="button" id="addtemplate" class="btn btn-default"> <i class="fas fa-plus-circle"></i></button>
-            </span>
-        </div>
+        <button type="button" id="addtemplate" class="btn btn-outline-primary"><i class="fas fa-plus-circle"></i></button>
       </div>
     </div>
   </div>
@@ -25,32 +14,12 @@
     副营行业：{{industry.secondary_industry.first_class}} ， {{industry.secondary_industry.second_class}}
   </div>
   <div class="card-body table-responsive">
-    <table id="msgTplData" class="table table-bordered table-hover">
-      <thead>
-      <tr>
-        <th></th>
-        <th>模板ID</th>
-        <th>模板标题</th>
-        <th>所属行业</th>
-        <th>操作</th>
-      </tr>
-      </thead>
-      <tbody>
-      </tbody>
-    </table>
+    <table id="msgTplData" class="table table-bordered table-hover"></table>
   </div>
   <!-- /.card-body -->
 </div>
 <!-- /.card -->
-{% endblock %}
 
-{% block scripts %}
-<!-- DataTables -->
-<script src="/plugins/datatables/jquery.dataTables.min.js"></script>
-<script src="/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-<script src="/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-<script src="/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-<script src="/js/dataTable.defaults.js"></script>
 <script type="text/javascript">
   function format(d) {
     return d.template_id + '<div class="row"><div class="col-sm-6">' + d.content + '</div><div class="col-sm-6">' + d.example + '</div></div>';
@@ -68,10 +37,10 @@
           "data": null,
           "defaultContent": '<i class="fas fa-plus-circle"></i>'
         },
-        {data: "template_id_short", defaultContent: ''},
-        {data: "title"},
-        {data: "primary_industry"},
-        {
+        {title:'模板ID',data: "template_id_short", defaultContent: ''},
+        {title:'模板标题',data: "title"},
+        {title:'所属行业',data: "primary_industry"},
+        {title:'操作',
           data: "op", defaultContent: '<button type="button" class="btn btn-tool del"><i class="fas fa-trash-alt"></i></button>'
         }
       ]
@@ -122,10 +91,7 @@
         });
       });
     });
-  });
-</script>
-<script type="text/javascript">
-  $(document).ready(function () {
+
     $('#addtemplate').click(function () {
       var tmpid = $(this).closest('.input-group').children('input').val();
       if (!tmpid) return false;
@@ -142,4 +108,4 @@
     });
   });
 </script>
-{% endblock %}
+

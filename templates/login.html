@@ -1,16 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>用户登录</title>
-  <!-- Tell the browser to be responsive to screen width -->
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>登录管理系统 | 登录</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- Font Awesome -->
-  <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css">
-  <link rel="stylesheet" href="/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
-  <link rel="stylesheet" href="/plugins/toastr/toastr.min.css">
+  <link rel="stylesheet" href="/fontawesome/css/all.min.css">
+  <!-- SweetAlert2 -->
+  <link rel="stylesheet" href="/js/sweetalert2/sweetalert2.min.css">
   <!-- Theme style -->
   <link rel="stylesheet" href="/adminlte/css/adminlte.min.css">
   <style>
@@ -18,60 +16,44 @@
       max-width: 100%;
       height: auto;
     }
-
-    .swal2-popup.swal2-toast .swal2-title {
-      line-height: 3;
-    }
   </style>
 </head>
-<body class="hold-transition login-page">
+<body class="login-page bg-body-secondary">
 <div class="login-box">
   <div class="card">
     <div class="card-header text-center">
-      <h1 class="h1">授权登录系统</h1>
+      <h1 class="h1">登录管理系统</h1>
     </div>
     <div class="card-body login-card-body">
-      <form id="loginForm" action="" method="post" novalidate="novalidate">
-        <div class="form-group">
-          <label for="acc">授权登录帐号</label>
-          <div class="input-group mb-3">
-            <input name="account" type="text" class="form-control" placeholder="输入登录帐号" id="acc" autocomplete="off">
-            <div class="input-group-append">
-              <div class="input-group-text">
-                <span class="fas fa-user"></span>
-              </div>
-            </div>
-          </div>
+      <form id="loginForm" class="needs-validation" method="post" novalidate>
+        <div class="input-group mb-3 has-validation">
+          <div class="input-group-text"><span class="fas fa-user"></span></div>
+          <input name="account" type="text" class="form-control" placeholder="输入登录帐号" autocomplete="off" required
+                 pattern="^[A-Za-z\u4e00-\u9fa5][A-Za-z\d\u4e00-\u9fa5_.]{1,8}$">
+          <div class="invalid-feedback">账号必须以字母或中文开头，长度2-10位</div>
         </div>
-        <div class="form-group">
-          <label for="passwd">授权帐号密码</label>
-          <div class="input-group mb-3">
-            <input name="password" type="password" class="form-control" placeholder="请输入帐号密码" id="passwd">
-            <div class="input-group-append">
-              <div class="input-group-text">
-                <span class="fas fa-lock"></span>
-              </div>
-            </div>
-          </div>
+        <div class="input-group mb-3 has-validation">
+          <div class="input-group-text"><span class="fas fa-lock"></span></div>
+          <input name="password" type="password" class="form-control" placeholder="请输入帐号密码" required
+                 pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,16}$">
+          <div class="invalid-feedback">密码必须包含至少一个大写字母，一个小写字母，一个数字和一个特殊字符!@#$%^&*，长度8-16位</div>
         </div>
       </form>
-      <div class="social-auth-links text-center mt-2 mb-3">
-        <button type="submit" class="btn btn-primary btn-block" form="loginForm"><i class="fas fa-key"></i> 登录</button>
-        <button class="btn btn-block btn-success"><i class="fab fa-weixin mr-2"></i> 使用微信授权登录</button>
+      <div class="social-auth-links text-center mb-3 d-grid gap-2">
+        <button type="submit" class="btn btn-primary" form="loginForm"><i class="fas fa-key"></i> 登录</button>
+        <button class="btn btn-success"><i class="fab fa-weixin mr-2"></i> 微信登录</button>
       </div>
     </div>
     <!-- /.login-card-body -->
   </div>
 </div>
 <!-- /.login-box -->
-<div class="modal fade" id="modal-qrLogin" style="display: none;" aria-hidden="true">
+<div class="modal fade" id="modal-qrLogin" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">微信扫一扫授权登录</h4>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">×</span>
-        </button>
+        <h1 class="modal-title fs-5">微信扫一扫登录</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div class="row text-center">
@@ -85,16 +67,11 @@
   </div>
 </div>
 <!-- jQuery -->
-<script src="/plugins/jquery/jquery.min.js"></script>
+<script src="/jquery/jquery.min.js"></script>
 <!-- Bootstrap 4 -->
-<script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-<script src="/plugins/jquery-validation/jquery.validate.min.js"></script>
-<script src="/plugins/jquery-validation/additional-methods.min.js"></script>
+<script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
 <!-- SweetAlert2 -->
-<script src="/plugins/sweetalert2/sweetalert2.min.js"></script>
-<!-- Toastr -->
-<script src="/plugins/toastr/toastr.min.js"></script>
+<script src="/js/sweetalert2/sweetalert2.all.min.js"></script>
 <!-- AdminLTE App -->
 <script src="/adminlte/js/adminlte.min.js"></script>
 <script src="/js/ua-parser.min.js"></script>
@@ -102,17 +79,21 @@
   $(document).ready(function () {
     $('.btn-success').click(function () {
       var ua = window.navigator.userAgent.toLowerCase();
-      $('#modal-qrLogin').modal('show');
+      if (ua.match(/MicroMessenger/i) == "micromessenger") {
+        location.href = '/qrLogin?state=weixin';
+      } else {
+        $('#modal-qrLogin').modal('show');
+      }
     });
     var timer;
     var checkNum = 0;
     $('#modal-qrLogin').on('shown.bs.modal', function () {
       timer = setInterval(function () {
         checkNum++;
-        $.post('/auth/qrLogin', function (data) {
-          if (data.res == 'OK') {
-            $('body').prepend('<form id="login" action="" method="post"></form>');
-            $('#login').submit();
+        $.post('/qrLogin', function (data) {
+          if (data.res === 'OK') {
+            location.href = '/';
+            clearInterval(timer);
           }
         }, 'json');
         if (checkNum > 100) {
@@ -127,28 +108,31 @@
       clearInterval(timer);
     });
 
-    const Toast = Swal.mixin({
-      toast: true,
-      position: 'top-end',
-      showConfirmButton: false,
-      timer: 5000
-    });
+    const Toast = Swal.mixin({toast: true, position: 'top-end', showConfirmButton: false, timer: 5000});
 
     var parser = new UAParser();
 
-    $.validator.setDefaults({
-      submitHandler: function (e) {
+    var device = '';
+    if (parser.getDevice().vendor) device = parser.getDevice().vendor + '(' + parser.getDevice().model + ')';
+    else device = parser.getOS().name + '(' + parser.getOS().version + ')';
+    device += ';' + parser.getBrowser().name + '(' + parser.getBrowser().major + ')';
+    $('#loginForm').submit(function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.target.classList.add('was-validated');
+      if (e.target.checkValidity()) {
         $.ajax({
-          url: '',
-          data: new FormData(e),
+          url: '/login',
+          data: new FormData(e.target),
           type: 'POST',
+          headers: {"X-HTTP-Device": device},
           cache: false,
           contentType: false,
           processData: false,
           dataType: 'json',
           success: function (data) {
-            $('body').prepend('<form id="login" action="" method="post"></form>');
-            $('#login').submit();
+            console.log(data);
+            location.href = data.redirect_uri;
           },
           error: function (data) {
             Toast.fire({
@@ -157,38 +141,11 @@
             });
           }
         });
-        return false;
-      }
-    });
-    $('#loginForm').validate({
-      rules: {
-        account: {
-          required: true
-        },
-        password: {
-          required: true,
-          minlength: 6
-        }
-      },
-      messages: {
-        account: {
-          required: "请输入登录帐号"
-        },
-        password: {
-          required: "请输入登录密码",
-          minlength: "密码长度密码6位及以上"
-        }
-      },
-      errorElement: 'span',
-      errorPlacement: function (error, element) {
-        error.addClass('invalid-feedback');
-        element.closest('.form-group').append(error);
-      },
-      highlight: function (element, errorClass, validClass) {
-        $(element).addClass('is-invalid');
-      },
-      unhighlight: function (element, errorClass, validClass) {
-        $(element).removeClass('is-invalid');
+      } else {
+        Toast.fire({
+          icon: 'error',
+          title: '账号或密码格式不正确'
+        });
       }
     });
   });
