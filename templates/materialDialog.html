@@ -15,9 +15,9 @@
         {data: 4, render: formatData}
       ]
     });
-    $('#modal-dialog .modal-title button').click(function () {
+    $('#modalDialog .modal-title button').click(function () {
       if ($(this).hasClass('btn-outline-info')) {
-        $('#modal-dialog .modal-title button[data-type].btn-outline-success').removeClass('btn-outline-success').addClass('btn-outline-info');
+        $('#modalDialog .modal-title button[data-type].btn-outline-success').removeClass('btn-outline-success').addClass('btn-outline-info');
         $(this).removeClass('btn-outline-info').addClass('btn-outline-success');
         if ($.fn.DataTable.isDataTable('#materialData')) {
           materialData.destroy();
@@ -56,9 +56,9 @@
       }
     }
 
-    $('#modal-dialog').off('click', '.card').on('click', '.card', function () {
+    $('#modalDialog').off('click', '.card').on('click', '.card', function () {
       selMaterial(materialData.row($(this).parents('tr')).data()[$(this).parents('td').index()]);
-      $('#modal-dialog').modal('hide');
+      $('#modalDialog').modal('hide');
     });
   });
 </script>

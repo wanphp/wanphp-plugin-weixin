@@ -173,7 +173,7 @@
       ]
     });
 
-    $('#modal-dialog').on('shown.bs.modal', function (event) {
+    $('#modalDialog').on('shown.bs.modal', function (event) {
       if ($(event.target).find('iframe').length) {
         const iframe = $(event.target).find('iframe');
         iframe[0].onload = function () {
@@ -182,7 +182,7 @@
         };
       }
     })
-    $('#modal-dialog').on('hidden.bs.modal', function (event) {
+    $('#modalDialog').on('hidden.bs.modal', function (event) {
       if ($(event.target).find('video').length) $(event.target).find('video')[0].pause();
     })
 

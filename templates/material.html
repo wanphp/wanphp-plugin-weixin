@@ -3,6 +3,10 @@
     display: none;
   }
 
+  #tableData td {
+    border: none;
+  }
+
   #tableData td .card-img-top {
     width: 100%;
     aspect-ratio: 16/9;
@@ -41,22 +45,6 @@
 <script src="/js/spark-md5.min.js"></script>
 <script src="/js/upfile.js"></script>
 <script type="text/javascript">
-  // 传入一个时间戳（毫秒）
-  function formatTimestamp(timestamp) {
-    // 创建一个Date对象，传入时间戳
-    const date = new Date(timestamp);
-
-    // 获取年、月、日等信息
-    const year = date.getFullYear();
-    const month = ('0' + (date.getMonth() + 1)).slice(-2); // 月份是从0开始的，所以要加1，并确保两位数
-    const day = ('0' + date.getDate()).slice(-2);
-    const hours = ('0' + date.getHours()).slice(-2);
-    const minutes = ('0' + date.getMinutes()).slice(-2);
-    const seconds = ('0' + date.getSeconds()).slice(-2);
-
-    return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
-  }
-
   $(document).ready(function () {
     var datatables = $('#tableData').DataTable({
       searching: false,
@@ -235,20 +223,20 @@
       const data = datatables.row($(this).parents('tr')).data()[$(this).parents('td').index()];
       if (data.url) {// 图片
         modalDialog(data.name, '<img class="img-fluid" src="' + data.url.replace('https://mmbiz.qpic.cn', '') + '">', 'modal-xl',
-          '<div>上传时间：' + formatTimestamp(parseInt(data.update_time) * 1000) + '</div><button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>');
+          '<div>上传时间：' + formatTimestamp(parseInt(data.update_time) * 1000) + '</div>');
       } else if (data.cover_url) {// 视频
         Swal.fire({title: '正在获取视频地址...'})
         Swal.showLoading();
         modalDialog(data.name, '<iframe src="/admin/weixin/material/video/' + data.media_id + '" style="display: none">', 'modal-md',
-          '<div>上传时间：' + formatTimestamp(parseInt(data.update_time) * 1000) + '</div><button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>');
+          '<div>上传时间：' + formatTimestamp(parseInt(data.update_time) * 1000) + '</div>');
         Swal.close();
       } else {// 音频
         modalDialog(data.name, '<audio src="/admin/weixin/material/voice/' + data.media_id + '" controls>', 'modal-md',
-          '<div>上传时间：' + formatTimestamp(parseInt(data.update_time) * 1000) + '</div><button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>');
+          '<div>上传时间：' + formatTimestamp(parseInt(data.update_time) * 1000) + '</div>');
       }
     });
 
-    $('#modal-dialog').on('shown.bs.modal', function (event) {
+    $('#modalDialog').on('shown.bs.modal', function (event) {
       if ($(event.target).find('iframe').length) {
         const iframe = $(event.target).find('iframe');
         iframe[0].onload = function () {
@@ -256,7 +244,7 @@
         };
       }
     })
-    $('#modal-dialog').on('hidden.bs.modal', function (event) {
+    $('#modalDialog').on('hidden.bs.modal', function (event) {
       if ($(event.target).find('audio').length) $(event.target).find('audio')[0].pause();
       if ($(event.target).find('video').length) $(event.target).find('video')[0].pause();
     })
