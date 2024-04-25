@@ -300,4 +300,12 @@ class UserRepository extends BaseRepository implements UserInterface
   {
     throw new Exception('微信端未提供用户更新操作接口！');
   }
+
+  /**
+   * @inheritDoc
+   */
+  public function checkOauthUser(): string
+  {
+    throw new Exception('客户端实现，服务端不使用此方法！');
+  }
 }

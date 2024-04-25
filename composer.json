@@ -26,6 +26,13 @@
   "require-dev": {
     "zircote/swagger-php": "^3.1"
   },
+  "config": {
+    "process-timeout": 0,
+    "sort-packages": true,
+    "allow-plugins": {
+      "wanphp/installers": true
+    }
+  },
   "autoload": {
     "psr-4": {
       "Wanphp\\Plugins\\Weixin\\": "/src"
