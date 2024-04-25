@@ -34,7 +34,18 @@ class ClientRepository extends BaseRepository implements ClientRepositoryInterfa
       $post = json_decode(file_get_contents('php://input'), true) ?: $_POST;
       if (isset($post['redirect_uri'])) $redirect_uri = $post['redirect_uri'];
     }
-    if (isset($redirect_uri) && !empty($redirect_uri) && str_starts_with($redirect_uri, $client['redirect_uri'])) $client['redirect_uri'] = $redirect_uri;
+    if (isset($redirect_uri) && $redirect_uri) {
+      if (str_contains($client['redirect_uri'], ',')) {
+        foreach (explode(',', $client['redirect_uri']) as $uri) {
+          if (str_starts_with($redirect_uri, $uri)) {
+            $client['redirect_uri'] = $redirect_uri;
+            break;
+          }
+        }
+      } else {
+        if (str_starts_with($redirect_uri, $client['redirect_uri'])) $client['redirect_uri'] = $redirect_uri;
+      }
+    }
     return new ClientEntity($client);
   }
 

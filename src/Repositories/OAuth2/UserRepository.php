@@ -39,7 +39,7 @@ class UserRepository implements UserRepositoryInterface
     $res = $this->user->userLogin($username, $password);
     if (is_numeric($res) && $res > 0) {
       $user = new UserEntity();
-      $user->setIdentifier($user['id']);
+      $user->setIdentifier($res);
       return $user;
     } else {
       throw new OAuthServerException($res, 3, 'invalid_request', 400);
