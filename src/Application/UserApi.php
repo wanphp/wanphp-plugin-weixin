@@ -199,7 +199,7 @@ class UserApi extends Api
     $this->args = $args;
 
     $res = $this->user->updateUser($this->getUid(), ['name' => '', 'tel' => '', 'address' => '', 'remark' => '', 'status' => '-']);
-    if (isset($res['errMsg'])) return $this->respondWithError($res['errMsg'] ?? 'error');
+    if (isset($res['errMsg'])) return $this->respondWithError($res['errMsg'] ?: 'error');
     else return $this->respondWithData($res, 201);
   }
 

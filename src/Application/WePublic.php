@@ -9,7 +9,12 @@
 namespace Wanphp\Plugins\Weixin\Application;
 
 
+use Defuse\Crypto\Crypto;
+use Defuse\Crypto\Exception\BadFormatException;
+use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
+use Defuse\Crypto\Key;
 use Exception;
+use Wanphp\Libray\Slim\Setting;
 use Wanphp\Libray\Weixin\WeChatBase;
 use Psr\Http\Message\ResponseInterface as Response;
 use Wanphp\Plugins\Weixin\Domain\AutoReplyInterface;
@@ -22,13 +27,19 @@ abstract class WePublic extends Api
   protected UserInterface $user;
   protected PublicInterface $public;
   protected AutoReplyInterface $autoReply;
+  protected Key $encryptionKey;
 
-  public function __construct(WeChatBase $weChatBase, UserInterface $user, PublicInterface $public, AutoReplyInterface $autoReply)
+  /**
+   * @throws EnvironmentIsBrokenException
+   * @throws BadFormatException
+   */
+  public function __construct(WeChatBase $weChatBase, Setting $setting, UserInterface $user, PublicInterface $public, AutoReplyInterface $autoReply)
   {
     $this->weChatBase = $weChatBase;
     $this->user = $user;
     $this->public = $public;
     $this->autoReply = $autoReply;
+    $this->encryptionKey = Key::loadFromAsciiSafeString($setting->get('oauth2Config')['encryptionKey']);
   }
 
   /**
@@ -73,7 +84,6 @@ abstract class WePublic extends Api
               $this->public->update([
                 'subscribe' => 0,
                 'unsubscribe_time' => $time,
-                'integral' => 0,
                 'lastop_time' => 0],
                 ['openid' => $openid]);
               break;
@@ -89,8 +99,16 @@ abstract class WePublic extends Api
           break;
         case 'text':
           $this->endMsgTime($openid);
-          // 处理关键词回复
-          $body = $this->text();
+          if (!$this->weChatBase->webAuthorization && $this->weChatBase->getRev()->getRevContent() == '登录') {
+            $user_id = $this->updateUser();
+            if ($user_id) {
+              $code = Crypto::encrypt($user_id, $this->encryptionKey);
+              $body = $this->weChatBase->Message('text', ['Content' => '<a href="' . $this->httpHost() . '/auth/authorize?code=' . $code . '&state=code">点击授权登录</a>']);
+            }
+          } else {
+            // 处理关键词回复
+            $body = $this->text();
+          }
           break;
         case 'image':
           $this->endMsgTime($openid);
@@ -124,45 +142,66 @@ abstract class WePublic extends Api
   }
 
   /**
-   * @return false|void
+   * @return int
    * @throws Exception
    */
-  protected function updateUser()
+  protected function updateUser(): int
   {
     $openid = $this->weChatBase->getRev()->getRevFrom();//获取每个微信用户的openid
     $time = time();
     $info = $this->public->get('id,lastop_time', ['openid' => $openid]);
-    if (isset($info['lastop_time']) && $info['lastop_time'] > ($time - 172800)) return false; // 两天内已更新过用户信息
+    if (isset($info['lastop_time']) && $info['lastop_time'] > ($time - 172800)) return $info['id']; // 两天内已更新过用户信息
 
     //保存用户信息
-    $userinfo = $this->weChatBase->getUserInfo($openid);
-    //本地存储用户
-    $data = [
-      'subscribe' => 1,
-      'tagid_list' => $userinfo['tagid_list'],
-      'subscribe_time' => $userinfo['subscribe_time'],
-      'subscribe_scene' => $userinfo['subscribe_scene'],
-      'lastop_time' => $time
-    ];
-    if (isset($info['id'])) {//二次关注
-      //更新公众号信息
-      $data['unsubscribe_time'] = 0;
-      $this->public->update($data, ['id' => $info['id']]);
-    } else {
-      $data['openid'] = $openid;
-      $data['parent_id'] = $userinfo['qr_scene'];
-      //检查用户是否通过小程序等，存储到本地
-      if (isset($userinfo['unionid']) && !empty($userinfo['unionid'])) {
-        $user_id = $this->user->get('id', ['unionid' => $userinfo['unionid']]);
-        if ($user_id) {
-          $data['id'] = $user_id;
-        } else {
-          $data['id'] = $this->user->insert(['unionid' => $userinfo['unionid']]);
+    try {
+      $userinfo = $this->weChatBase->getUserInfo($openid);
+      //本地存储用户
+      $data = [
+        'subscribe' => 1,
+        'tagid_list' => $userinfo['tagid_list'],
+        'subscribe_time' => $userinfo['subscribe_time'],
+        'subscribe_scene' => $userinfo['subscribe_scene'],
+        'lastop_time' => $time
+      ];
+      if (isset($info['id'])) {//二次关注
+        $user_id = $info['id'];
+        //更新公众号信息
+        $data['unsubscribe_time'] = 0;
+        $this->public->update($data, ['id' => $user_id]);
+      } else {
+        $data['openid'] = $openid;
+        $data['parent_id'] = $userinfo['qr_scene'];
+        //检查用户是否通过小程序等，存储到本地
+        if (!empty($userinfo['unionid'])) {
+          $user_id = $this->user->get('id', ['unionid' => $userinfo['unionid']]);
+          if ($user_id) {
+            $data['id'] = $user_id;
+          } else {
+            $data['id'] = $this->user->insert(['unionid' => $userinfo['unionid']]);
+          }
         }
+        //添加公众号信息
+        $user_id = $this->public->insert($data);
       }
-      //添加公众号信息
-      $this->public->insert($data);
+    } catch (Exception) {
+      if (isset($info['id'])) {//二次关注
+        $user_id = $info['id'];
+        //更新公众号信息
+        $this->public->update(['unsubscribe_time' => 0], ['id' => $user_id]);
+      } else {
+        //本地存储用户
+        $data = [
+          'openid' => $openid,
+          'subscribe' => 1,
+          'subscribe_time' => $time,
+          'lastop_time' => $time
+        ];
+        $id = $this->public->insert($data);
+        $user_id = $this->user->get('id', ['id' => $id]);
+        if (!$user_id) $user_id = $this->user->insert(['id' => $id]);
+      }
     }
+    return $user_id;
   }
 
   /**
@@ -267,7 +306,7 @@ abstract class WePublic extends Api
    * @return void
    * @throws Exception
    */
-  private function endMsgTime($openid)
+  protected function endMsgTime($openid): void
   {
     $this->public->update(['lastop_time' => time()], ['openid' => $openid]);
   }
@@ -279,7 +318,7 @@ abstract class WePublic extends Api
    * @return string
    * @throws Exception
    */
-  private function userScan(string $scan_key, string $openid): string
+  protected function userScan(string $scan_key, string $openid): string
   {
     $uid = $this->public->get('id', ['openid' => $openid]);
     $qrRes = explode('_', $scan_key);

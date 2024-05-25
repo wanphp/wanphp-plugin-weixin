@@ -35,6 +35,8 @@ abstract class OAuth2Api extends Api
   protected CacheInterface $storage;
   protected WpUserInterface $user;
   protected Key $encryptionKey;
+  protected string $uin_base64; // 公众号的唯一ID
+  protected bool $webAuthorization; // 公众号是否有网页授权获取用户基本信息权限
 
   /**
    * @param Database $database
@@ -49,6 +51,10 @@ abstract class OAuth2Api extends Api
     $this->database = $database;
     $this->storage = $setting->get('AuthCodeStorage');
     $config = $setting->get('oauth2Config');
+    $options = $setting->get('wechat.base');
+    $this->uin_base64 = $options['uin_base64'] ?? '';
+    $this->webAuthorization = $options['webAuthorization'] ?? true;
+
 
     $this->user = $user;
 
@@ -70,7 +76,7 @@ abstract class OAuth2Api extends Api
     );
   }
 
-  protected function implicit()
+  protected function implicit(): void
   {
     $this->server->enableGrantType(
       new ImplicitGrant(new DateInterval('P1D')),
@@ -81,7 +87,7 @@ abstract class OAuth2Api extends Api
   /**
    * @throws HttpNotFoundException
    */
-  protected function authorization_code()
+  protected function authorization_code(): void
   {
     // 授权码授权类型初始化
     $authCodeRepository = new AuthCodeRepository($this->storage);
@@ -105,7 +111,7 @@ abstract class OAuth2Api extends Api
     );
   }
 
-  protected function client_credentials()
+  protected function client_credentials(): void
   {
     $this->server->enableGrantType(
       new ClientCredentialsGrant(),
@@ -113,7 +119,7 @@ abstract class OAuth2Api extends Api
     );
   }
 
-  protected function password()
+  protected function password(): void
   {
     $userRepository = new UserRepository($this->user);
     $refreshTokenRepository = new RefreshTokenRepository($this->storage);
@@ -131,7 +137,7 @@ abstract class OAuth2Api extends Api
     );
   }
 
-  protected function refresh_token()
+  protected function refresh_token(): void
   {
     $refreshTokenRepository = new RefreshTokenRepository($this->storage);
     $grant = new RefreshTokenGrant($refreshTokenRepository);

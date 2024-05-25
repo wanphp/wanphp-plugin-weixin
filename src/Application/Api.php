@@ -55,5 +55,8 @@ use Wanphp\Libray\Slim\Action;
 
 abstract class Api extends Action
 {
-
+  protected function httpHost(): string
+  {
+    return $this->request->getUri()->getScheme() . '://' . $this->request->getUri()->getHost();
+  }
 }

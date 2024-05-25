@@ -22,7 +22,6 @@ return function (App $app, Middleware $PermissionMiddleware, Middleware $OAuthSe
     $group->post('/accessToken', \Wanphp\Plugins\Weixin\Application\Auth\AccessTokenApi::class);
     $group->post('/passwordAccessToken', \Wanphp\Plugins\Weixin\Application\Auth\PasswordAccessTokenApi::class);
     $group->post('/refreshAccessToken', \Wanphp\Plugins\Weixin\Application\Auth\RefreshAccessTokenApi::class);
-    $group->map(['GET', 'POST'], '/qrLogin', \Wanphp\Plugins\Weixin\Application\Auth\QrLoginApi::class);
   });
   // 后台管理
   $app->group('/admin/weixin', function (Group $group) {
