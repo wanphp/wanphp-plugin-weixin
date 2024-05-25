@@ -76,13 +76,7 @@ class AuthorizeApi extends OAuth2Api
         $_SESSION['authQueryParams'] = $queryParams;
 
         // 跳转到微信，获取OPENID
-        if ($this->webAuthorization) {
-          return $this->user->oauthRedirect($this->request, $this->response);
-        } else {
-          // 没有网页授权获取用户基本信息，跳转到公众号关注页面，关注后通过公众号被动回复连接登录
-          $redirectUri = 'https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=' . $this->uin_base64 . '==&scene=124#wechat_redirect';
-          return $this->response->withHeader('Location', $redirectUri)->withStatus(301);
-        }
+        return $this->user->oauthRedirect($this->request, $this->response);
       }
       if (isset($queryParams['code'])) {//微信公众号认证回调
         if ($this->webAuthorization) {
@@ -91,7 +85,7 @@ class AuthorizeApi extends OAuth2Api
             $user = $this->user->getOauthUserinfo($access_token);
             $user_id = $user['id'];
           }
-        }else{
+        } else {
           // 没有网页授权获取用户基本信息，通过，公众号被动回复连接登录
           $user_id = Crypto::decrypt($queryParams['code'], $this->encryptionKey);
         }
