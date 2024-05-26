@@ -37,6 +37,7 @@ abstract class OAuth2Api extends Api
   protected Key $encryptionKey;
   protected string $uin_base64; // 公众号的唯一ID
   protected bool $webAuthorization; // 公众号是否有网页授权获取用户基本信息权限
+  protected string $basePath;
 
   /**
    * @param Database $database
@@ -54,7 +55,7 @@ abstract class OAuth2Api extends Api
     $options = $setting->get('wechat.base');
     $this->uin_base64 = $options['uin_base64'] ?? '';
     $this->webAuthorization = $options['webAuthorization'] ?? true;
-
+    $this->basePath = $setting->get('basePath');
 
     $this->user = $user;
 

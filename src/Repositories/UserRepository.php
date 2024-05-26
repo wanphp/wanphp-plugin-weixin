@@ -217,7 +217,7 @@ class UserRepository extends BaseRepository implements UserInterface
       return $response->withHeader('Location', $url)->withStatus(301);
     } else {
       // 没有网页授权获取用户基本信息，跳转到公众号关注页面，关注后通过公众号被动回复连接登录
-      $redirectUri = 'https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=' . $this->weChatBase->uin_base64 . '==&scene=124#wechat_redirect';
+      $redirectUri = 'https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=' . $this->weChatBase->uin_base64 . '&scene=124#wechat_redirect';
       return $response->withHeader('Location', $redirectUri)->withStatus(301);
     }
 

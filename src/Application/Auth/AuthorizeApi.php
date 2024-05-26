@@ -148,7 +148,23 @@ class AuthorizeApi extends OAuth2Api
       // 完成后重定向至客户端请求重定向地址
       return $this->server->completeAuthorizationRequest($authRequest, $this->response);
     } catch (OAuthServerException $exception) {
-      return $exception->generateHttpResponse($this->response);
+      if (isset($user_id) && $user_id > 0
+        && str_contains($this->request->getServerParams()['HTTP_USER_AGENT'], 'MicroMessenger')
+        && !isset($_SESSION['authQueryParams'])
+        && $this->webAuthorization === false) {
+        $_SESSION['login_user_id'] = $user_id;
+        if (isset($_SESSION['weixin']) && $_SESSION['weixin'] == 'weixin') {
+          return $this->response->withHeader('Location', $this->httpHost() . $this->basePath . '/')->withStatus(301);
+        } else {
+          $data = ['title' => '授权成功',
+            'msg' => '您已成功授权，详情查看PC端扫码页面！',
+            'icon' => 'weui-icon-success'
+          ];
+          return $this->respondView('admin/error/wxerror.html', $data);
+        }
+      } else {
+        return $exception->generateHttpResponse($this->response);
+      }
     } catch (Exception $exception) {
       $body = new Stream(fopen('php://temp', 'r+'));
       $body->write($exception->getMessage());
