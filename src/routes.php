@@ -54,6 +54,7 @@ return function (App $app, Middleware $PermissionMiddleware, Middleware $OAuthSe
   // Api 接口
   $app->group('/api', function (Group $group) use ($PermissionMiddleware) {
     // 当前用户
+    $group->get('/userProfile', \Wanphp\Plugins\Weixin\Application\UserApi::class . ':user');
     $group->map(['GET', 'PATCH'], '/user', \Wanphp\Plugins\Weixin\Application\UserApi::class);
     // 发送消息
     $group->post('/user/sendMsg', \Wanphp\Plugins\Weixin\Application\SendTemplateMessageApi::class);

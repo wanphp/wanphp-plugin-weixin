@@ -140,12 +140,15 @@ class TemplateMessageApi extends Api
             'data' => $list ?? []
           ]);
         } else {
-          $data = [
-            'title' => '消息模板管理',
-            'industry' => $this->weChatBase->getIndustry()
-          ];
-
-          return $this->respondView('@weixin/template.html', $data);
+          try {
+            $data = [
+              'title' => '消息模板管理',
+              'industry' => $this->weChatBase->getIndustry()
+            ];
+            return $this->respondView('@weixin/template.html', $data);
+          } catch (Exception $exception) {
+            return $this->respondView('/admin/error/404.html', ['message' => '错误代码：' . $exception->getMessage()]);
+          }
         }
       default:
         return $this->respondWithError('禁止访问', 403);

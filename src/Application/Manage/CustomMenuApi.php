@@ -116,24 +116,28 @@ class CustomMenuApi extends Api
         $delNum += $this->customMenu->delete(['parent_id' => $this->args['id']]);
         return $this->respondWithData(['delNum' => $delNum]);
       case 'GET':
-        $userTags = $this->weChatBase->getTags();
-        $data = [
-          'tags' => $userTags['tags']
-        ];
-        $data['tag_id'] = intval($this->args['id'] ?? 0);
-        $where = ['tag_id' => $data['tag_id'], 'parent_id' => 0, 'ORDER' => ['tag_id' => 'ASC', 'parent_id' => 'ASC', 'sortOrder' => 'ASC']];
-        $menus = [];
-        foreach ($this->customMenu->select('*', $where) as $item) {
-          $where['parent_id'] = $item['id'];
-          $item['subBtn'] = $this->customMenu->select('*', $where);
-          $menus[] = $item;
-        }
-        $tags = array_column($data['tags'], 'name', 'id');
-        $data['tagTitle'] = $tags[$data['tag_id']] ?? '默认';
-        $data['menus'] = $menus;
-        $data['menuTitle'] = "添加{$data['tagTitle']}一级菜单";
+        try {
+          $userTags = $this->weChatBase->getTags();
+          $data = [
+            'tags' => $userTags['tags']
+          ];
+          $data['tag_id'] = intval($this->args['id'] ?? 0);
+          $where = ['tag_id' => $data['tag_id'], 'parent_id' => 0, 'ORDER' => ['tag_id' => 'ASC', 'parent_id' => 'ASC', 'sortOrder' => 'ASC']];
+          $menus = [];
+          foreach ($this->customMenu->select('*', $where) as $item) {
+            $where['parent_id'] = $item['id'];
+            $item['subBtn'] = $this->customMenu->select('*', $where);
+            $menus[] = $item;
+          }
+          $tags = array_column($data['tags'], 'name', 'id');
+          $data['tagTitle'] = $tags[$data['tag_id']] ?? '默认';
+          $data['menus'] = $menus;
+          $data['menuTitle'] = "添加{$data['tagTitle']}一级菜单";
 
-        return $this->respondView('@weixin/custom-menu.html', $data);
+          return $this->respondView('@weixin/custom-menu.html', $data);
+        } catch (Exception $exception) {
+          return $this->respondView('/admin/error/404.html', ['message' => '错误代码：' . $exception->getMessage()]);
+        }
       default:
         return $this->respondWithError('禁止访问', 403);
     }

@@ -99,11 +99,11 @@ abstract class WePublic extends Api
           break;
         case 'text':
           $this->endMsgTime($openid);
-          if (!$this->weChatBase->webAuthorization && $this->weChatBase->getRev()->getRevContent() == '登录') {
+          if (!$this->weChatBase->webAuthorization && $this->weChatBase->getRev()->getRevContent() == '授权') {
             $user_id = $this->updateUser();
             if ($user_id) {
               $code = Crypto::encrypt($user_id, $this->encryptionKey);
-              $body = $this->weChatBase->Message('text', ['Content' => '<a href="' . $this->httpHost() . '/auth/authorize?code=' . $code . '&state=code">点击授权登录</a>']);
+              $body = $this->weChatBase->Message('text', ['Content' => '<a href="' . $this->httpHost() . '/auth/authorize?code=' . $code . '&state=code">点击确认授权</a>']);
             }
           } else {
             // 处理关键词回复

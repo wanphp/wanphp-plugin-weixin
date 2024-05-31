@@ -72,11 +72,16 @@ class AuthorizeApi extends OAuth2Api
         is_string($queryParams['state']) &&
         !in_array($queryParams['state'], ['code', 'token']) &&
         str_contains($this->request->getServerParams()['HTTP_USER_AGENT'], 'MicroMessenger')) {
-        // 将 $queryParams 存放在当前会话(session)中，用于验证完回调回来时验证 HTTP 请求
-        $_SESSION['authQueryParams'] = $queryParams;
+        // 检查cookie中是否有记录用户信息
+        if (isset($_COOKIE['u_code'])) {
+          $user_id = Crypto::decrypt($_COOKIE['u_code'], $this->encryptionKey);
+        } else {
+          // 将 $queryParams 存放在当前会话(session)中，用于验证完回调回来时验证 HTTP 请求
+          $_SESSION['authQueryParams'] = $queryParams;
 
-        // 跳转到微信，获取OPENID
-        return $this->user->oauthRedirect($this->request, $this->response);
+          // 跳转到微信，获取OPENID
+          return $this->user->oauthRedirect($this->request, $this->response);
+        }
       }
       if (isset($queryParams['code'])) {//微信公众号认证回调
         if ($this->webAuthorization) {
@@ -88,6 +93,26 @@ class AuthorizeApi extends OAuth2Api
         } else {
           // 没有网页授权获取用户基本信息，通过，公众号被动回复连接登录
           $user_id = Crypto::decrypt($queryParams['code'], $this->encryptionKey);
+          // 如果是后端扫码验证，会在调用oauthRedirect生成跳转时记录oauth_state，state为后端发起时生成的16位随机数或网页上固定写的weixin
+          $adminLogin = !empty($_SESSION['oauth_state']) && (strlen($_SESSION['oauth_state']) == 16 || $_SESSION['oauth_state'] === 'weixin');
+          unset($_SESSION['oauth_state']);
+          if (intval($user_id) > 0
+            && str_contains($this->request->getServerParams()['HTTP_USER_AGENT'], 'MicroMessenger')
+            && (!isset($_SESSION['authQueryParams']) || $adminLogin)) { // 后端登录验证，客户端验证扫码
+            $_SESSION['login_user_id'] = $user_id;
+            // 保存到cookie,保存一年
+            $expire_time = time() + (365 * 24 * 60 * 60);
+            setcookie('u_code', $queryParams['code'], $expire_time, '/', '', true, true);
+            if (isset($_SESSION['weixin']) && $_SESSION['weixin'] === 'weixin') {// 服务端后台扫码登录
+              return $this->response->withHeader('Location', $this->httpHost() . $this->basePath . '/')->withStatus(301);
+            } else {
+              $data = ['title' => '授权成功',
+                'msg' => '您已成功授权，详情查看客户端扫码页面！',
+                'icon' => 'weui-icon-success'
+              ];
+              return $this->respondView('admin/error/wxerror.html', $data);
+            }
+          }
         }
       } else {
         //用户自定义登录方式
@@ -111,23 +136,24 @@ class AuthorizeApi extends OAuth2Api
             }
             break;
           case 'GET';
-            // 将 $queryParams 存放在当前会话(session)中，用于POST提交登录验证完成后验证 HTTP 请求
-            $_SESSION['authQueryParams'] = $queryParams;
+            if (!isset($user_id)) {
+              // 将 $queryParams 存放在当前会话(session)中，用于POST提交登录验证完成后验证 HTTP 请求
+              $_SESSION['authQueryParams'] = $queryParams;
 
-            $code = Crypto::encrypt(session_id(), $this->encryptionKey);
-            $renderer = new ImageRenderer(new RendererStyle(480), new SvgImageBackEnd());
-            $writer = new Writer($renderer);
-            $data['loginQr'] = $writer->writeString($this->request->getUri()->getScheme() . '://' . $this->request->getUri()->getHost() . '/auth/qrLogin?tk=' . $code);
-            //return $this->respondView('@weixin/login.html', $data);
-            //使用自定义模板
-            return $this->respondView('oauth2/login.html', $data);
+              $code = Crypto::encrypt(session_id(), $this->encryptionKey);
+              $renderer = new ImageRenderer(new RendererStyle(480), new SvgImageBackEnd());
+              $writer = new Writer($renderer);
+              $data['loginQr'] = $writer->writeString($this->request->getUri()->getScheme() . '://' . $this->request->getUri()->getHost() . '/auth/qrLogin?tk=' . $code);
+              //return $this->respondView('@weixin/login.html', $data);
+              //使用自定义模板
+              return $this->respondView('oauth2/login.html', $data);
+            }
         }
       }
 
       // 在会话(session)中取出验证的用户queryParams
       if (isset($_SESSION['authQueryParams'])) {
         $this->request = $this->request->withQueryParams($_SESSION['authQueryParams']);
-        unset($_SESSION['authRequest']);
       }
       $authRequest = $this->server->validateAuthorizationRequest($this->request);
 
@@ -145,26 +171,11 @@ class AuthorizeApi extends OAuth2Api
         $authRequest->setAuthorizationApproved(false);
       }
 
+      if (isset($_SESSION['authQueryParams'])) unset($_SESSION['authQueryParams']);
       // 完成后重定向至客户端请求重定向地址
       return $this->server->completeAuthorizationRequest($authRequest, $this->response);
     } catch (OAuthServerException $exception) {
-      if (isset($user_id) && $user_id > 0
-        && str_contains($this->request->getServerParams()['HTTP_USER_AGENT'], 'MicroMessenger')
-        && !isset($_SESSION['authQueryParams'])
-        && $this->webAuthorization === false) {
-        $_SESSION['login_user_id'] = $user_id;
-        if (isset($_SESSION['weixin']) && $_SESSION['weixin'] == 'weixin') {
-          return $this->response->withHeader('Location', $this->httpHost() . $this->basePath . '/')->withStatus(301);
-        } else {
-          $data = ['title' => '授权成功',
-            'msg' => '您已成功授权，详情查看PC端扫码页面！',
-            'icon' => 'weui-icon-success'
-          ];
-          return $this->respondView('admin/error/wxerror.html', $data);
-        }
-      } else {
-        return $exception->generateHttpResponse($this->response);
-      }
+      return $exception->generateHttpResponse($this->response);
     } catch (Exception $exception) {
       $body = new Stream(fopen('php://temp', 'r+'));
       $body->write($exception->getMessage());

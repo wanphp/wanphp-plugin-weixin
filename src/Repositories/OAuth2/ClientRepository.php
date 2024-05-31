@@ -29,7 +29,7 @@ class ClientRepository extends BaseRepository implements ClientRepositoryInterfa
     $client = $this->get('client_id,name,redirect_uri,confidential', ['client_id' => $clientIdentifier]);
     if (!$client) return null;
     if (isset($_GET['redirect_uri'])) $redirect_uri = $_GET['redirect_uri'];
-    if (isset($_SESSION['authQueryParams']) && isset($_SESSION['authQueryParams']['redirect_uri'])) $redirect_uri = $_SESSION['authQueryParams']['redirect_uri'];
+    if (isset($_SESSION['authQueryParams']['redirect_uri'])) $redirect_uri = $_SESSION['authQueryParams']['redirect_uri'];
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       $post = json_decode(file_get_contents('php://input'), true) ?: $_POST;
       if (isset($post['redirect_uri'])) $redirect_uri = $post['redirect_uri'];

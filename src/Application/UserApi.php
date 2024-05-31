@@ -203,4 +203,20 @@ class UserApi extends Api
     else return $this->respondWithData($res, 201);
   }
 
+  /**
+   * 用户基本信息
+   * @throws Exception
+   */
+  public function user(Request $request, Response $response, array $args): Response
+  {
+    $this->request = $request;
+    $this->response = $response;
+    $this->args = $args;
+
+    $user = $this->user->get('nickname,name,headimgurl,tel', ['id' => $this->getUid()]);
+    $user['tagid_list'] = $this->public->get('tagid_list[JSON]', ['id' => $this->getUid()]);
+    if ($user) return $this->respondWithData($user);
+    else return $this->respondWithError('用户不存在');
+  }
+
 }

@@ -162,14 +162,21 @@ class UserApi extends Api
 
           return $this->respondWithData($data);
         } else {
-          $userTags = $this->weChatBase->getTags();
-          $data = [
-            'title' => '微信用户管理',
-            'tags' => $userTags['tags']
-          ];
-          $userTags = array_column($userTags['tags'], 'name', 'id');
-          $data['userTags'] = json_encode($userTags ?? []);
-
+          try {
+            $userTags = $this->weChatBase->getTags();
+            $data = [
+              'title' => '微信用户管理',
+              'tags' => $userTags['tags']
+            ];
+            $userTags = array_column($userTags['tags'], 'name', 'id');
+            $data['userTags'] = json_encode($userTags);
+          } catch (Exception $exception) {
+            $data = [
+              'title' => '微信用户管理',
+              'tags' => [],
+              'userTags' => '{}'
+            ];
+          }
           return $this->respondView('@weixin/user-list.html', $data);
         }
       default:

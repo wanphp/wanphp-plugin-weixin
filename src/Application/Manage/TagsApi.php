@@ -132,21 +132,24 @@ class TagsApi extends Api
         }
       case 'GET':
         //公众号粉丝数
-        $user_total = $this->cache->get('wxuser_total');
-        if (!$user_total) {
-          $list = $this->weChatBase->getUserList();
-          $user_total = $list['total'];
-          $this->cache->set('wxuser_total', $user_total, 3600);
+        try {
+          $user_total = $this->cache->get('wxuser_total');
+          if (!$user_total) {
+            $list = $this->weChatBase->getUserList();
+            $user_total = $list['total'];
+            $this->cache->set('wxuser_total', $user_total, 3600);
+          }
+          $userTags = $this->weChatBase->getTags();
+          $data = [
+            'title' => '粉丝标签管理',
+            'tags' => $userTags['tags'] ?? [],
+            'total' => $user_total
+          ];
+
+          return $this->respondView('@weixin/tags.html', $data);
+        } catch (Exception $exception) {
+          return $this->respondView('/admin/error/404.html', ['message' => '错误代码：' . $exception->getMessage()]);
         }
-
-        $userTags = $this->weChatBase->getTags();
-        $data = [
-          'title' => '粉丝标签管理',
-          'tags' => $userTags['tags'] ?? [],
-          'total' => $user_total
-        ];
-
-        return $this->respondView('@weixin/tags.html', $data);
       default:
         return $this->respondWithError('禁止访问', 403);
     }

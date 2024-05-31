@@ -1,11 +1,12 @@
-<div class="card">
+<div id="wx-templates" class="card">
   <div class="card-header">
     <h3 class="card-title">模板消息管理</h3>
 
     <div class="card-tools">
       <div class="input-group">
         <input type="text" name="tmpid" value="" placeholder="模板编号：TM*或OPEN*" class="form-control">
-        <button type="button" id="addtemplate" class="btn btn-outline-primary"><i class="fas fa-plus-circle"></i></button>
+        <button type="button" id="addtemplate" class="btn btn-outline-primary"><i class="fas fa-plus-circle"></i>
+        </button>
       </div>
     </div>
   </div>
@@ -21,91 +22,6 @@
 <!-- /.card -->
 
 <script type="text/javascript">
-  function format(d) {
-    return d.template_id + '<div class="row"><div class="col-sm-6">' + d.content + '</div><div class="col-sm-6">' + d.example + '</div></div>';
-  }
-
-  $(document).ready(function () {
-    var datatables = $('#msgTplData').DataTable({
-      serverSide: false,
-      ajax: "/admin/weixin/tplmsg",
-      rowId: 'id',
-      columns: [
-        {
-          "class": "details-control text-center",
-          "orderable": false,
-          "data": null,
-          "defaultContent": '<i class="fas fa-plus-circle"></i>'
-        },
-        {title:'模板ID',data: "template_id_short", defaultContent: ''},
-        {title:'模板标题',data: "title"},
-        {title:'所属行业',data: "primary_industry"},
-        {title:'操作',
-          data: "op", defaultContent: '<button type="button" class="btn btn-tool del"><i class="fas fa-trash-alt"></i></button>'
-        }
-      ]
-    });
-
-    var detailRows = [];
-
-    $('#msgTplData tbody').on('click', 'tr td.details-control', function () {
-      var tr = $(this).closest('tr');
-      var row = datatables.row(tr);
-      var idx = $.inArray(tr.attr('id'), detailRows);
-
-      if (row.child.isShown()) {
-        $(this).html('<i class="fas fa-plus-circle"></i>');
-        row.child.hide();
-
-        detailRows.splice(idx, 1);
-      } else {
-        $(this).html('<i class="fas fa-minus-circle"></i>');
-        row.child(format(row.data())).show();
-        if (idx === -1) {
-          detailRows.push(tr.attr('id'));
-        }
-      }
-    });
-
-    datatables.on('draw', function () {
-      $.each(detailRows, function (i, id) {
-        $('#' + id + ' td.details-control').trigger('click');
-      });
-    });
-
-    $('#msgTplData tbody').on('click', 'button', function () {
-      var data = datatables.row($(this).parents('tr')).data();
-      console.log(data);
-      var deltr = $(this).parents('tr');
-      dialog('删除消息模板', '是否确认删除消息模板', function () {
-        $.ajax({
-          url: '/admin/weixin/tplmsg/' + data.template_id,
-          type: 'POST',
-          headers: {"X-HTTP-Method-Override": "DELETE"},
-          dataType: 'json',
-          success: function (data) {
-            datatables.row(deltr).remove().draw(false);
-            Swal.fire({icon: 'success', title: '删除成功！', showConfirmButton: false, timer: 1500});
-          },
-          error: errorDialog
-        });
-      });
-    });
-
-    $('#addtemplate').click(function () {
-      var tmpid = $(this).closest('.input-group').children('input').val();
-      if (!tmpid) return false;
-      $.ajax({
-        url: '/admin/weixin/tplmsg',
-        type: 'POST',
-        data: {tmpid: tmpid},
-        dataType: 'json',
-        success: function (json) {
-          location.reload();
-        },
-        error: errorDialog
-      });
-    });
-  });
+  loadScript('/plugins/weixin/js/template.js');
 </script>
 
