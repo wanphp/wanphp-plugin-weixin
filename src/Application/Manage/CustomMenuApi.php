@@ -117,9 +117,13 @@ class CustomMenuApi extends Api
         return $this->respondWithData(['delNum' => $delNum]);
       case 'GET':
         try {
-          $userTags = $this->weChatBase->getTags();
+          try {
+            $userTags = $this->weChatBase->getTags();
+          } catch (Exception) {
+          }
+
           $data = [
-            'tags' => $userTags['tags']
+            'tags' => $userTags['tags'] ?? []
           ];
           $data['tag_id'] = intval($this->args['id'] ?? 0);
           $where = ['tag_id' => $data['tag_id'], 'parent_id' => 0, 'ORDER' => ['tag_id' => 'ASC', 'parent_id' => 'ASC', 'sortOrder' => 'ASC']];
