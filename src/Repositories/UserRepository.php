@@ -118,12 +118,14 @@ class UserRepository extends BaseRepository implements UserInterface
       'nickname[~]' => $keyword,
       'tel[~]' => $keyword
     ];
+    $total = $this->count('id', $where);
     $page = (max($page, 1) - 1) * 10;
     $where['LIMIT'] = [$page, 10];
+    $where['ORDER'] = ['id' => 'DESC'];
 
     return [
       'users' => $this->select('id,unionid,nickname,headimgurl,name,tel', $where),
-      'total' => $this->count('id', $where)
+      'total' => $total
     ];
   }
 
