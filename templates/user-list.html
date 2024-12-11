@@ -1,6 +1,11 @@
 <div id="wx-user-list" class="card">
   <div class="card-header">
     <h3 class="card-title">{{title}}</h3>
+    <div class="card-tools">
+      <button id="setCookie" type="button" class="btn btn-tool" data-bs-toggle="tooltip" data-bs-title="设置公众号Token、Cookie获取用户头像、呢称">
+        <i class="fas fa-key">设置Cookie</i>
+      </button>
+    </div>
   </div>
   {% if tags %}
   <div id="tags" class="card-header">
@@ -24,21 +29,21 @@
         <div class="modal-body">
           <form id="userForm" action="" method="POST" class="needs-validation" novalidate>
             <div class="input-group mb-3">
-              <label for="name">姓名</label>
+              <label for="name" class="input-group-text">姓名</label>
               <input id="name" name="name" type="text" class="form-control" required
                      pattern="[\u4e00-\u9fa5]{2,8}$" placeholder="用户姓名"
                      autocomplete="off">
               <div class="invalid-feedback">姓名只能是中文名，最少两个字</div>
             </div>
-            <div class="form-group mb-3">
-              <label for="tel">手机号</label>
+            <div class="input-group mb-3">
+              <label for="tel" class="input-group-text">手机号</label>
               <input id="tel" name="tel" type="text" class="form-control" required
                      pattern="^(13[0-9]|14[579]|15[0-35-9]|16[6]|17[0-9]|18[0-9]|19[12589])\d{8}$"
                      placeholder="用户手机号" autocomplete="off">
               <div class="invalid-feedback">手机号格式不正确</div>
             </div>
-            <div class="form-group">
-              <label for="remark">备注</label>
+            <div class="input-group">
+              <label for="remark" class="input-group-text">备注</label>
               <input id="remark" name="remark" type="text" class="form-control" placeholder="用户备注"
                      autocomplete="off">
             </div>
@@ -56,7 +61,7 @@
 </div>
 <!-- /.card -->
 <script type="text/javascript">
-  const userTags = JSON.parse('{{userTags|raw}}');
+  var userTags = JSON.parse('{{userTags|raw}}');
   loadScript('/plugins/weixin/js/user-list.js', function () {
     userListDataTables = $('#wx-user-list #userData').DataTable({
       ajax: basePath + '/admin/weixin/user?pid={{ pid }}',
@@ -91,7 +96,13 @@
         {title: '姓名', data: "name"},
         {title: '手机号', data: "tel"},
         {
+          title: '关注时间', data: "subscribe_time", render: function (data) {
+            return formatTimestamp(parseInt(data) * 1000);
+          }
+        },
+        {
           title: '操作',
+          width: 80,
           data: "op",
           defaultContent: '<button type="button" class="btn btn-tool edit" data-toggle="tooltip" title="修改用户信息"><i class="fas fa-edit"></i></button>' +
             '<button type="button" class="btn btn-tool subscribe" data-toggle="tooltip" title="更新关注信息"><i class="fas fa-sync-alt"></i></button>'

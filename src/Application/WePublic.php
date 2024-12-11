@@ -94,17 +94,17 @@ abstract class WePublic extends Api
               }
               break;
             default:
-              $body = $this->clickevent();
+              if ($event == 'CLICK' && !$this->weChatBase->webAuthorization && $eventArr['key'] == '授权') {
+                $body = $this->getAuthorizationLink();
+              } else {
+                $body = $this->clickevent();
+              }
           }
           break;
         case 'text':
           $this->endMsgTime($openid);
           if (!$this->weChatBase->webAuthorization && $this->weChatBase->getRev()->getRevContent() == '授权') {
-            $user_id = $this->updateUser();
-            if ($user_id) {
-              $code = Crypto::encrypt($user_id, $this->encryptionKey);
-              $body = $this->weChatBase->Message('text', ['Content' => '<a href="' . $this->httpHost() . '/auth/authorize?code=' . $code . '&state=code">点击确认授权</a>']);
-            }
+            $body = $this->getAuthorizationLink();
           } else {
             // 处理关键词回复
             $body = $this->text();
@@ -149,8 +149,8 @@ abstract class WePublic extends Api
   {
     $openid = $this->weChatBase->getRev()->getRevFrom();//获取每个微信用户的openid
     $time = time();
-    $info = $this->public->get('id,lastop_time', ['openid' => $openid]);
-    if (isset($info['lastop_time']) && $info['lastop_time'] > ($time - 172800)) return $info['id']; // 两天内已更新过用户信息
+    $info = $this->public->get('id,lastop_time,subscribe', ['openid' => $openid]);
+    if (isset($info['lastop_time']) && $info['lastop_time'] > ($time - 172800) && $info['subscribe'] == 1) return $info['id']; // 两天内已更新过用户信息
 
     //保存用户信息
     try {
@@ -174,20 +174,17 @@ abstract class WePublic extends Api
         //检查用户是否通过小程序等，存储到本地
         if (!empty($userinfo['unionid'])) {
           $user_id = $this->user->get('id', ['unionid' => $userinfo['unionid']]);
-          if ($user_id) {
-            $data['id'] = $user_id;
-          } else {
-            $data['id'] = $this->user->insert(['unionid' => $userinfo['unionid']]);
-          }
+          $data['id'] = $user_id ?: $this->user->insert(['unionid' => $userinfo['unionid']]);
         }
         //添加公众号信息
         $user_id = $this->public->insert($data);
+        if (empty($userinfo['unionid'])) $this->user->insert(['id' => $user_id]);
       }
     } catch (Exception) {
       if (isset($info['id'])) {//二次关注
         $user_id = $info['id'];
         //更新公众号信息
-        $this->public->update(['unsubscribe_time' => 0], ['id' => $user_id]);
+        $this->public->update(['subscribe' => 1, 'unsubscribe_time' => 0], ['id' => $user_id]);
       } else {
         //本地存储用户
         $data = [
@@ -330,5 +327,20 @@ abstract class WePublic extends Api
       default:
     }
     return $body;
+  }
+
+  /**
+   * 没有网页授权的公众号，通过自定义授权链接授权
+   * @return array|string
+   * @throws Exception
+   */
+  private function getAuthorizationLink(): string|array
+  {
+    $user_id = $this->updateUser();
+    if ($user_id) {
+      $code = Crypto::encrypt($user_id . '', $this->encryptionKey);
+      $body = $this->weChatBase->Message('text', ['Content' => '<a href="' . $this->httpHost() . '/auth/authorize?code=' . $code . '&state=code">点击确认授权</a>']);
+    }
+    return $body ?? '';
   }
 }

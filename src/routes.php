@@ -42,6 +42,8 @@ return function (App $app, Middleware $PermissionMiddleware, Middleware $OAuthSe
     $group->map(['GET', 'PUT', 'POST', 'DELETE'], '/autoReply[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\Manage\AutoReplyApi::class);
     // 取自定义菜单事件
     $group->get('/autoReply/getEvent[/{type:click|view}]', \Wanphp\Plugins\Weixin\Application\Manage\AutoReplyApi::class . ':getEvent');
+    // 设置公众号Cookie
+    $group->post('/setCookie', \Wanphp\Plugins\Weixin\Application\Manage\UserApi::class . ':setCookie');
     // 素材管理
     $group->post('/material/add/{type:image|voice|video|thumb}', \Wanphp\Plugins\Weixin\Application\Manage\MaterialApi::class);
     $group->delete('/material/del/{media_id}', \Wanphp\Plugins\Weixin\Application\Manage\MaterialApi::class);

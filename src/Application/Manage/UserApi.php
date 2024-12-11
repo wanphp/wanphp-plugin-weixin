@@ -10,8 +10,12 @@ namespace Wanphp\Plugins\Weixin\Application\Manage;
 
 
 use Exception;
+use GuzzleHttp\Client;
 use Medoo\Medoo;
 use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Wanphp\Libray\Slim\CacheInterface;
+use Wanphp\Libray\Slim\HttpTrait;
 use Wanphp\Libray\Slim\Setting;
 use Wanphp\Libray\Weixin\WeChatBase;
 use Wanphp\Plugins\Weixin\Application\Api;
@@ -26,17 +30,23 @@ use Wanphp\Plugins\Weixin\Domain\UserInterface;
  */
 class UserApi extends Api
 {
+  use HttpTrait;
+
   private UserInterface $user;
   private PublicInterface $public;
   private WeChatBase $weChatBase;
   private string $prefix;
+  private string $appid;
+  private CacheInterface $cache;
 
-  public function __construct(UserInterface $user, PublicInterface $public, Setting $setting, WeChatBase $weChatBase)
+  public function __construct(UserInterface $user, PublicInterface $public, Setting $setting, WeChatBase $weChatBase, CacheInterface $cache)
   {
     $this->user = $user;
     $this->public = $public;
     $this->weChatBase = $weChatBase;
     $this->prefix = $setting->get('database')['prefix'];
+    $this->appid = $setting->get('wechat.base')['appid'] ?? '';
+    $this->cache = $cache;
   }
 
   /**
@@ -153,6 +163,70 @@ class UserApi extends Api
             $where = ['ORDER' => ["u.id" => "DESC"], 'LIMIT' => $this->getLimit()];
           }
 
+          $users = $this->user->getUserList($where);
+          // 取用户信息
+          $cookie = $this->cache->get('forever_' . $this->appid . '_official_account_cookie');
+          $official_account_user = [];
+          if (!empty($cookie)) {
+            $endIndex = count($users) - 1;
+            $next_openid = '';
+            $begin_create_time = time();
+            if (!empty($params['start']) && $endIndex > 0) {
+              $next_openid = $users[$endIndex]['openid'];
+              $begin_create_time = $users[$endIndex]['subscribe_time'];
+            }
+            $res = $this->request(new Client(), 'GET', 'https://mp.weixin.qq.com/cgi-bin/user_tag?action=get_user_list&groupid=-2&begin_openid=' . $next_openid . '&begin_create_time=' . $begin_create_time . '&limit=20&offset=0&backfoward=1&token=' . $cookie['token'] . '&lang=zh_CN&f=json&ajax=1&random=' . (mt_rand() / mt_getrandmax()), [
+              'headers' => [
+                'cookie' => trim($cookie['cookies'])
+              ]
+            ]);
+            if (!empty($res['user_list']['user_info_list'])) foreach ($res['user_list']['user_info_list'] as $user) {
+              $official_account_user[$user['user_openid']] = $user;
+              $id = $this->public->get('id', ['openid' => $user['user_openid']]);
+              if ($id) {
+                $this->user->update(
+                  ['nickname' => $user['user_name'], 'headimgurl' => parse_url($user['user_head_img'], PHP_URL_PATH), 'remark' => $user['user_remark']],
+                  ['id' => $id]
+                );
+                $this->public->update(['subscribe_time' => $user['user_create_time']], ['id' => $id]);
+              }
+            }
+          }
+          $openidList = [];
+          foreach ($users as &$user) {
+            if ($user['subscribe'] == 1 && $user['subscribe_time'] == 0) $openidList[] = ['openid' => $user['openid']];
+            if (isset($official_account_user[$user['openid']])) {
+              $user['nickname'] = $official_account_user[$user['openid']]['user_name'];
+              $user['headimgurl'] = $official_account_user[$user['openid']]['user_head_img'];
+            }
+          }
+          if (count($openidList) > 0) {
+            try {
+              $userList = $this->weChatBase->getUserListInfo($openidList);
+              if (!empty($userList['user_info_list'])) foreach ($userList['user_info_list'] as $userinfo) {
+                $index = array_search($userinfo['openid'], array_column($users['list'], 'openid'));
+                if ($userinfo['subscribe']) {
+                  $upData = [
+                    'tagid_list' => $userinfo['tagid_list'],
+                    'subscribe_time' => $userinfo['subscribe_time'],
+                    'subscribe_scene' => $userinfo['subscribe_scene'],
+                    'qr_scene' => $userinfo['qr_scene'] . ($userinfo['qr_scene_str'] ? "({$userinfo['qr_scene_str']})" : ''),
+                    'remark' => $userinfo['remark']
+                  ];
+                } else {
+                  $upData = ['subscribe' => 0];
+                }
+                $users['list'][$index] = array_merge($users['list'][$index], $upData);
+                $this->user->update(
+                  $upData,
+                  ['openid' => $userinfo['openid']]
+                );
+              }
+            } catch (Exception) {
+              // 无获取用户信息权限
+            }
+          }
+
           $data = [
             "draw" => $params['draw'],
             "recordsTotal" => $this->user->count('id'),
@@ -162,25 +236,48 @@ class UserApi extends Api
 
           return $this->respondWithData($data);
         } else {
+          $data = [
+            'title' => '微信用户管理',
+            'tags' => [],
+            'userTags' => '{}'
+          ];
           try {
             $userTags = $this->weChatBase->getTags();
-            $data = [
-              'title' => '微信用户管理',
-              'tags' => $userTags['tags']
-            ];
+            $data['tags'] = $userTags['tags'];
             $userTags = array_column($userTags['tags'], 'name', 'id');
             $data['userTags'] = json_encode($userTags);
-          } catch (Exception $exception) {
-            $data = [
-              'title' => '微信用户管理',
-              'tags' => [],
-              'userTags' => '{}'
-            ];
+          } catch (Exception) {
+            // 无获取用户标签权限
           }
           return $this->respondView('@weixin/user-list.html', $data);
         }
       default:
         return $this->respondWithError('禁止访问', 403);
     }
+  }
+
+  /**
+   * 设置公众号Cookie
+   * @param Request $request
+   * @param Response $response
+   * @param array $args
+   * @return Response
+   * @throws Exception
+   */
+  public function setCookie(Request $request, Response $response, array $args): Response
+  {
+    $this->request = $request;
+    $this->response = $response;
+    $this->args = $args;
+    $data = $this->getFormData();
+    if (!empty($this->appid)) {
+      // 设置缓存
+      $cacheKey = 'forever_' . $this->appid . '_official_account_cookie';
+      $this->cache->set($cacheKey, $data, 316800);// 88小时
+      return $this->respondWithData(['code' => '0', 'msg' => '已授权成功！']);
+    } else {
+      return $this->respondWithError('Error!');
+    }
+
   }
 }

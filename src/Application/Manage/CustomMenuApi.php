@@ -117,31 +117,54 @@ class CustomMenuApi extends Api
         return $this->respondWithData(['delNum' => $delNum]);
       case 'GET':
         try {
-          try {
-            $userTags = $this->weChatBase->getTags();
-          } catch (Exception) {
+          if ($this->customMenu->count('id') == 0) {
+            // 同步菜单
+            $menus = $this->weChatBase->getMenu();
+            if (!empty($menus['menu']['button'])) foreach ($menus['menu']['button'] as $index => $menu) {
+              $menu['sortOrder'] = $index + 1;
+              $parent_id = $this->customMenu->insert($menu);
+              if (!empty($menu['sub_button'])) foreach ($menu['sub_button'] as $i => $sub_menu) {
+                $menu['sortOrder'] = $i + 1;
+                $sub_menu['parent_id'] = $parent_id;
+                $this->customMenu->insert($sub_menu);
+              }
+            }
+            if (!empty($menus['conditionalmenu'])) foreach ($menus['conditionalmenu'] as $menu) {
+              foreach ($menu['button'] as $index => $conditionalMenu) {
+                $conditionalMenu['sortOrder'] = $index + 1;
+                $conditionalMenu['tag_id'] = $menu['matchrule']['group_id'];
+                $parent_id = $this->customMenu->insert($conditionalMenu);
+                if (!empty($conditionalMenu['sub_button'])) foreach ($conditionalMenu['sub_button'] as $i => $sub_menu) {
+                  $sub_menu['sortOrder'] = $i + 1;
+                  $sub_menu['tag_id'] = $menu['matchrule']['group_id'];
+                  $sub_menu['parent_id'] = $parent_id;
+                  $this->customMenu->insert($sub_menu);
+                }
+              }
+            }
           }
-
-          $data = [
-            'tags' => $userTags['tags'] ?? []
-          ];
-          $data['tag_id'] = intval($this->args['id'] ?? 0);
-          $where = ['tag_id' => $data['tag_id'], 'parent_id' => 0, 'ORDER' => ['tag_id' => 'ASC', 'parent_id' => 'ASC', 'sortOrder' => 'ASC']];
-          $menus = [];
-          foreach ($this->customMenu->select('*', $where) as $item) {
-            $where['parent_id'] = $item['id'];
-            $item['subBtn'] = $this->customMenu->select('*', $where);
-            $menus[] = $item;
-          }
-          $tags = array_column($data['tags'], 'name', 'id');
-          $data['tagTitle'] = $tags[$data['tag_id']] ?? '默认';
-          $data['menus'] = $menus;
-          $data['menuTitle'] = "添加{$data['tagTitle']}一级菜单";
-
-          return $this->respondView('@weixin/custom-menu.html', $data);
-        } catch (Exception $exception) {
-          return $this->respondView('/admin/error/404.html', ['message' => '错误代码：' . $exception->getMessage()]);
+          $userTags = $this->weChatBase->getTags();
+        } catch (Exception) {
+          // 未认证服务号，无个性化菜单权限
         }
+
+        $data = [
+          'tags' => $userTags['tags'] ?? []
+        ];
+        $data['tag_id'] = intval($this->args['id'] ?? 0);
+        $where = ['tag_id' => $data['tag_id'], 'parent_id' => 0, 'ORDER' => ['tag_id' => 'ASC', 'parent_id' => 'ASC', 'sortOrder' => 'ASC']];
+        $menus = [];
+        foreach ($this->customMenu->select('*', $where) as $item) {
+          $where['parent_id'] = $item['id'];
+          $item['subBtn'] = $this->customMenu->select('*', $where);
+          $menus[] = $item;
+        }
+        $tags = array_column($data['tags'], 'name', 'id');
+        $data['tagTitle'] = $tags[$data['tag_id']] ?? '默认';
+        $data['menus'] = $menus;
+        $data['menuTitle'] = "添加{$data['tagTitle']}一级菜单";
+
+        return $this->respondView('@weixin/custom-menu.html', $data);
       default:
         return $this->respondWithError('禁止访问', 403);
     }
