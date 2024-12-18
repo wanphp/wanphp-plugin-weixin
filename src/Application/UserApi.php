@@ -156,13 +156,13 @@ class UserApi extends Api
       case 'POST':
         // 客户端添加用户
         $res = $this->user->addUser($this->request->getParsedBody());
-        if (isset($res['errMsg'])) return $this->respondWithError($res['errMsg'] ?? 'error');
+        if (isset($res['errMsg'])) return $this->respondWithError($res['errMsg']);
         else return $this->respondWithData($res, 201);
       case 'PUT':
         // 客户端修改用户
         $id = (int)$this->resolveArg('id');
         $res = $this->user->updateUser($id, $this->request->getParsedBody());
-        if (isset($res['errMsg'])) return $this->respondWithError($res['errMsg'] ?? 'error');
+        if (isset($res['errMsg'])) return $this->respondWithError($res['errMsg']);
         else return $this->respondWithData($res, 201);
       case 'PATCH':
         $uid = $this->request->getAttribute('oauth_user_id');
@@ -176,8 +176,8 @@ class UserApi extends Api
         // 用户取自己的信息
         $uid = $this->request->getAttribute('oauth_user_id');
         if ($uid < 1) return $this->respondWithError('未知用户', 422);
-        //id,openid,sex,role_id,cash_back,money,
-        $user = $this->user->get('unionid,nickname,headimgurl,name,tel,address,remark', ['id' => $uid]);
+        //openid,sex,role_id,cash_back,money,
+        $user = $this->user->get('id,unionid,nickname,headimgurl,name,tel,address,remark', ['id' => $uid]);
 
         if ($user) {
           $user['tagId'] = $this->public->get('tagid_list[JSON]', ['id' => $uid]);
