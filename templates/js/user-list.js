@@ -97,6 +97,7 @@ $(function () {
       $("#wx-user-list #modal-editUser #userForm input[name='name']").val(data.name);
       $("#wx-user-list #modal-editUser #userForm input[name='tel']").val(data.tel);
       $("#wx-user-list #modal-editUser #userForm input[name='remark']").val(data.remark);
+      $("#wx-user-list #modal-editUser #userForm select[name='status']").val(data.status);
       $('#wx-user-list #modal-editUser').modal('show');
     } else if ($(this).hasClass('subscribe')) {
       $.ajax({

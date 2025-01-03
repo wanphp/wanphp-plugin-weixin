@@ -42,10 +42,17 @@
                      placeholder="用户手机号" autocomplete="off">
               <div class="invalid-feedback">手机号格式不正确</div>
             </div>
-            <div class="input-group">
+            <div class="input-group mb-3">
               <label for="remark" class="input-group-text">备注</label>
               <input id="remark" name="remark" type="text" class="form-control" placeholder="用户备注"
                      autocomplete="off">
+            </div>
+            <div class="input-group">
+              <label for="status" class="input-group-text">状态</label>
+              <select id="status" name="status" class="form-select">
+                <option value="0">正常</option>
+                <option value="1">锁定</option>
+              </select>
             </div>
           </form>
         </div>
@@ -97,7 +104,8 @@
         {title: '手机号', data: "tel"},
         {
           title: '关注时间', data: "subscribe_time", render: function (data) {
-            return formatTimestamp(parseInt(data) * 1000);
+            if (data > 0) return formatTimestamp(parseInt(data) * 1000);
+            else return '未关注';
           }
         },
         {
