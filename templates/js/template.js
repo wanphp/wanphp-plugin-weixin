@@ -14,7 +14,12 @@ $(function () {
         "data": null,
         "defaultContent": '<i class="fas fa-plus-circle"></i>'
       },
-      {title: '模板ID', data: "template_id_short", defaultContent: ''},
+      {
+        title: '模板ID', data: "template_id_short", render: function (data, type, row) {
+          console.log(data)
+          return data ? data : row.template_id
+        }
+      },
       {title: '模板标题', data: "title"},
       {title: '所属行业', data: "primary_industry"},
       {
@@ -27,7 +32,7 @@ $(function () {
 
   let detailRows = [];
 
-  $('#wx-templates #msgTplData tbody').on('click', 'tr td.details-control', function () {
+  $('body').on('click', '#wx-templates #msgTplData tbody td.details-control', function () {
     var tr = $(this).closest('tr');
     var row = wxTemplateDataTables.row(tr);
     var idx = $.inArray(tr.attr('id'), detailRows);
@@ -54,7 +59,7 @@ $(function () {
         type: 'POST',
         headers: {"X-HTTP-Method-Override": "DELETE"},
         dataType: 'json',
-        success: function (data) {
+        success: function () {
           wxTemplateDataTables.row(row).remove().draw(false);
           Swal.fire({icon: 'success', title: '删除成功！', showConfirmButton: false, timer: 1500});
         },
@@ -69,7 +74,7 @@ $(function () {
       type: 'POST',
       data: {tmpid: tpl_id},
       dataType: 'json',
-      success: function (json) {
+      success: function () {
         location.reload();
       },
       error: errorDialog

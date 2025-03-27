@@ -10,10 +10,12 @@
       </div>
     </div>
   </div>
+  {% if industry %}
   <div class="card-header form-horizontal">
     主营行业：{{industry.primary_industry.first_class}} ， {{industry.primary_industry.second_class}}，
     副营行业：{{industry.secondary_industry.first_class}} ， {{industry.secondary_industry.second_class}}
   </div>
+  {% endif %}
   <div class="card-body table-responsive">
     <table id="msgTplData" class="table table-bordered table-hover"></table>
   </div>
