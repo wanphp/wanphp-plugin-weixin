@@ -6,7 +6,6 @@ use DI\ContainerBuilder;
 return function (ContainerBuilder $containerBuilder) {
   $containerBuilder->addDefinitions([
     Wanphp\Libray\Weixin\MiniProgram::class => \DI\autowire(Wanphp\Libray\Weixin\MiniProgram::class),
-    Wanphp\Libray\Weixin\Pay::class => \DI\autowire(Wanphp\Libray\Weixin\Pay::class),
     Wanphp\Libray\Weixin\WeChatPay::class => \DI\autowire(Wanphp\Libray\Weixin\WeChatPay::class),
     Wanphp\Libray\Weixin\WeChatBase::class => \DI\autowire(Wanphp\Libray\Weixin\WeChatBase::class),
     \Wanphp\Plugins\Weixin\Domain\CustomMenuInterface::class => \DI\autowire(\Wanphp\Plugins\Weixin\Repositories\CustomMenuRepository::class),
