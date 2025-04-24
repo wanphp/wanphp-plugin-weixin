@@ -14,11 +14,11 @@ $(function () {
     else window.location.hash = '/admin/weixin/menu';
   }).on('click', '#wx-custom-menu .addMenu', function () {
     if (!$(this).attr('data-menu')) {
-      $('#wx-custom-menu #menuTitle').text('添加{{tagTitle}}一级菜单');
+      $('#wx-custom-menu #menuTitle').text('添加' + tagTitle + '一级菜单');
     } else {
       const menu = JSON.parse($(this).attr('data-menu'));
       $("#wx-custom-menu #menuForm input[name='parent_id']").val(menu.id);
-      $('#wx-custom-menu #menuTitle').text('添加{{tagTitle}}“' + menu.name + '”的二级菜单');
+      $('#wx-custom-menu #menuTitle').text('添加' + tagTitle + '“' + menu.name + '”的二级菜单');
     }
     $('#wx-custom-menu #menuForm').attr('action', '/admin/weixin/menu').attr('method', 'POST')[0].reset();
     $("#wx-custom-menu .btn-outline-danger").hide();
@@ -53,9 +53,9 @@ $(function () {
     });
   }).on('click', '#wx-custom-menu .editMenu', function () {
     if ($(this).hasClass('dropdown-item')) {
-      $('#wx-custom-menu #menuTitle').text('修改{{tagTitle}}二级菜单');
+      $('#wx-custom-menu #menuTitle').text('修改' + tagTitle + '二级菜单');
     } else {
-      $('#wx-custom-menu #menuTitle').text('修改{{tagTitle}}一级菜单');
+      $('#wx-custom-menu #menuTitle').text('修改' + tagTitle + '一级菜单');
     }
     const menu = JSON.parse($(this).attr('data-menu'));
     $('#wx-custom-menu #menuForm').attr('action', '/admin/weixin/menu/' + menu.id).attr('method', 'PUT');
