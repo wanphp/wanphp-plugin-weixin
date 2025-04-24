@@ -11,6 +11,7 @@ namespace Wanphp\Plugins\Weixin\Repositories;
 
 use Exception;
 use JetBrains\PhpStorm\ArrayShape;
+use Medoo\Medoo;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
@@ -54,14 +55,38 @@ class UserRepository extends BaseRepository implements UserInterface
     ) ?: [];
   }
 
-  public function getUserList($where): array
+  public function getUserList($params): array
   {
-    return $this->db->select(UserInterface::TABLE_NAME . '(u)', [
+    // 用户标签
+    if (!empty($params['tag_id'])) {
+      $where['u.id'] = $this->db->select('id', Medoo::raw("WHERE JSON_CONTAINS(tagid_list, '{$params['tag_id']}')"));
+    }
+    // 推广用户
+    if (isset($params['pid']) && $params['pid'] > 0) {
+      $where['p.parent_id'] = intval($params['pid']);
+    }
+    // 关键词
+    if (!empty($params['search']['value'])) {
+      $keyword = trim($params['search']['value']);
+      $where['OR'] = [
+        'u.name[~]' => $keyword,
+        'u.nickname[~]' => $keyword,
+        'u.tel[~]' => $keyword
+      ];
+    }
+    $recordsFiltered = $this->db->count(UserInterface::TABLE_NAME . '(u)', [
+      '[>]' . PublicInterface::TABLE_NAME . '(p)' => ["u.id" => "id"]
+    ], ['u.id'], $where ?? []);
+    $where['LIMIT'] = [$params['start'] ?? 0, $params['length'] ?? 10];
+    $where['ORDER'] = ["u.id" => "DESC"];
+
+    $users = $this->db->select(UserInterface::TABLE_NAME . '(u)', [
       '[>]' . PublicInterface::TABLE_NAME . '(p)' => ["u.id" => "id"]
     ],
       ['u.id', 'u.nickname', 'u.headimgurl', 'u.name', 'u.tel', 'u.remark', 'u.status', 'u.address', 'p.openid', 'p.tagid_list[JSON]', 'p.subscribe', 'p.parent_id', 'p.subscribe_time'],
       $where
     ) ?: [];
+    return ['users' => $users, 'total' => $recordsFiltered];
   }
 
   public function getUserCount($where): int

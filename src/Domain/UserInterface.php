@@ -10,7 +10,7 @@ interface UserInterface extends BaseInterface, WpUserInterface
 {
   const TABLE_NAME = "weixin_users";
 
-  public function getUserList($where): array;
+  public function getUserList($params): array;
 
   public function getUserCount($where): int;
 }

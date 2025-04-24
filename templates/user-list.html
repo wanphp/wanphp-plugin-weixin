@@ -78,7 +78,7 @@
           title: '微信',
           data: "headimgurl", render: function (data, type, row) {
             let html = '';
-            if (userTags.length) {
+            if (userTags) {
               html = '<div class="btn-group dropup"><button type="button" class="btn btn-sm dropdown-toggle btn-link text-body-secondary" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
               if (row.tagid_list && row.tagid_list.length > 0) {
                 for (const tag_id of row.tagid_list) {

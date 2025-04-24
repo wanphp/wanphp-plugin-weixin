@@ -138,32 +138,31 @@ class UserApi extends Api
         return $this->respondWithData(['upNum' => $num], 201);
       case 'GET':
         if ($this->request->getHeaderLine("X-Requested-With") == "XMLHttpRequest") {
-          $whereRaw = [];
           $params = $this->request->getQueryParams();
-          if (!empty($params['search']['value'])) {
-            $keyword = trim($params['search']['value']);
-            $whereRaw[] = "(`{$this->prefix}u`.`name` LIKE '%{$keyword}%' OR `{$this->prefix}u`.`nickname` LIKE '%{$keyword}%' OR `{$this->prefix}u`.`tel` LIKE '%{$keyword}%')";
-          }
 
-          // 推广用户
-          if (isset($params['pid']) && $params['pid'] > 0) {
-            $parent_id = intval($params['pid']);
-            $whereRaw[] = "`{$this->prefix}p`.`parent_id` = {$parent_id}";
+          $userCount = $this->user->count('id');
+          if ($userCount == 0) {
+            // 公众号刚加入，取已关注粉丝
+            $next_openid = '';
+            do {
+              $users = $this->weChatBase->getUserList($next_openid);
+              $userData = [];
+              foreach ($users['data']['openid'] as $openid) {
+                $userData[] = ['openid' => $openid, 'subscribe' => 1];
+              }
+              $this->public->insert($userData);
+              $userData = [];
+              foreach ($this->public->select('id') as $id) {
+                $userData[] = ['id' => $id];
+              }
+              $this->user->insert($userData);
+              $next_openid = $users['next_openid'];
+            } while ($users['count'] === 10000);
           }
-          if (isset($params['tag_id']) && $params['tag_id'] > 0) {
-            $tag_id = intval($params['tag_id']);
-            $whereRaw[] = "REPLACE(`{$this->prefix}p`.`tagid_list`, ',', '][') LIKE '%[{$tag_id}]%'";
-          }
-          if ($whereRaw) {
-            $whereRawStr = join(' AND ', $whereRaw);
-            $recordsFiltered = $this->user->getUserCount(Medoo::raw("WHERE {$whereRawStr}"));
-            $where = Medoo::raw("WHERE {$whereRawStr} ORDER BY `{$this->prefix}u`.`id` DESC LIMIT {$params['start']}, {$params['length']}");
-          } else {
-            $recordsFiltered = $this->user->count('id');
-            $where = ['ORDER' => ["u.id" => "DESC"], 'LIMIT' => $this->getLimit()];
-          }
+          $data = $this->user->getUserList($params);
+          $users = $data['users'];
+          $recordsFiltered = $users['total'];
 
-          $users = $this->user->getUserList($where);
           // 取用户信息
           $cookie = $this->cache->get('forever_' . $this->appid . '_official_account_cookie');
           $official_account_user = [];
@@ -204,7 +203,7 @@ class UserApi extends Api
             try {
               $userList = $this->weChatBase->getUserListInfo($openidList);
               if (!empty($userList['user_info_list'])) foreach ($userList['user_info_list'] as $userinfo) {
-                $index = array_search($userinfo['openid'], array_column($users['list'], 'openid'));
+                $index = array_search($userinfo['openid'], array_column($users, 'openid'));
                 if ($userinfo['subscribe']) {
                   $upData = [
                     'tagid_list' => $userinfo['tagid_list'],
@@ -216,7 +215,7 @@ class UserApi extends Api
                 } else {
                   $upData = ['subscribe' => 0];
                 }
-                $users['list'][$index] = array_merge($users['list'][$index], $upData);
+                $users[$index] = array_merge($users[$index], $upData);
                 $this->user->update(
                   $upData,
                   ['openid' => $userinfo['openid']]
@@ -229,9 +228,9 @@ class UserApi extends Api
 
           $data = [
             "draw" => $params['draw'],
-            "recordsTotal" => $this->user->count('id'),
+            "recordsTotal" => $userCount,
             "recordsFiltered" => $recordsFiltered,
-            'data' => $this->user->getUserList($where)
+            'data' => $users
           ];
 
           return $this->respondWithData($data);
