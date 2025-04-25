@@ -240,7 +240,9 @@ class UserRepository extends BaseRepository implements UserInterface
       $redirectUri = $request->getUri()->getScheme() . '://' . $request->getUri()->getHost() . $request->getUri()->getPath();
       $queryParams = $request->getQueryParams();
       $response_type = $queryParams['response_type'] ?? $queryParams['state'] ?? '';
-      $url = $this->weChatBase->getOauthRedirect($redirectUri, $response_type);
+      $scope = 'snsapi_userinfo';
+      if (empty($queryParams['scope']) && str_contains($queryParams['scope'], 'snsapi_base')) $scope = 'snsapi_base';
+      $url = $this->weChatBase->getOauthRedirect($redirectUri, $response_type, $scope);
       return $response->withHeader('Location', $url)->withStatus(301);
     } else {
       // 没有网页授权获取用户基本信息，跳转到公众号关注页面，关注后通过公众号被动回复连接登录
@@ -263,74 +265,105 @@ class UserRepository extends BaseRepository implements UserInterface
   public function getOauthUserinfo(string $access_token): array
   {
     $accessToken = json_decode($access_token, true);
-    //需要用户授权
-    $weUser = $this->weChatBase->getOauthUserinfo($accessToken['access_token'], $accessToken['openid']);
-    if (isset($weUser['openid'])) {
-      //用户基本数据
-      $data = [
-        'unionid' => $weUser['unionid'] ?? null,
-        'nickname' => $weUser['nickname'],
-        'headimgurl' => $weUser['headimgurl'],
-        'sex' => $weUser['sex']
+    //用户基本数据
+    $userinfo = $this->weChatBase->getUserInfo($accessToken['openid']);
+    if ($userinfo['subscribe']) {//用户已关注公众号
+      $pubData = [
+        'subscribe' => $userinfo['subscribe'],
+        'tagid_list[JSON]' => $userinfo['tagid_list'],
+        'subscribe_time' => $userinfo['subscribe_time'],
+        'subscribe_scene' => $userinfo['subscribe_scene']
       ];
-      $userinfo = $this->weChatBase->getUserInfo($weUser['openid']);
-      if ($userinfo['subscribe']) {//用户已关注公众号
-        $pubData = [
-          'subscribe' => $userinfo['subscribe'],
-          'tagid_list[JSON]' => $userinfo['tagid_list'],
-          'subscribe_time' => $userinfo['subscribe_time'],
-          'subscribe_scene' => $userinfo['subscribe_scene']
+    }
+    //需要用户授权
+    if ($accessToken['scope'] == 'snsapi_userinfo') {
+      $weUser = $this->weChatBase->getOauthUserinfo($accessToken['access_token'], $accessToken['openid']);
+      if (isset($weUser['openid'])) {
+        //用户基本数据
+        $data = [
+          'unionid' => $weUser['unionid'] ?? null,
+          'nickname' => $weUser['nickname'],
+          'headimgurl' => $weUser['headimgurl'],
+          'sex' => $weUser['sex']
         ];
-      }
-      //检查数据库是否存在用户数据
-      $user_id = $this->db->get(PublicInterface::TABLE_NAME, 'id', ['openid' => $accessToken['openid']]);
-      if ($user_id) {// 已存在公众号关注信息
-        if ($data['unionid']) $uid = $this->get('id', ['unionid' => $data['unionid']]);
-        else $uid = $this->get('id', ['id' => $user_id]);
-        if ($uid) {
-          //更新用户
-          $status = $this->get('status', ['id' => $uid]);
-          if ($status == '-') $data['status'] = 0; // 用户自助注销后，又重新登录
-          if ($uid != $user_id) $data['id'] = $user_id;
-          $this->update($data, ['id' => $uid]);
-        } else {
-          //添加用户
-          $data['id'] = $user_id;
-          $this->insert($data);
-        }
-        if (isset($pubData)) $this->db->update(PublicInterface::TABLE_NAME, $pubData, ['id' => $user_id]);
-      } else {
-        // 不存在公众号关注信息
-        //检查用户是否通过小程序等，存储到本地
-        if ($data['unionid']) {
-          $uid = $this->get('id', ['unionid' => $data['unionid']]);
+        //检查数据库是否存在用户数据
+        $user_id = $this->db->get(PublicInterface::TABLE_NAME, 'id', ['openid' => $accessToken['openid']]);
+        if ($user_id) {// 已存在公众号关注信息
+          if ($data['unionid']) $uid = $this->get('id', ['unionid' => $data['unionid']]);
+          else $uid = $this->get('id', ['id' => $user_id]);
           if ($uid) {
+            //更新用户
+            $status = $this->get('status', ['id' => $uid]);
+            if ($status == '-') $data['status'] = 0; // 用户自助注销后，又重新登录
+            if ($uid != $user_id) $data['id'] = $user_id;
             $this->update($data, ['id' => $uid]);
-            $user_id = $uid;
           } else {
+            //添加用户
+            $data['id'] = $user_id;
+            $this->insert($data);
+          }
+          if (isset($pubData)) $this->db->update(PublicInterface::TABLE_NAME, $pubData, ['id' => $user_id]);
+        } else {
+          // 不存在公众号关注信息
+          //检查用户是否通过小程序等，存储到本地
+          if ($data['unionid']) {
+            $uid = $this->get('id', ['unionid' => $data['unionid']]);
+            if ($uid) {
+              $this->update($data, ['id' => $uid]);
+              $user_id = $uid;
+            } else {
+              //添加用户
+              $user_id = $this->insert($data);
+            }
+            //添加公众号数据
+            if (isset($pubData)) {
+              $pubData['id'] = $user_id;
+              $pubData['openid'] = $weUser['openid'];
+            } else {
+              $pubData = ['id' => $user_id, 'openid' => $weUser['openid']];
+            }
+            $this->db->insert(PublicInterface::TABLE_NAME, $pubData);
+          } else {
+            //添加公众号数据
+            if (isset($pubData)) $pubData['openid'] = $weUser['openid'];
+            else $pubData = ['openid' => $weUser['openid']];
+            $data['id'] = $this->db->insert(PublicInterface::TABLE_NAME, $pubData);
             //添加用户
             $user_id = $this->insert($data);
           }
-          //添加公众号数据
-          if (isset($pubData)) {
-            $pubData['id'] = $user_id;
-            $pubData['openid'] = $weUser['openid'];
+        }
+        return $this->get('id,unionid,nickname,headimgurl,name,tel,address,remark', ['id' => $user_id]);
+      } else {
+        return [];
+      }
+    } else {
+      if (!empty($accessToken['openid'])) {
+        //检查数据库是否存在用户数据
+        $user_id = $this->db->get(PublicInterface::TABLE_NAME, 'id', ['openid' => $accessToken['openid']]);
+        if ($user_id) {// 已存在公众号关注信息
+          $uid = $this->get('id', ['id' => $user_id]);
+          if ($uid) {
+            //更新用户
+            $status = $this->get('status', ['id' => $uid]);
+            if ($status == '-') $this->update(['status' => 0], ['id' => $uid]); // 用户自助注销后，又重新登录
           } else {
-            $pubData = ['id' => $user_id, 'openid' => $weUser['openid']];
+            //添加用户
+            $this->insert(['id' => $user_id]);
           }
-          $this->db->insert(PublicInterface::TABLE_NAME, $pubData);
+          if (isset($pubData)) $this->db->update(PublicInterface::TABLE_NAME, $pubData, ['id' => $user_id]);
         } else {
+          // 不存在公众号关注信息
           //添加公众号数据
-          if (isset($pubData)) $pubData['openid'] = $weUser['openid'];
-          else $pubData = ['openid' => $weUser['openid']];
-          $data['id'] = $this->db->insert(PublicInterface::TABLE_NAME, $pubData);
+          if (isset($pubData)) $pubData['openid'] = $accessToken['openid'];
+          else $pubData = ['openid' => $accessToken['openid']];
+          $data = ['id' => $this->db->insert(PublicInterface::TABLE_NAME, $pubData)];
           //添加用户
           $user_id = $this->insert($data);
         }
+        return $this->get('id,unionid,nickname,headimgurl,name,tel,address,remark', ['id' => $user_id]);
+      } else {
+        return [];
       }
-      return $this->get('id,unionid,nickname,headimgurl,name,tel,address,remark', ['id' => $user_id]);
-    } else {
-      return [];
     }
   }
 
