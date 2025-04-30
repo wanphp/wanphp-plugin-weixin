@@ -80,16 +80,23 @@ class AccessTokenApi extends OAuth2Api
   {
     try {
       $post = $this->request->getParsedBody();
-      if (isset($post['grant_type']) && $post['grant_type'] == 'authorization_code') {
-        $this->authorization_code();
+      $grant_type = $post['grant_type'];
+      switch ($grant_type) {
+        case 'client_credentials':
+          $this->client_credentials();
+          break;
+        case 'authorization_code':
+          $this->authorization_code();
+          break;
+        case 'refresh_token':
+          $this->refresh_token();
+          break;
+        case 'password':
+          $this->password();
+          break;
+        default:
+          throw new Exception('Unsupported grant_type');
       }
-      if (isset($post['grant_type']) && $post['grant_type'] == 'client_credentials') {
-        $this->client_credentials();
-      }
-      if (isset($post['grant_type']) && $post['grant_type'] == 'refresh_token') {
-        $this->refresh_token();
-      }
-      // 这里只需要这一行就可以，具体的判断在 Repositories 中
       return $this->server->respondToAccessTokenRequest($this->request, $this->response);
     } catch (OAuthServerException $exception) {
       return $exception->generateHttpResponse($this->response);

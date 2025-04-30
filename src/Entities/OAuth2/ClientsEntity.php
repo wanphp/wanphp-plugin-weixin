@@ -37,7 +37,7 @@ class ClientsEntity implements \JsonSerializable
    */
   private string $client_id;
   /**
-   * @DBType({"type":"char(32) NOT NULL DEFAULT ''"})
+   * @DBType({"type":"char(60) NOT NULL DEFAULT ''"})
    * @OA\Property(description="客户端密钥")
    * @var string
    */

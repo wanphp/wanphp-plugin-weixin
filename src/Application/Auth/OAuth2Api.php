@@ -8,8 +8,10 @@ use Defuse\Crypto\Exception\BadFormatException;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Defuse\Crypto\Key;
 use Exception;
+use Psr\Cache\CacheItemPoolInterface;
+use Psr\Cache\InvalidArgumentException;
 use Wanphp\Libray\Mysql\Database;
-use Wanphp\Libray\Slim\CacheInterface;
+use Wanphp\Libray\Slim\RedisCacheFactory;
 use Wanphp\Libray\Slim\Setting;
 use Wanphp\Libray\Slim\WpUserInterface;
 use Wanphp\Plugins\Weixin\Application\Api;
@@ -32,7 +34,7 @@ abstract class OAuth2Api extends Api
 {
   protected AuthorizationServer $server;
   protected Database $database;
-  protected CacheInterface $storage;
+  protected CacheItemPoolInterface $storage;
   protected WpUserInterface $user;
   protected Key $encryptionKey;
   protected string $uin_base64; // 公众号的唯一ID
@@ -44,23 +46,61 @@ abstract class OAuth2Api extends Api
    * @param Setting $setting
    * @param ClientRepository $clientRepository
    * @param WpUserInterface $user
+   * @param RedisCacheFactory $redisCacheFactory
    * @throws BadFormatException
    * @throws EnvironmentIsBrokenException
+   * @throws InvalidArgumentException
    */
-  public function __construct(Database $database, Setting $setting, ClientRepository $clientRepository, WpUserInterface $user)
+  public function __construct(
+    Database          $database,
+    Setting           $setting,
+    ClientRepository  $clientRepository,
+    WpUserInterface   $user,
+    RedisCacheFactory $redisCacheFactory,
+  )
   {
     $this->database = $database;
-    $this->storage = $setting->get('AuthCodeStorage');
     $config = $setting->get('oauth2Config');
+    $this->storage = $redisCacheFactory->create($config['database'] ?? 2, $config['prefix'] ?? 'wp_uc');
     $options = $setting->get('wechat.base');
     $this->uin_base64 = $options['uin_base64'] ?? '';
     $this->webAuthorization = $options['webAuthorization'] ?? true;
     $this->basePath = $setting->get('basePath');
 
     $this->user = $user;
+    // 缓存Scopes
+    $item = $this->storage->getItem('scopes');
+    if (!$item->isHit()) {
+      $scopes = $database->select('scopes', ['identifier', 'scopeRules[JSON]']);
+      $pathScope = [];
+      foreach ($scopes as $scope) {
+        foreach ($scope['scopeRules'] as $scopeRule) {
+          if (preg_match('/^(.*)\[(.*)\]$/', $scopeRule, $matches)) {
+            $path = $matches[1];
+            $request = $matches[2];
+          } else {
+            $path = $scopeRule;
+            $request = 777;
+          }
+          $rule_md5 = md5($path);
+          if (isset($pathScope[$rule_md5])) {
+            $pathScope[$rule_md5]['scopes'][] = $scope['identifier'];
+            $a = str_split(str_pad((string)$request, 3, '0', STR_PAD_LEFT));
+            $b = str_split(str_pad((string)$pathScope[$rule_md5]['request'], 3, '0', STR_PAD_LEFT));
+            $result = '';
+            for ($i = 0; $i < 3; $i++) {
+              $result .= max($a[$i], $b[$i]);
+            }
+            $pathScope[$rule_md5]['request'] = $result;
+          } else $pathScope[$rule_md5] = ['scopes' => [$scope['identifier']], 'request' => $request];
+        }
+      }
+      $item->set($scopes);
+      $this->storage->save($item);
+    }
 
     // 初始化存储库
-    $scopeRepository = new ScopeRepository();
+    $scopeRepository = new ScopeRepository($database);
     $accessTokenRepository = new AccessTokenRepository($this->storage);
 
     // 私钥与加密密钥
@@ -97,7 +137,7 @@ abstract class OAuth2Api extends Api
       $grant = new AuthCodeGrant(
         $authCodeRepository,
         $refreshTokenRepository,
-        new DateInterval('PT10M') // 设置授权码过期时间为10分钟
+        new DateInterval('PT1M') // 设置授权码过期时间为1分钟
       );
     } catch (Exception $e) {
       throw new HttpNotFoundException($this->request, $e->getMessage());

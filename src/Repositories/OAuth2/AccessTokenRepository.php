@@ -7,14 +7,15 @@ use Exception;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
-use Wanphp\Libray\Slim\CacheInterface;
+use Psr\Cache\CacheItemPoolInterface;
+use Psr\Cache\InvalidArgumentException;
 use Wanphp\Plugins\Weixin\Entities\OAuth2\AccessTokenEntity;
 
 class AccessTokenRepository implements AccessTokenRepositoryInterface
 {
-  private CacheInterface $storage;
+  private CacheItemPoolInterface $storage;
 
-  public function __construct(CacheInterface $storage)
+  public function __construct(CacheItemPoolInterface $storage)
   {
     $this->storage = $storage;
   }
@@ -43,28 +44,34 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
   /**
    * @throws Exception
+   * @throws InvalidArgumentException
    */
-  public function persistNewAccessToken(AccessTokenEntityInterface $accessTokenEntity)
+  public function persistNewAccessToken(AccessTokenEntityInterface $accessTokenEntity): void
   {
     $data = [
       'type' => 'access_token',
       'client_id' => $accessTokenEntity->getClient()->getIdentifier(), // 获得客户端标识符
       'user_id' => $accessTokenEntity->getUserIdentifier(), // 获得用户标识符
-      'scopes' => $accessTokenEntity->getScopes() // 获得权限范围
+      'scopes' => array_map(function ($scope) {
+        return $scope->getIdentifier();
+      }, $accessTokenEntity->getScopes()) // 获得权限范围
     ];
 
-    $this->storage->set($accessTokenEntity->getIdentifier(), $data, $accessTokenEntity->getExpiryDateTime()->getTimestamp() - time());
+    $item = $this->storage->getItem($accessTokenEntity->getIdentifier());
+    $item->set($data)->expiresAfter($accessTokenEntity->getExpiryDateTime()->getTimestamp() - time());
+    $this->storage->save($item);
   }
 
   /**
    * @throws Exception
+   * @throws InvalidArgumentException
    */
-  public function revokeAccessToken($tokenId)
+  public function revokeAccessToken($tokenId): void
   {
     // 使用刷新令牌创建新的访问令牌时调用此方法
     // 参数为原访问令牌的唯一标识符
     // 可将其在持久化存储中过期
-    $this->storage->delete($tokenId);
+    $this->storage->deleteItem($tokenId);
   }
 
   /**
@@ -75,7 +82,10 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
     // 资源服务器验证访问令牌时将调用此方法
     // 用于验证访问令牌是否已被删除
     // return true 已删除，false 未删除
-    return empty($this->storage->get($tokenId));
+    try {
+      return !$this->storage->hasItem($tokenId);
+    } catch (InvalidArgumentException $e) {
+      return true;
+    }
   }
-
 }

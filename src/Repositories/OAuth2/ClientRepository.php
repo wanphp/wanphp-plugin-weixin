@@ -8,6 +8,7 @@ use Wanphp\Libray\Mysql\BaseRepository;
 use Wanphp\Libray\Mysql\Database;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Repositories\ClientRepositoryInterface;
+use Wanphp\Plugins\Weixin\Domain\ClientInterface;
 use Wanphp\Plugins\Weixin\Entities\OAuth2\ClientEntity;
 use Wanphp\Plugins\Weixin\Entities\OAuth2\ClientsEntity;
 
@@ -15,7 +16,7 @@ class ClientRepository extends BaseRepository implements ClientRepositoryInterfa
 {
   public function __construct(Database $database)
   {
-    parent::__construct($database, 'clients', ClientsEntity::class);
+    parent::__construct($database, ClientInterface::TABLE_NAME, ClientsEntity::class);
   }
 
   /**
@@ -29,6 +30,7 @@ class ClientRepository extends BaseRepository implements ClientRepositoryInterfa
     $client = $this->get('client_id,name,redirect_uri,confidential', ['client_id' => $clientIdentifier]);
     if (!$client) return null;
     if (isset($_GET['redirect_uri'])) $redirect_uri = $_GET['redirect_uri'];
+    // 微信授权回来
     if (isset($_SESSION['authQueryParams']['redirect_uri'])) $redirect_uri = $_SESSION['authQueryParams']['redirect_uri'];
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       $post = json_decode(file_get_contents('php://input'), true) ?: $_POST;
@@ -58,10 +60,21 @@ class ClientRepository extends BaseRepository implements ClientRepositoryInterfa
    */
   public function validateClient($clientIdentifier, $clientSecret, $grantType): bool
   {
-    $client_secret = $this->get('client_secret', ['client_id' => $clientIdentifier]);
-    if (!$client_secret) return false;
-    if (!empty($clientSecret) && $client_secret !== $clientSecret) return false;
+    $clientData = $this->get('client_secret,client_ip[JSON]', ['client_id' => $clientIdentifier]);
+    if (empty($clientData['client_secret']) || empty($clientSecret)) return false;
+    if ($clientData['client_secret'] == 32) {
+      // 老的系统更新client_secret
+      $clientData['client_secret'] = password_hash($clientData['client_secret'], PASSWORD_BCRYPT);
+      $this->update(['client_secret' => $clientData['client_secret']], ['client_id' => $clientIdentifier]);
+    }
+    if (!password_verify($clientSecret, $clientData['client_secret'])) return false;
     if (!in_array($grantType, ['authorization_code', 'client_credentials', 'password', 'refresh_token'])) return false;
+    $clientIp = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? null;
+    if (str_contains($clientIp, ',')) $clientIp = explode(',', $clientIp)[0]; // 只取最前面的
+    $clientIp = trim($clientIp);
+    if ($grantType == 'client_credentials' && !in_array($clientIp, $clientData['client_ip'])) {
+      throw new Exception('Invalid client IP: ' . $clientIp);
+    }
     return true;
   }
 }

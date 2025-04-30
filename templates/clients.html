@@ -41,6 +41,21 @@
                      id="client_ip" autocomplete="off">
               <div class="invalid-feedback">授权客户端IP不能为空</div>
             </div>
+            <div class="input-group mb-3">
+              <label for="confidential" class="input-group-text">验证方式</label>
+              <select id="confidential" name="confidential" class="form-select">
+                <option value="1">私密</option>
+                <option value="0">开放</option>
+              </select>
+            </div>
+            <div class="from-group mb-3">
+              <label for="scopes">授权范围</label>
+              <select class="form-select" id="scopes" name="scopes[]" multiple>
+                {% for scope in scopes %}
+                <option value="{{ scope.identifier }}">{{ scope.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
           </form>
         </div>
         <div class="modal-footer justify-content-between">
@@ -59,7 +74,12 @@
 </div>
 <!-- /.card -->
 <script type="text/javascript">
-  loadScript('/plugins/weixin/js/clients.js', function () {
+  loadScript('/plugins/weixin/js/clients.js?2', function () {
+    $("#wx-clients #clientForm select#scopes").select2({
+      theme: "bootstrap-5",
+      language: "zh-CN",
+      placeholder: '选择授权范围'
+    });
     clientsDataTables = $('#wx-clients #clientsData').DataTable({
       serverSide: false,
       ajax: "/admin/clients",
@@ -67,15 +87,32 @@
       columns: [
         {'title': '客户端', data: "name", className: 'align-middle'},
         {'title': 'APPID', data: "client_id", className: 'align-middle'},
-        {'title': '密钥', data: "client_secret", className: 'align-middle'},
+        {
+          'title': '密钥', data: "client_secret", className: 'align-middle', render: function (data, type, row) {
+            if (data) return '<span class="alert alert-success p-1">'+data + '</span><br><span class="text-danger">密钥只显示这一次</span>';
+            else return '<button class="btn btn-sm btn-default reset">重置密钥</button>';
+          }
+        },
         {'title': '回调地址', data: "redirect_uri", className: 'align-middle'},
         {
-          'title': '客户端IP', className: 'align-middle',
+          'title': '客户端授权IP', className: 'align-middle',
           data: "client_ip", render: function (data) {
             return data.join('<br>');
           }
         },
-        {'title': '操作', data: "op", defaultContent: buttonStr, className: 'align-middle'}
+        {
+          'title': '授权范围', className: 'align-middle',
+          data: "scopes", render: function (data) {
+            return data.join('、');
+          }
+        },
+        {
+          title: '操作',
+          className: 'align-middle',
+          data: "op",
+          defaultContent: '<button type="button" class="btn btn-tool edit" data-bs-toggle="tooltip" data-bs-title="修改"><i class="fas fa-edit"></i></button>' +
+            '<button type="button" class="btn btn-tool del" data-bs-toggle="tooltip" data-bs-title="删除"><i class="fas fa-trash-alt"></i></button>'
+        }
       ]
     });
   });

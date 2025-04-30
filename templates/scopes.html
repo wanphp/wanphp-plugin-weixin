@@ -1,0 +1,90 @@
+<div id="wx-scopes" class="card">
+  <div class="card-header">
+    <h3 class="card-title">{{title}}</h3>
+
+    <div class="card-tools">
+      <button type="button" class="btn btn-tool" data-bs-toggle="modal" data-bs-target="#modal-addScope">
+        <i class="fas fa-plus-circle" data-bs-toggle="tooltip" data-bs-title="添加客户端">添加</i>
+      </button>
+    </div>
+  </div>
+  <div class="modal fade" id="modal-addScope" aria-hidden="true" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">授权范围</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="scopeForm" action="/admin/client/scopes" method="POST" class="needs-validation" novalidate>
+            <div class="from-group mb-3">
+              <label for="identifier">ID</label>
+              <input id="identifier" name="identifier" type="text" class="form-control" required
+                     placeholder="授权范围ID"
+                     autocomplete="off" pattern="^[a-z][a-z\d_]{1,19}$">
+              <div class="invalid-feedback">ID只能由小写字母开头的小写字母、数字与_组成，20字符以内</div>
+            </div>
+            <div class="from-group mb-3">
+              <label for="name">名称</label>
+              <input id="name" name="name" type="text" class="form-control" required
+                     placeholder="名称" autocomplete="off" pattern="[\w\u4e00-\u9fa5]{2,10}$">
+              <div class="invalid-feedback">名称2-10个字符</div>
+            </div>
+            <div class="from-group mb-3">
+              <label for="description">授权范围描述</label>
+              <textarea id="description" name="description" class="form-control" placeholder="描述"
+                        autocomplete="off"></textarea>
+            </div>
+            <div class="from-group mb-3">
+              <label for="scopeRules">授权路由(每行一条)</label>
+              <textarea id="scopeRules" name="scopeRules" class="form-control" rows="10"
+                        placeholder="示例：&#13;&#10;/api/user/userinfo[700]&#13;&#10;/api/user/*
+授权说明：&#13;&#10;[700]三个数字分别代表客户端、管理员用户和普通用户&#13;&#10;0无权限，4读，5读删，6读写，7读写删&#13;&#10;“读”对应GET，“写”对应POST|PUT|PATCH，“删”对应DELETE
+不配置权限，表示[777]获得授权可执行所有请求"
+                        autocomplete="off" required></textarea>
+              <div class="invalid-feedback">授权路由不能为空</div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer justify-content-between">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+          <button type="submit" form="scopeForm" class="btn btn-primary">提交</button>
+        </div>
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <div class="card-body">
+    <table id="scopesData" class="table table-sm table-bordered table-hover"></table>
+  </div>
+  <!-- /.card-body -->
+</div>
+<!-- /.card -->
+<script type="text/javascript">
+  loadScript('/plugins/weixin/js/scopes.js', function () {
+    scopesDataTables = $('#wx-scopes #scopesData').DataTable({
+      serverSide: false,
+      ajax: "/admin/client/scopes",
+      rowId: 'id',
+      columns: [
+        {'title': 'ID', data: "identifier", className: 'align-middle'},
+        {'title': '名称', data: "name", className: 'align-middle'},
+        {'title': '描述', data: "description", className: 'align-middle'},
+        {
+          'title': '授权路由', className: 'align-middle',
+          data: "scopeRules", render: function (data) {
+            return data.join('<br>');
+          }
+        },
+        {
+          'title': '操作',
+          data: "op",
+          defaultContent: '<button type="button" class="btn btn-tool edit" data-bs-toggle="tooltip" data-bs-title="修改"><i class="fas fa-edit"></i></button>' +
+            '<button type="button" class="btn btn-tool del" data-bs-toggle="tooltip" data-bs-title="删除"><i class="fas fa-trash-alt"></i></button>',
+          className: 'align-middle'
+        }
+      ]
+    });
+  });
+</script>

@@ -12,16 +12,19 @@ return function (App $app, Middleware $PermissionMiddleware, Middleware $OAuthSe
   //$app->post('/paynotice', \Wanphp\Plugins\Weixin\Application\PayNotice::class);
   //公众号分享签名
   $app->post('/getSignPackage', \Wanphp\Plugins\Weixin\Application\ShareApi::class);
+  // OpenID Connect 基本配置
+  $app->get('/.well-known/openid-configuration', \Wanphp\Plugins\Weixin\Application\OpenIdConfigurationApi::class);
 
   $app->group('/admin', function (Group $group) {
     // 客户端管理
-    $group->map(['GET', 'PUT', 'POST', 'DELETE'], '/clients[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\Manage\ClientsApi::class);
+    $group->map(['GET', 'PUT', 'PATCH', 'POST', 'DELETE'], '/clients[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\Manage\ClientsApi::class);
+    $group->map(['GET', 'PUT', 'POST', 'DELETE'], '/client/scopes[/{id:[0-9]+}]', \Wanphp\Plugins\Weixin\Application\Manage\ScopesApi::class);
   })->addMiddleware($PermissionMiddleware);
   $app->group('/auth', function (Group $group) {
     $group->map(['GET', 'POST'], '/authorize', \Wanphp\Plugins\Weixin\Application\Auth\AuthorizeApi::class);
     $group->post('/accessToken', \Wanphp\Plugins\Weixin\Application\Auth\AccessTokenApi::class);
-    $group->post('/passwordAccessToken', \Wanphp\Plugins\Weixin\Application\Auth\PasswordAccessTokenApi::class);
-    $group->post('/refreshAccessToken', \Wanphp\Plugins\Weixin\Application\Auth\RefreshAccessTokenApi::class);
+    $group->post('/passwordAccessToken', \Wanphp\Plugins\Weixin\Application\Auth\AccessTokenApi::class);
+    $group->post('/refreshAccessToken', \Wanphp\Plugins\Weixin\Application\Auth\AccessTokenApi::class);
     $group->map(['GET', 'POST'], '/qrLogin', \Wanphp\Plugins\Weixin\Application\Auth\QrLoginApi::class);
   });
   // 后台管理
