@@ -214,7 +214,7 @@ class UserApi extends Api
     $this->args = $args;
 
     $user = $this->user->get('nickname,name,headimgurl,tel', ['id' => $this->getUid()]);
-    $user['tagid_list'] = $this->public->get('tagid_list[JSON]', ['id' => $this->getUid()]);
+    $user['tagId'] = $this->public->get('tagid_list[JSON]', ['id' => $this->getUid()]);
     if ($user) return $this->respondWithData($user);
     else return $this->respondWithError('用户不存在');
   }

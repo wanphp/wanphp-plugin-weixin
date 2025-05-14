@@ -176,7 +176,7 @@ class AuthorizeApi extends OAuth2Api
       return $this->server->completeAuthorizationRequest($authRequest, $this->response);
     } catch (OAuthServerException $exception) {
       $data = ['title' => '授权失败！',
-        'msg' => '您未授权成功，系统无法识别您的身份！' . $exception->getMessage(),
+        'msg' => '您未授权成功，系统无法识别您的身份，请选择使用完整服务。',
         'icon' => 'weui-icon-warn'
       ];
       return $this->respondView('admin/error/wxerror.html', $data);

@@ -163,7 +163,7 @@ class UserApi extends Api
           }
           $data = $this->user->getUserList($params);
           $users = $data['users'];
-          $recordsFiltered = $users['total'];
+          $recordsFiltered = $data['total'];
 
           // 取用户信息
           $item = $this->cache->getItem('forever_' . $this->appid . '_official_account_cookie');

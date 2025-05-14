@@ -60,7 +60,9 @@ class ClientRepository extends BaseRepository implements ClientRepositoryInterfa
    */
   public function validateClient($clientIdentifier, $clientSecret, $grantType): bool
   {
-    $clientData = $this->get('client_secret,client_ip[JSON]', ['client_id' => $clientIdentifier]);
+    $clientData = $this->get('client_secret,client_ip[JSON],confidential', ['client_id' => $clientIdentifier]);
+    // 允许 public client refresh_token
+    if (!empty($clientData) && $clientData['confidential'] == 0 && $grantType === 'refresh_token') return true;
     if (empty($clientData['client_secret']) || empty($clientSecret)) return false;
     if ($clientData['client_secret'] == 32) {
       // 老的系统更新client_secret

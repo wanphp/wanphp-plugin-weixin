@@ -59,7 +59,7 @@ class UserRepository extends BaseRepository implements UserInterface
   {
     // 用户标签
     if (!empty($params['tag_id'])) {
-      $where['u.id'] = $this->db->select('id', Medoo::raw("WHERE JSON_CONTAINS(tagid_list, '{$params['tag_id']}')"));
+      $where['u.id'] = $this->db->select(PublicInterface::TABLE_NAME, 'id', Medoo::raw("WHERE JSON_CONTAINS(tagid_list, '{$params['tag_id']}')"));
     }
     // 推广用户
     if (isset($params['pid']) && $params['pid'] > 0) {
@@ -241,7 +241,7 @@ class UserRepository extends BaseRepository implements UserInterface
       $queryParams = $request->getQueryParams();
       $response_type = $queryParams['response_type'] ?? $queryParams['state'] ?? '';
       $scope = 'snsapi_userinfo';
-      if (empty($queryParams['scope']) && str_contains($queryParams['scope'], 'snsapi_base')) $scope = 'snsapi_base';
+      if (!empty($queryParams['scope']) && str_contains($queryParams['scope'], 'snsapi_base')) $scope = 'snsapi_base';
       $url = $this->weChatBase->getOauthRedirect($redirectUri, $response_type, $scope);
       return $response->withHeader('Location', $url)->withStatus(301);
     } else {
@@ -327,7 +327,8 @@ class UserRepository extends BaseRepository implements UserInterface
             //添加公众号数据
             if (isset($pubData)) $pubData['openid'] = $weUser['openid'];
             else $pubData = ['openid' => $weUser['openid']];
-            $data['id'] = $this->db->insert(PublicInterface::TABLE_NAME, $pubData);
+            $this->db->insert(PublicInterface::TABLE_NAME, $pubData);
+            $data['id'] = $this->db->id();
             //添加用户
             $user_id = $this->insert($data);
           }
@@ -356,7 +357,8 @@ class UserRepository extends BaseRepository implements UserInterface
           //添加公众号数据
           if (isset($pubData)) $pubData['openid'] = $accessToken['openid'];
           else $pubData = ['openid' => $accessToken['openid']];
-          $data = ['id' => $this->db->insert(PublicInterface::TABLE_NAME, $pubData)];
+          $this->db->insert(PublicInterface::TABLE_NAME, $pubData);
+          $data = ['id' => $this->db->id()];
           //添加用户
           $user_id = $this->insert($data);
         }

@@ -16,6 +16,8 @@ use Wanphp\Plugins\Weixin\Entities\OAuth2\ScopesEntity;
 
 class ScopeRepository extends BaseRepository implements ScopeRepositoryInterface
 {
+  private array $defaultScopes = ['ADMIN', 'openid', 'profile', 'snsapi_base', 'snsapi_userinfo'];
+
   public function __construct(Database $database)
   {
     parent::__construct($database, 'scopes', ScopesEntity::class);
@@ -28,7 +30,7 @@ class ScopeRepository extends BaseRepository implements ScopeRepositoryInterface
    */
   public function getScopeEntityByIdentifier($identifier): ?ScopeEntityInterface
   {
-    if (!in_array($identifier, ['ADMIN', 'openid', 'profile'])) {
+    if (!in_array($identifier, $this->defaultScopes, true)) {
       $identifier = $this->get('identifier', ['identifier' => $identifier]);
       if (!$identifier) return null;
     }
@@ -52,6 +54,7 @@ class ScopeRepository extends BaseRepository implements ScopeRepositoryInterface
     if (!empty($scopes)) {
       // 有 scopes，就逐个检查是否合法
       $allowedScopes = $this->db->get(ClientInterface::TABLE_NAME, 'scopes[JSON]', ['client_id' => $clientEntity->getIdentifier()]);
+      $allowedScopes = array_merge($allowedScopes, $this->defaultScopes);
       if (!empty($allowedScopes)) foreach ($scopes as $scope) {
         if (in_array($scope->getIdentifier(), $allowedScopes, true)) {
           $finalScopes[] = $scope;

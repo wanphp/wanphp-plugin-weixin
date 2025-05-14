@@ -78,7 +78,7 @@ $(function () {
       });
     }
   }).on('hidden.bs.modal', '#wx-clients #modal-addClient', function () {
-    $("#wx-clients #clientForm select#scopes").val().trigger('change');
+    $("#wx-clients #clientForm select#scopes").val('').trigger('change');
     $('#wx-clients #clientForm').attr('action', '/admin/clients').attr('method', 'POST').removeClass('was-validated')[0].reset();
   });
 });
