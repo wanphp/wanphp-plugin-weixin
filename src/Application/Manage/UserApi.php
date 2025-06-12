@@ -11,12 +11,10 @@ namespace Wanphp\Plugins\Weixin\Application\Manage;
 
 use Exception;
 use GuzzleHttp\Client;
-use Psr\Cache\CacheItemPoolInterface;
-use Psr\Cache\InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\SimpleCache\CacheInterface;
 use Wanphp\Libray\Slim\HttpTrait;
-use Wanphp\Libray\Slim\RedisCacheFactory;
 use Wanphp\Libray\Slim\Setting;
 use Wanphp\Libray\Weixin\WeChatBase;
 use Wanphp\Plugins\Weixin\Application\Api;
@@ -38,22 +36,21 @@ class UserApi extends Api
   private WeChatBase $weChatBase;
   private string $prefix;
   private string $appid;
-  private CacheItemPoolInterface $cache;
+  private CacheInterface $cache;
 
-  public function __construct(UserInterface $user, PublicInterface $public, Setting $setting, WeChatBase $weChatBase, RedisCacheFactory $cacheFactory)
+  public function __construct(UserInterface $user, PublicInterface $public, Setting $setting, WeChatBase $weChatBase, CacheInterface $cache)
   {
     $this->user = $user;
     $this->public = $public;
     $this->weChatBase = $weChatBase;
     $this->prefix = $setting->get('database')['prefix'];
     $this->appid = $setting->get('wechat.base')['appid'] ?? '';
-    $this->cache = $cacheFactory->create();
+    $this->cache = $cache;
   }
 
   /**
    * @return Response
    * @throws Exception
-   * @throws InvalidArgumentException
    * @OA\Patch(
    *  path="/admin/weixin/user/{id}",
    *  tags={"User"},
@@ -166,10 +163,9 @@ class UserApi extends Api
           $recordsFiltered = $data['total'];
 
           // 取用户信息
-          $item = $this->cache->getItem('forever_' . $this->appid . '_official_account_cookie');
           $official_account_user = [];
-          if ($item->isHit()) {
-            $cookie = $item->get();
+          if ($this->cache->has('forever_' . $this->appid . '_official_account_cookie')) {
+            $cookie = $this->cache->get('forever_' . $this->appid . '_official_account_cookie');
             $endIndex = count($users) - 1;
             $next_openid = '';
             $begin_create_time = time();
@@ -265,7 +261,6 @@ class UserApi extends Api
    * @param array $args
    * @return Response
    * @throws Exception
-   * @throws InvalidArgumentException
    */
   public function setCookie(Request $request, Response $response, array $args): Response
   {
@@ -275,8 +270,7 @@ class UserApi extends Api
     $data = $this->getFormData();
     if (!empty($this->appid)) {
       // 设置缓存
-      $item = $this->cache->getItem('forever_' . $this->appid . '_official_account_cookie');
-      $item->set($data)->expiresAfter(316800);// 88小时
+      $this->cache->set('forever_' . $this->appid . '_official_account_cookie', $data, 316800);// 88小时
       return $this->respondWithData(['code' => '0', 'msg' => '已授权成功！']);
     } else {
       return $this->respondWithError('Error!');

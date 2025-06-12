@@ -8,10 +8,8 @@ use Defuse\Crypto\Exception\BadFormatException;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Defuse\Crypto\Key;
 use Exception;
-use Psr\Cache\CacheItemPoolInterface;
-use Psr\Cache\InvalidArgumentException;
+use Psr\SimpleCache\CacheInterface;
 use Wanphp\Libray\Mysql\Database;
-use Wanphp\Libray\Slim\RedisCacheFactory;
 use Wanphp\Libray\Slim\Setting;
 use Wanphp\Libray\Slim\WpUserInterface;
 use Wanphp\Plugins\Weixin\Application\Api;
@@ -34,7 +32,7 @@ abstract class OAuth2Api extends Api
 {
   protected AuthorizationServer $server;
   protected Database $database;
-  protected CacheItemPoolInterface $storage;
+  protected CacheInterface $storage;
   protected WpUserInterface $user;
   protected Key $encryptionKey;
   protected string $uin_base64; // 公众号的唯一ID
@@ -46,31 +44,29 @@ abstract class OAuth2Api extends Api
    * @param Setting $setting
    * @param ClientRepository $clientRepository
    * @param WpUserInterface $user
-   * @param RedisCacheFactory $redisCacheFactory
    * @throws BadFormatException
    * @throws EnvironmentIsBrokenException
-   * @throws InvalidArgumentException
+   * @throws \Psr\SimpleCache\InvalidArgumentException
    */
   public function __construct(
-    Database          $database,
-    Setting           $setting,
-    ClientRepository  $clientRepository,
-    WpUserInterface   $user,
-    RedisCacheFactory $redisCacheFactory,
+    Database         $database,
+    Setting          $setting,
+    ClientRepository $clientRepository,
+    WpUserInterface  $user
   )
   {
     $this->database = $database;
     $config = $setting->get('oauth2Config');
-    $this->storage = $redisCacheFactory->create($config['database'] ?? 2, $config['prefix'] ?? 'wp_uc');
     $options = $setting->get('wechat.base');
     $this->uin_base64 = $options['uin_base64'] ?? '';
     $this->webAuthorization = $options['webAuthorization'] ?? true;
     $this->basePath = $setting->get('basePath');
+    $this->storage = $setting->get('AuthCodeStorage');
 
     $this->user = $user;
     // 缓存Scopes
-    $item = $this->storage->getItem('scopes');
-    if (!$item->isHit()) {
+    $scopes = $this->storage->get('scopes');
+    if (empty($scopes)) {
       $scopes = $database->select('scopes', ['identifier', 'scopeRules[JSON]']);
       $pathScope = [];
       foreach ($scopes as $scope) {
@@ -95,8 +91,7 @@ abstract class OAuth2Api extends Api
           } else $pathScope[$rule_md5] = ['scopes' => [$scope['identifier']], 'request' => $request];
         }
       }
-      $item->set($scopes);
-      $this->storage->save($item);
+      $this->storage->set('scopes', $pathScope);
     }
 
     // 初始化存储库

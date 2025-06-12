@@ -7,15 +7,15 @@ use Exception;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
-use Psr\Cache\CacheItemPoolInterface;
 use Psr\Cache\InvalidArgumentException;
+use Psr\SimpleCache\CacheInterface;
 use Wanphp\Plugins\Weixin\Entities\OAuth2\AccessTokenEntity;
 
 class AccessTokenRepository implements AccessTokenRepositoryInterface
 {
-  private CacheItemPoolInterface $storage;
+  private CacheInterface $storage;
 
-  public function __construct(CacheItemPoolInterface $storage)
+  public function __construct(CacheInterface $storage)
   {
     $this->storage = $storage;
   }
@@ -44,7 +44,6 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
   /**
    * @throws Exception
-   * @throws InvalidArgumentException
    */
   public function persistNewAccessToken(AccessTokenEntityInterface $accessTokenEntity): void
   {
@@ -57,21 +56,18 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
       }, $accessTokenEntity->getScopes()) // 获得权限范围
     ];
 
-    $item = $this->storage->getItem($accessTokenEntity->getIdentifier());
-    $item->set($data)->expiresAfter($accessTokenEntity->getExpiryDateTime()->getTimestamp() - time());
-    $this->storage->save($item);
+    $this->storage->set($accessTokenEntity->getIdentifier(), $data, $accessTokenEntity->getExpiryDateTime()->getTimestamp() - time());
   }
 
   /**
    * @throws Exception
-   * @throws InvalidArgumentException
    */
   public function revokeAccessToken($tokenId): void
   {
     // 使用刷新令牌创建新的访问令牌时调用此方法
     // 参数为原访问令牌的唯一标识符
     // 可将其在持久化存储中过期
-    $this->storage->deleteItem($tokenId);
+    $this->storage->delete($tokenId);
   }
 
   /**
@@ -83,7 +79,7 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
     // 用于验证访问令牌是否已被删除
     // return true 已删除，false 未删除
     try {
-      return !$this->storage->hasItem($tokenId);
+      return !$this->storage->has($tokenId);
     } catch (InvalidArgumentException $e) {
       return true;
     }

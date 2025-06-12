@@ -2,10 +2,9 @@
 
 namespace Wanphp\Plugins\Weixin\Application\Manage;
 
-use Psr\Cache\CacheItemPoolInterface;
 use Psr\Cache\InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface as Response;
-use Wanphp\Libray\Slim\RedisCacheFactory;
+use Psr\SimpleCache\CacheInterface;
 use Wanphp\Libray\Slim\Setting;
 use Wanphp\Plugins\Weixin\Application\Api;
 use Wanphp\Plugins\Weixin\Repositories\OAuth2\ScopeRepository;
@@ -20,13 +19,12 @@ class ScopesApi extends Api
 {
 
   private ScopeRepository $scope;
-  private CacheItemPoolInterface $storage;
+  private CacheInterface $storage;
 
-  public function __construct(ScopeRepository $scope, Setting $setting, RedisCacheFactory $redisCacheFactory)
+  public function __construct(ScopeRepository $scope, Setting $setting)
   {
     $this->scope = $scope;
-    $config = $setting->get('oauth2Config');
-    $this->storage = $redisCacheFactory->create($config['database'] ?? 2, $config['prefix'] ?? 'wp_uc');
+    $this->storage = $setting->get('AuthCodeStorage');
   }
 
   /**
@@ -40,17 +38,17 @@ class ScopesApi extends Api
         $data = $this->request->getParsedBody();
         $data['scopeRules'] = explode("\n", $data['scopeRules']);
         $data['id'] = $this->scope->insert($data);
-        $this->storage->deleteItem('scopes');
+        $this->storage->delete('scopes');
         return $this->respondWithData($data, 201);
       case  'PUT';
         $data = $this->request->getParsedBody();
         $data['scopeRules'] = explode("\n", $data['scopeRules']);
         $num = $this->scope->update($data, ['id' => $this->args['id']]);
-        $this->storage->deleteItem('scopes');
+        $this->storage->delete('scopes');
         return $this->respondWithData(['upNum' => $num], 201);
       case  'DELETE';
         $delNum = $this->scope->delete(['id' => $this->args['id']]);
-        $this->storage->deleteItem('scopes');
+        $this->storage->delete('scopes');
         return $this->respondWithData(['delNum' => $delNum]);
       case 'GET';
         if ($this->request->getHeaderLine("X-Requested-With") == "XMLHttpRequest") {

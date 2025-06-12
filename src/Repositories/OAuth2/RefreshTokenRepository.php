@@ -6,15 +6,15 @@ namespace Wanphp\Plugins\Weixin\Repositories\OAuth2;
 use Exception;
 use League\OAuth2\Server\Entities\RefreshTokenEntityInterface;
 use League\OAuth2\Server\Repositories\RefreshTokenRepositoryInterface;
-use Psr\Cache\CacheItemPoolInterface;
 use Psr\Cache\InvalidArgumentException;
+use Psr\SimpleCache\CacheInterface;
 use Wanphp\Plugins\Weixin\Entities\OAuth2\RefreshTokenEntity;
 
 class RefreshTokenRepository implements RefreshTokenRepositoryInterface
 {
-  private CacheItemPoolInterface $storage;
+  private CacheInterface $storage;
 
-  public function __construct(CacheItemPoolInterface $storage)
+  public function __construct(CacheInterface $storage)
   {
     $this->storage = $storage;
   }
@@ -29,7 +29,6 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
 
   /**
    * @throws Exception
-   * @throws InvalidArgumentException
    */
   public function persistNewRefreshToken(RefreshTokenEntityInterface $refreshTokenEntity): void
   {
@@ -44,14 +43,11 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
       'access_token' => $refreshTokenEntity->getAccessToken()->getIdentifier() // 获得访问令牌标识符
     ];
 
-    $item = $this->storage->getItem($refreshTokenEntity->getIdentifier());
-    $item->set($data)->expiresAfter($refreshTokenEntity->getExpiryDateTime()->getTimestamp() - time());
-    $this->storage->save($item);
+    $this->storage->set($refreshTokenEntity->getIdentifier(), $data, $refreshTokenEntity->getExpiryDateTime()->getTimestamp() - time());
   }
 
   /**
    * @throws Exception
-   * @throws InvalidArgumentException
    */
   public function revokeRefreshToken($tokenId): void
   {
@@ -59,7 +55,7 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
     // 原刷新令牌将删除，创建新的刷新令牌
     // 参数为原刷新令牌唯一标识
     // 可在此删除原刷新令牌
-    $this->storage->deleteItem($tokenId);
+    $this->storage->delete($tokenId);
   }
 
   /**
@@ -71,7 +67,7 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
     // 用于验证刷新令牌是否已被删除
     // return true 已删除，false 未删除
     try {
-      return !$this->storage->hasItem($tokenId);
+      return !$this->storage->has($tokenId);
     } catch (InvalidArgumentException $e) {
       return true;
     }

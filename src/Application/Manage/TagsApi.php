@@ -9,9 +9,7 @@
 namespace Wanphp\Plugins\Weixin\Application\Manage;
 
 
-use Psr\Cache\CacheItemPoolInterface;
-use Psr\Cache\InvalidArgumentException;
-use Wanphp\Libray\Slim\RedisCacheFactory;
+use Psr\SimpleCache\CacheInterface;
 use Wanphp\Libray\Weixin\WeChatBase;
 use Psr\Http\Message\ResponseInterface as Response;
 use Wanphp\Plugins\Weixin\Application\Api;
@@ -26,18 +24,17 @@ use Exception;
 class TagsApi extends Api
 {
   private WeChatBase $weChatBase;
-  private CacheItemPoolInterface $cache;
+  private CacheInterface $cache;
 
-  public function __construct(WeChatBase $weChatBase, RedisCacheFactory $redisCacheFactory)
+  public function __construct(WeChatBase $weChatBase, CacheInterface $cache)
   {
     $this->weChatBase = $weChatBase;
-    $this->cache = $redisCacheFactory->create();
+    $this->cache = $cache;
   }
 
   /**
    * @return Response
    * @throws Exception
-   * @throws InvalidArgumentException
    * @OA\Post(
    *  path="/admin/weixin/tags",
    *  tags={"WeixinTag"},
@@ -136,13 +133,11 @@ class TagsApi extends Api
       case 'GET':
         //公众号粉丝数
         try {
-          $item = $this->cache->getItem('wxuser_total');
-          if (!$item->isHit()) {
+          $user_total = $this->cache->get('wxuser_total');
+          if (empty($user_total)) {
             $list = $this->weChatBase->getUserList();
             $user_total = $list['total'];
-            $item->set($user_total)->expiresAfter(3600);
-          } else {
-            $user_total = $item->get();
+            $this->cache->set('wxuser_total', $user_total, 3600);
           }
           $userTags = $this->weChatBase->getTags();
           $data = [

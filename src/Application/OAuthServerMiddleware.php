@@ -5,36 +5,29 @@ namespace Wanphp\Plugins\Weixin\Application;
 
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\ResourceServer;
-use Psr\Cache\CacheItemPoolInterface;
 use Psr\Cache\InvalidArgumentException;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\SimpleCache\CacheInterface;
 use Slim\Psr7\Response;
-use Wanphp\Libray\Slim\RedisCacheFactory;
-use Wanphp\Libray\Slim\Setting;
 use Wanphp\Plugins\Weixin\Repositories\OAuth2\AccessTokenRepository;
 
 class OAuthServerMiddleware implements MiddlewareInterface
 {
-  protected CacheItemPoolInterface $storage;
+  protected CacheInterface $storage;
   private string $publicKeyPath;
 
   /**
-   * @param ContainerInterface $container
-   * @throws ContainerExceptionInterface
-   * @throws NotFoundExceptionInterface
+   * @param array $config
+   * @param CacheInterface $storage
    */
-  public function __construct(ContainerInterface $container)
+  public function __construct(array $config, CacheInterface $storage)
   {
     //授权服务器分发的公钥
-    $settings = $container->get(Setting::class)->get('oauth2Config');
-    $this->publicKeyPath = realpath($settings['publicKey']);
-    $this->storage = $container->get(RedisCacheFactory::class)->create($settings['database'] ?? 2, $settings['prefix'] ?? 'wp_uc');
+    $this->publicKeyPath = realpath($config['publicKey']);
+    $this->storage = $storage;
   }
 
   /**
@@ -74,8 +67,7 @@ class OAuthServerMiddleware implements MiddlewareInterface
     if (empty($tokenScopes)) return;
 
     $requiredScopes = [];
-    $item = $this->storage->getItem('scopes');
-    $scopes = $item->get();
+    $scopes = $this->storage->get('scopes');
     // 先精准匹配
     if (!empty($scopes[md5($path)])) {
       $requiredScopes = $scopes[md5($path)];
