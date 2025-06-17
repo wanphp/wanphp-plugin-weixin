@@ -40,19 +40,18 @@ class GetUsersApi extends Api
       case 'POST':
         $data = $this->request->getParsedBody();
         if (!isset($data['uid'])) return $this->respondWithError('无用户ID');
-        return $this->respondWithData($this->user->getUserList(['u.id' => $data['uid']]));
+        return $this->respondWithData($this->user->getUsers($data['uid']));
       case 'GET':
         $params = $this->request->getQueryParams();
         $id = $this->args['id'] ?? 0;
         if ($id > 0) return $this->respondWithData($this->user->getUser($id));
         else if (!empty($params)) {
-          if(isset($params['id'])){
+          if (isset($params['id'])) {
             $params['id[!]'] = $params['id'];
             unset($params['id']);
           }
           return $this->respondWithData($this->user->get('id,status', $params));
-        }
-        else return $this->respondWithError('用户ID错误！');
+        } else return $this->respondWithError('用户ID错误！');
       default:
         return $this->respondWithError('非法请求！');
     }
